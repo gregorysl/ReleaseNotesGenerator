@@ -4,9 +4,6 @@ using Xceed.Words.NET;
 
 namespace Gui
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow
     {
         public MainWindow()
@@ -25,7 +22,7 @@ namespace Gui
                     var p = placeholder.InsertParagraphAfterSelf(category).FontSize(11d).Heading(HeadingType.Heading2);
 
                     var table = p.InsertTableAfterSelf(2, 6);
-                    table.Rows[0].Cells[0].Paragraphs[0].Append(category).Bold();
+                    table.Rows[0].Cells[0].Paragraphs[0].Append("TFS").Bold();
                     table.Rows[0].Cells[1].Paragraphs[0].Append("Developer").Bold();
                     table.Rows[0].Cells[2].Paragraphs[0].Append("Date/Time").Bold();
                     table.Rows[0].Cells[3].Paragraphs[0].Append("Description").Bold();
@@ -37,14 +34,13 @@ namespace Gui
                     table.Rows[1].Cells[3].Paragraphs[0].Append("{Desc}");
                     table.Rows[1].Cells[4].Paragraphs[0].Append("{WorkItemId}");
                     table.Rows[1].Cells[5].Paragraphs[0].Append("{WorkItemI}");
-
                     placeholder = table;
                 }
 
-                var thirdSection = placeholder.InsertParagraphAfterSelf("Product reported Defects in this Release")
-                    .Heading(HeadingType.Heading1);
-                var fourthSection1 = thirdSection.InsertParagraphAfterSelf("Product Backlog Items and KTRs in this Release")
-                    .Heading(HeadingType.Heading1);
+                var thirdSection = placeholder.CreateHeadingSection("Product reported Defects in this Release");
+                var fourthSection = thirdSection.CreateHeadingSection("Product Backlog Items and KTRs in this Release");
+                var fifthSection = fourthSection.CreateHeadingSection("Test Report");
+                var sixthSection = fifthSection.CreateHeadingSection("Known issues in this Release");
 
                 doc.SaveAs(dTestDocx);
             }
@@ -52,7 +48,8 @@ namespace Gui
             Process.Start(dTestDocx);
             
             InitializeComponent();
-            this.Close();
+            Close();
         }
+
     }
 }
