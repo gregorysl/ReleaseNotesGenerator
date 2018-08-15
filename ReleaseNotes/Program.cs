@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -33,7 +34,7 @@ namespace ReleaseNotes
                 ? VersionSpec.Latest
                 : new ChangesetVersionSpec(changesetTo);
 
-            var path = $"c:\\PatchNotes\\{tfsBranchName}\\"; 
+            var path = $"c:\\PatchNotes\\{tfsBranchName}\\";
             Directory.CreateDirectory(path);
 
             var excludedDirs = new[] { "CodeAnalysis", "QA", "_AutomatedBuild" };
@@ -54,7 +55,7 @@ namespace ReleaseNotes
 
             foreach (var category in categories)
             {
-                var categoryChanges = new CategoryChanges {Name = category};
+                var categoryChanges = new CategoryChanges { Name = category };
                 var categoryPath = $"$/{tfsProjectName}/{tfsBranchName}/{category}";
                 var catList = changes.Where(x => x.Changes.Any(c => c.Item.ServerItem.Contains(categoryPath)));
                 foreach (var item in catList)
@@ -89,15 +90,33 @@ namespace ReleaseNotes
                 }
             }
 
-            var workItems = changes.SelectMany(x => x.WorkItems).ToList().Where(x => x.Type.Name != "Code Review Request").GroupBy(x => x.Id).Select(x => x.First()).OrderBy(x => x.Id).ToList();
-            //WorkItemStore workItemStore = new WorkItemStore(collection);
-            //workItemStore.
-            //var sv1c = collection.GetService<Microsoft.TeamFoundation.>();
-            var asddadddddd = workItems.Where(HasClientProject).OrderBy(x => x.Fields["client.project"].Value).ToList();
+
+
+
+
+            var liiiiist = categoryChangesList.SelectMany(x => x.Changes).ToList().Where(x => x.WorkItemId != "N/A").Select(x => Convert.ToInt32(x.WorkItemId)).Distinct().OrderBy(x => x)
+                .ToList();
+            WorkItemStore workitemstore = collection.GetService<WorkItemStore>();
+            string wiql = "SELECT * FROM WorkItems WHERE [System.Id] in ({0})";
+            var enumerable = liiiiist.Select(x => x.ToString()).ToList();
+            var ids = string.Join(",", enumerable);
+            WorkItemCollection wic = workitemstore.Query(String.Format(wiql, ids));
+
+
+            List<WorkItemDetails> workItemChanges = new List<WorkItemDetails>();
+            foreach (WorkItem workItem in wic)
+            {
+                workItemChanges.Add(new WorkItemDetails
+                {
+                    Id = workItem.Id,
+                    Title = workItem.Title,
+                    ClientProject = workItem.Fields["client.project"].Value.ToString()
+                });
+            }
 
             var projectItemsSb = new StringBuilder();
-            asddadddddd.ForEach(x => projectItemsSb.Append($"{x.Id} {x.Title} {x.Fields["client.project"].Value}\n"));
-            using (StreamWriter writetext = new StreamWriter($"{path}\\ProjectItems_{DateTime.Now.ToFileTime()}.csv"))
+            workItemChanges.ForEach(x => projectItemsSb.Append($"{x.Id},{x.Title},{x.ClientProject}\n"));
+            using (StreamWriter writetext = new StreamWriter($"{path}\\ProjectItems1_{DateTime.Now.ToFileTime()}.csv"))
             {
                 writetext.Write(projectItemsSb.ToString());
             }
@@ -130,6 +149,12 @@ namespace ReleaseNotes
         //}
     }
 
+    public class WorkItemDetails
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string ClientProject { get; set; }
+    }
     public class CategoryChanges
     {
         public string Name { get; set; }
