@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReleaseNotes", "ReleaseNote
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gui", "Gui\Gui.csproj", "{996CA38E-5F25-4E39-AF89-B52A26BA2306}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TfsData", "TfsData\TfsData.csproj", "{F88C7DF3-6632-4FA0-B2B7-67F022A726D2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{996CA38E-5F25-4E39-AF89-B52A26BA2306}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{996CA38E-5F25-4E39-AF89-B52A26BA2306}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{996CA38E-5F25-4E39-AF89-B52A26BA2306}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F88C7DF3-6632-4FA0-B2B7-67F022A726D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F88C7DF3-6632-4FA0-B2B7-67F022A726D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F88C7DF3-6632-4FA0-B2B7-67F022A726D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F88C7DF3-6632-4FA0-B2B7-67F022A726D2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
