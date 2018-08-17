@@ -25,6 +25,20 @@
             <TextBlock>Branch</TextBlock>
             <TextBox Name="Branch" Width="200" />
         </StackPanel>
+        <StackPanel Name="ChangesetFromStack" Visibility="Visible" Orientation="Horizontal">
+            <TextBlock>Changeset from</TextBlock>
+            <xctk:IntegerUpDown Name="ChangesetFrom" ShowButtonSpinner="False"  Width="200" LostFocus="GetChangesetFrom"  />
+            <CheckBox Content="Include" VerticalContentAlignment="Center" Name="IncludeFrom" IsChecked="True"/>
+        </StackPanel>
+        <TextBlock Name="ChangesetFromText"/>
+        <StackPanel Name="ChangesetToStack" Visibility="Visible" Orientation="Horizontal">
+            <TextBlock>Changeset to</TextBlock>
+            <xctk:IntegerUpDown Name="ChangesetTo" ShowButtonSpinner="False"  Width="200" LostMouseCapture="GetChangesetTo" />
+            <CheckBox Content="Include" VerticalContentAlignment="Center" Name="IncludeTo" IsChecked="True"/>
+        </StackPanel>
+        <TextBlock Name="ChangesetToText"/>
+        <Button Name="Convert" Content="Get changesets and Work Items" Click="ConvertClicked"/>
+
         <StackPanel Name="ReleaseNameStack" Visibility="Visible" Orientation="Horizontal">
             <TextBlock>ReleaseName</TextBlock>
             <TextBox Name="ReleaseName" Width="200" />
@@ -33,18 +47,9 @@
             <TextBlock>Release Date</TextBlock>
             <DatePicker Name="ReleaseDate" Width="200" />
         </StackPanel>
-        <StackPanel Name="ChangesetFromStack" Visibility="Visible" Orientation="Horizontal">
-            <TextBlock>Changeset from</TextBlock>
-            <xctk:IntegerUpDown Name="ChangesetFrom" ShowButtonSpinner="False"  Width="200" />
-            <CheckBox Content="Include" VerticalContentAlignment="Center" Name="IncludeFrom"/>
-        </StackPanel>
-        <TextBlock Name="ChangesetFromText"/>
-        <StackPanel Name="ChangesetToStack" Visibility="Visible" Orientation="Horizontal">
-            <TextBlock>Changeset to</TextBlock>
-            <xctk:IntegerUpDown Name="ChangesetTo" ShowButtonSpinner="False"  Width="200" LostFocus="GetChangesetTo "/>
-            <CheckBox Content="Include" VerticalContentAlignment="Center" Name="IncludeTo"/>
-        </StackPanel>
-        <TextBlock Name="ChangesetToText"/>
-        <Button Name="Convert" Click="ConvertClicked"/>
+        <xctk:CheckListBox x:Name="_listBox" 
+                           Height="250"
+                           DisplayMemberPath="Comment"
+                           ValueMemberPath="ChangesetId"  />
     </StackPanel>
 </Window>
