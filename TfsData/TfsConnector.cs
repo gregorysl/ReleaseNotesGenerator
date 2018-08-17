@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Microsoft.TeamFoundation.Client;
+using Microsoft.TeamFoundation.Common;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
 
@@ -13,8 +13,8 @@ namespace TfsData
         private readonly WorkItemStore _itemStore;
         private readonly VersionControlServer _changesetServer;
         private readonly TfsTeamProjectCollection _tfsTeamProjectCollection;
-        private string _workItemsForIteration = "SELECT [System.Id], [System.Title] FROM WorkItems WHERE [System.IterationPath] UNDER '{0}'";
-        private string _workItemsByIds = "SELECT * FROM WorkItems WHERE [System.Id] in ({0})";
+        private readonly string _workItemsForIteration = "SELECT [System.Id], [System.Title] FROM WorkItems WHERE [System.IterationPath] UNDER '{0}'";
+        private readonly string _workItemsByIds = "SELECT * FROM WorkItems WHERE [System.Id] in ({0})";
 
         public TfsConnector(string url)
         {
@@ -81,8 +81,14 @@ namespace TfsData
             return result;
         }
 
-        public List<Changeset> GetChangesets(string queryLocation, VersionSpec versionSpecFrom, VersionSpec versionSpecTo)
+        public List<Changeset> GetChangesets(string queryLocation, string changesetFrom, string changesetTo)
         {
+            var versionSpecFrom = changesetFrom.IsNullOrEmpty()
+                ? new ChangesetVersionSpec(1)
+                : new ChangesetVersionSpec(changesetFrom);
+            var versionSpecTo = changesetTo.IsNullOrEmpty()
+                ? VersionSpec.Latest
+                : new ChangesetVersionSpec(changesetTo);
             var list = _changesetServer.QueryHistory(queryLocation, VersionSpec.Latest, 0, RecursionType.Full, null, versionSpecFrom,
                 versionSpecTo, int.MaxValue, true, false).OfType<Changeset>().OrderBy(x => x.ChangesetId).ToList();
             return list.Where(x => x.CommitterDisplayName != "TFS Service").ToList();
@@ -109,47 +115,47 @@ namespace TfsData
         }
 
 
-        public void GetCategorizedChanges(List<Changeset> changes, List<string> categories)
+        public void GetCategorizedChanges(string queryLocation, List<Changeset> changes, List<string> categories)
         {
 
-            //var categoryChangesList = new List<Model.CategoryChanges>();
+            var categoryChangesList = new List<Model.CategoryChanges>();
 
-            //foreach (var category in categories)
-            //{
-            //    var categoryChanges = new Model.CategoryChanges { Name = category };
-            //    var categoryPath = $"$/{tfsProjectName}/{tfsBranchName}/{category}";
-            //    var catList = changes.Where(x => x.Changes.Any(c => c.Item.ServerItem.Contains(categoryPath)));
-            //    foreach (var item in catList)
-            //    {
-            //        var changesetInfo = new Model.ChangesetInfo
-            //        {
-            //            Id = item.ChangesetId,
-            //            CommitedBy = item.CommitterDisplayName,
-            //            Created = item.CreationDate,
-            //            Comment = item.Comment
-            //        };
-            //        var workItemWithoutCodeReview = item.AssociatedWorkItems.Where(x => x.WorkItemType != "Code Review Request").ToList();
-            //        if (!workItemWithoutCodeReview.Any())
-            //        {
-            //            changesetInfo.WorkItemId = "N/A";
-            //            changesetInfo.WorkItemTitle = "N/A";
+            foreach (var category in categories)
+            {
+                var categoryChanges = new Model.CategoryChanges { Name = category };
+                var categoryPath = $"$/{queryLocation}/{category}";
+                var catList = changes.Where(x => x.Changes.Any(c => c.Item.ServerItem.Contains(categoryPath)));
+                foreach (var item in catList)
+                {
+                    var changesetInfo = new Model.ChangesetInfo
+                    {
+                        Id = item.ChangesetId,
+                        CommitedBy = item.CommitterDisplayName,
+                        Created = item.CreationDate,
+                        Comment = item.Comment
+                    };
+                    var workItemWithoutCodeReview = item.AssociatedWorkItems.Where(x => x.WorkItemType != "Code Review Request").ToList();
+                    if (!workItemWithoutCodeReview.Any())
+                    {
+                        changesetInfo.WorkItemId = "N/A";
+                        changesetInfo.WorkItemTitle = "N/A";
 
-            //            categoryChanges.Changes.Add(changesetInfo);
-            //        }
-            //        foreach (var info in workItemWithoutCodeReview)
-            //        {
+                        categoryChanges.Changes.Add(changesetInfo);
+                    }
+                    foreach (var info in workItemWithoutCodeReview)
+                    {
 
-            //            changesetInfo.WorkItemId = info.Id.ToString();
-            //            changesetInfo.WorkItemTitle = info.Title;
-            //            categoryChanges.Changes.Add(changesetInfo);
-            //        }
-            //    }
+                        changesetInfo.WorkItemId = info.Id.ToString();
+                        changesetInfo.WorkItemTitle = info.Title;
+                        categoryChanges.Changes.Add(changesetInfo);
+                    }
+                }
 
-            //    if (categoryChanges.Changes.Count != 0)
-            //    {
-            //        categoryChangesList.Add(categoryChanges);
-            //    }
-            //}
+                if (categoryChanges.Changes.Count != 0)
+                {
+                    categoryChangesList.Add(categoryChanges);
+                }
+            }
         }
     }
 }
