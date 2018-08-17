@@ -111,7 +111,38 @@ namespace Gui
 
         private void ConvertClicked(object sender, RoutedEventArgs e)
         {
-            throw new System.NotImplementedException();
+            var queryLocation = $"$/FenergoCore/{Branch.Text}";
+
+            var asd = _tfs.GetChangesets(queryLocation, ChangesetFrom.Value.ToString(), ChangesetTo.Value.ToString());
+            _listBox.ItemsSource = asd;
+        }
+
+        private async void GetChangesetTo(object sender, RoutedEventArgs e)
+        {
+            var changeset = ChangesetTo.Value.GetValueOrDefault();
+            if (changeset <= 1) return;
+            var result = await GetChangeset(changeset);
+
+            ChangesetToText.Text = result;
+        }
+
+        private async Task<string> GetChangeset(int changeset)
+        {
+            var result = await Dispatcher.Invoke(() => Task.Run(() =>
+            {
+                var title = _tfs.GetChangesetTitleById(changeset);
+                return title;
+            }));
+            return result;
+        }
+
+        private async void GetChangesetFrom(object sender, RoutedEventArgs e)
+        {
+            var changeset = ChangesetFrom.Value.GetValueOrDefault();
+            if (changeset <= 1) return;
+            var result = await GetChangeset(changeset);
+
+            ChangesetFromText.Text = result;
         }
     }
 }
