@@ -4,9 +4,47 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Gui"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
-    <Grid>
-        
-    </Grid>
+        Title="MainWindow" Height="350" Width="700">
+    <StackPanel Orientation="Vertical">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock>TFS Url</TextBlock>
+            <TextBox Name="TfsUrl" Text="https://secure.fenergo.com/tfs/Product/" Width="200"/>
+            <Button Content="Connect" Click="ConnectTfsButton"></Button>
+        </StackPanel>
+        <StackPanel Name="ProjectStack" Visibility="Visible" Orientation="Horizontal">
+            <TextBlock>Project</TextBlock>
+            <ComboBox Name="ProjectCombo" Width="200" SelectionChanged="ProjectSelected"/>
+        </StackPanel>
+        <StackPanel Name="IterationStack" Visibility="Visible" Orientation="Horizontal">
+            <TextBlock>Iteration</TextBlock>
+            <ComboBox Name="IterationCombo" Width="200" SelectionChanged="IterationSelected"/>
+        </StackPanel>
+        <StackPanel Name="BranchStack" Visibility="Visible" Orientation="Horizontal">
+            <TextBlock>Branch</TextBlock>
+            <TextBox Name="Branch" Width="200" />
+        </StackPanel>
+        <StackPanel Name="ReleaseNameStack" Visibility="Visible" Orientation="Horizontal">
+            <TextBlock>ReleaseName</TextBlock>
+            <TextBox Name="ReleaseName" Width="200" />
+        </StackPanel>
+        <StackPanel Name="ReleaseDateStack" Visibility="Visible" Orientation="Horizontal">
+            <TextBlock>Release Date</TextBlock>
+            <DatePicker Name="ReleaseDate" Width="200" />
+        </StackPanel>
+        <StackPanel Name="ChangesetFromStack" Visibility="Visible" Orientation="Horizontal">
+            <TextBlock>Changeset from</TextBlock>
+            <xctk:IntegerUpDown Name="ChangesetFrom" ShowButtonSpinner="False"  Width="200" />
+            <CheckBox Content="Include" VerticalContentAlignment="Center" Name="IncludeFrom"/>
+        </StackPanel>
+        <TextBlock Name="ChangesetFromText"/>
+        <StackPanel Name="ChangesetToStack" Visibility="Visible" Orientation="Horizontal">
+            <TextBlock>Changeset to</TextBlock>
+            <xctk:IntegerUpDown Name="ChangesetTo" ShowButtonSpinner="False"  Width="200" LostFocus="GetChangesetTo "/>
+            <CheckBox Content="Include" VerticalContentAlignment="Center" Name="IncludeTo"/>
+        </StackPanel>
+        <TextBlock Name="ChangesetToText"/>
+        <Button Name="Convert" Click="ConvertClicked"/>
+    </StackPanel>
 </Window>
