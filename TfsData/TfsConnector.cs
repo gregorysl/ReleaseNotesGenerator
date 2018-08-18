@@ -55,7 +55,14 @@ namespace TfsData
 
         public string GetChangesetTitleById(int id)
         {
-            return _changesetServer.GetChangeset(id).Comment;
+            try
+            {
+                return _changesetServer.GetChangeset(id).Comment;
+            }
+            catch (Exception e)
+            {
+                return e.Message;
+            }
         }
         private static void RecursiveAddIterationPath(Node node, ICollection<string> result)
         {
