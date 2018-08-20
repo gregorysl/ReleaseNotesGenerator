@@ -10,24 +10,24 @@
     <StackPanel Orientation="Vertical">
         <StackPanel Orientation="Horizontal">
             <TextBlock>TFS Url</TextBlock>
-            <TextBox Name="TfsUrl" Width="200"/>
+            <TextBox Name="TfsUrl" Text="{Binding Path=Url, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="200"/>
             <Button Content="Connect" Click="ConnectTfsButton"></Button>
         </StackPanel>
         <StackPanel Name="ProjectStack" Visibility="Hidden" Orientation="Horizontal">
             <TextBlock>Project</TextBlock>
-            <ComboBox Name="ProjectCombo" Width="200" SelectionChanged="ProjectSelected"/>
+            <ComboBox Name="ProjectCombo" SelectedItem="{Binding Path=ProjectSelected, Mode=TwoWay}" Width="200" SelectionChanged="ProjectSelected"/>
         </StackPanel>
         <StackPanel Name="TfsProjectStack" Visibility="Hidden" Orientation="Horizontal">
             <TextBlock>TFS project</TextBlock>
-            <TextBox Name="TfsProject" Width="200" />
+            <TextBox Name="TfsProject" Text="{Binding Path=TfsProject, Mode=TwoWay}" Width="200" />
         </StackPanel>
         <StackPanel Name="IterationStack" Visibility="Hidden" Orientation="Horizontal">
             <TextBlock>Iteration</TextBlock>
-            <ComboBox Name="IterationCombo" Width="200" SelectionChanged="IterationSelected"/>
+            <ComboBox Name="IterationCombo" SelectedItem="{Binding Path=IterationSelected, Mode=TwoWay}" Width="200" SelectionChanged="IterationSelected"/>
         </StackPanel>
         <StackPanel Name="BranchStack" Visibility="Hidden" Orientation="Horizontal">
             <TextBlock>Branch</TextBlock>
-            <TextBox Name="Branch" Width="200" />
+            <TextBox Name="Branch" Text="{Binding Path=TfsProject, Mode=TwoWay}" Width="200" />
         </StackPanel>
         <StackPanel Name="ChangesetFromStack" Visibility="Visible" Orientation="Horizontal">
             <TextBlock>Changeset from</TextBlock>

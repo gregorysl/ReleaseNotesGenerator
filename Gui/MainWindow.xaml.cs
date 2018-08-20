@@ -12,6 +12,7 @@ namespace Gui
 {
     public partial class MainWindow
     {
+        private DataViewModel _data;
         private const string RegexString = @".*\\\w+(?:.*)?\\((\w\d.\d+.\d+).\d+)";
         private static TfsConnector _tfs;
         public MainWindow()
@@ -22,12 +23,12 @@ namespace Gui
             //Close();
             Loaded += MainWindow_Loaded;
         }
-
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-          
+            _data = new DataViewModel();
+            DataContext = _data;
+            ConnectTfsButton(null, null);
         }
-
 
         private static void DoStuff()
         {
@@ -75,7 +76,7 @@ namespace Gui
 
         private void ConnectTfsButton(object sender, RoutedEventArgs e)
         {
-            _tfs = new TfsConnector(TfsUrl.Text);
+            _tfs = new TfsConnector(_data.Url);
 
             if (!_tfs.IsConnected) return;
             ProjectStack.Visibility = Visibility.Visible;
@@ -144,5 +145,4 @@ namespace Gui
             output.Text = result;
         }
     }
-
 }
