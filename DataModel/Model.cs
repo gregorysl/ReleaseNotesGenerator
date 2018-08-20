@@ -4,8 +4,12 @@ using System.Collections.Generic;
 
 namespace DataModel
 {
-
-    public class WorkItemDetails
+    public class ReleaseData
+    {
+        public List<ClientWorkItem> WorkItems { get; set; }
+        public List<CategoryChanges> CategorizedChanges { get; set; }
+    }
+    public class ClientWorkItem
     {
         public int Id { get; set; }
         public string Title { get; set; }
