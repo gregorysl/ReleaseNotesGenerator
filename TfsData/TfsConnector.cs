@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using DataModel;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.Common;
 using Microsoft.TeamFoundation.VersionControl.Client;
@@ -16,18 +17,10 @@ namespace TfsData
         private readonly string _workItemsForIteration = "SELECT [System.Id], [System.Title] FROM WorkItems WHERE [System.IterationPath] UNDER '{0}'";
         private readonly string _workItemsByIds = "SELECT * FROM WorkItems WHERE [System.Id] in ({0})";
 
+
         public TfsConnector(string url)
         {
-            //var versionSpecFrom = changesetFrom.IsNullOrEmpty()
-            //    ? new ChangesetVersionSpec(1)
-            //    : new ChangesetVersionSpec(changesetFrom);
-
-            //var versionSpecTo = changesetTo.IsNullOrEmpty()
-            //    ? VersionSpec.Latest
-            //    : new ChangesetVersionSpec(changesetTo);
-
             //var excludedDirs = new[] { "CodeAnalysis", "QA", "_AutomatedBuild" };
-            //var categories = new[] { "UIFramework", "Framework", "Infrastructure", "WebApp", "PSSolution" };
 
             _tfsTeamProjectCollection = TfsTeamProjectCollectionFactory.GetTeamProjectCollection(new Uri(url, UriKind.Absolute));
             _itemStore = _tfsTeamProjectCollection.GetService<WorkItemStore>();
@@ -76,17 +69,23 @@ namespace TfsData
             }
         }
 
-        public List<string> GetWorkItemsInIterationPath(string iterationPath)
+        public List<ClientWorkItem> GetWorkItemsInIterationPath(string iterationPath)
         {
-            var workItems = _itemStore.Query(string.Format(_workItemsForIteration, iterationPath)).Cast<WorkItem>().ToList();
-            var result = new List<string>();
-            foreach (var item in workItems)
+            var workItemsFromQuery = _itemStore.Query(string.Format(_workItemsForIteration, iterationPath)).Cast<WorkItem>().ToList();
+            var workItems = new List<ClientWorkItem>();
+            foreach (var workItem in workItemsFromQuery)
             {
-                result.Add(item.Fields["System.Id"].Value + ":" + item.Fields["System.Title"].Value);
+                workItems.Add(new ClientWorkItem
+                {
+                    Id = workItem.Id,
+                    Title = workItem.Title,
+                    ClientProject = workItem.Fields["client.project"].Value.ToString()
+                });
             }
 
-            return result;
+            return workItems;
         }
+        
 
         public List<Changeset> GetChangesets(string queryLocation, string changesetFrom, string changesetTo)
         {
@@ -101,16 +100,16 @@ namespace TfsData
             return list.Where(x => x.CommitterDisplayName != "TFS Service").ToList();
         }
 
-        public List<Model.WorkItemDetails> GetWorkItemsFromChangesets(List<Changeset> changes)
+        public List<ClientWorkItem> GetWorkItemsFromChangesets(List<Changeset> changes)
         {
             var workItemIds = changes.SelectMany(x => x.AssociatedWorkItems).ToList().Select(x => x.Id.ToString()).Distinct().ToList();
             var joinedWorkItems = string.Join(",", workItemIds);
             var workItems = _itemStore.Query(String.Format(_workItemsByIds, joinedWorkItems));
 
-            var workItemChanges = new List<Model.WorkItemDetails>();
+            var workItemChanges = new List<ClientWorkItem>();
             foreach (WorkItem workItem in workItems)
             {
-                workItemChanges.Add(new Model.WorkItemDetails
+                workItemChanges.Add(new ClientWorkItem
                 {
                     Id = workItem.Id,
                     Title = workItem.Title,
@@ -122,19 +121,19 @@ namespace TfsData
         }
 
 
-        public void GetCategorizedChanges(string queryLocation, List<Changeset> changes, List<string> categories)
+        public List<CategoryChanges> GetCategorizedChanges(string queryLocation, List<Changeset> changes, List<string> categories)
         {
 
-            var categoryChangesList = new List<Model.CategoryChanges>();
+            var categoryChangesList = new List<CategoryChanges>();
 
             foreach (var category in categories)
             {
-                var categoryChanges = new Model.CategoryChanges { Name = category };
-                var categoryPath = $"$/{queryLocation}/{category}";
-                var catList = changes.Where(x => x.Changes.Any(c => c.Item.ServerItem.Contains(categoryPath)));
+                var categoryChanges = new CategoryChanges { Name = category };
+                var categoryPath = $"{queryLocation}/{category}";
+                var catList = changes.Where(x => x.Changes.Any(c => c.Item.ServerItem.Contains(categoryPath))).OrderBy(x => x.ChangesetId);
                 foreach (var item in catList)
                 {
-                    var changesetInfo = new Model.ChangesetInfo
+                    var changesetInfo = new ChangesetInfo
                     {
                         Id = item.ChangesetId,
                         CommitedBy = item.CommitterDisplayName,
@@ -151,7 +150,6 @@ namespace TfsData
                     }
                     foreach (var info in workItemWithoutCodeReview)
                     {
-
                         changesetInfo.WorkItemId = info.Id.ToString();
                         changesetInfo.WorkItemTitle = info.Title;
                         categoryChanges.Changes.Add(changesetInfo);
@@ -163,6 +161,8 @@ namespace TfsData
                     categoryChangesList.Add(categoryChanges);
                 }
             }
+
+            return categoryChangesList;
         }
     }
 }
