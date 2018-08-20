@@ -31,13 +31,13 @@
         </StackPanel>
         <StackPanel Name="ChangesetFromStack" Visibility="Visible" Orientation="Horizontal">
             <TextBlock>Changeset from</TextBlock>
-            <xctk:IntegerUpDown Name="ChangesetFrom" Value="{Binding Path=ChangesetFrom, Mode=TwoWay}" ShowButtonSpinner="False"  Width="200" LostFocus="GetChangesetFrom"  />
+            <xctk:IntegerUpDown Name="ChangesetFrom" Value="{Binding Path=ChangesetFrom, Mode=TwoWay}" ShowButtonSpinner="False"  Width="200" ValueChanged="GetChangesetFrom"  />
             <CheckBox Content="Include" VerticalContentAlignment="Center" Name="IncludeFrom" IsChecked="True"/>
         </StackPanel>
         <TextBlock Name="ChangesetFromText"/>
         <StackPanel Name="ChangesetToStack" Visibility="Visible" Orientation="Horizontal">
             <TextBlock>Changeset to</TextBlock>
-            <xctk:IntegerUpDown Name="ChangesetTo" Value="{Binding Path=ChangesetTo, Mode=TwoWay}" ShowButtonSpinner="False" Width="200" LostMouseCapture="GetChangesetTo" />
+            <xctk:IntegerUpDown Name="ChangesetTo" Value="{Binding Path=ChangesetTo, Mode=TwoWay}" ShowButtonSpinner="False" Width="200" ValueChanged="GetChangesetTo" />
             <CheckBox Content="Include" VerticalContentAlignment="Center" Name="IncludeTo" IsChecked="True"/>
         </StackPanel>
         <TextBlock Name="ChangesetToText"/>
