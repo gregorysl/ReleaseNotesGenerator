@@ -25,6 +25,7 @@ namespace Gui
 
         public string ProjectSelected { get; set; }
         public string TfsProject { get; set; }
+        public string TfsBranch{ get; set; }
         public string IterationSelected { get; set; }
         public string ChangesetFrom { get; set; }
         public bool ChangesetFromInclude { get; set; }
