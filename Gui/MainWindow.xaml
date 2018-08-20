@@ -10,18 +10,22 @@
     <StackPanel Orientation="Vertical">
         <StackPanel Orientation="Horizontal">
             <TextBlock>TFS Url</TextBlock>
-            <TextBox Name="TfsUrl" Text="https://secure.fenergo.com/tfs/Product/" Width="200"/>
+            <TextBox Name="TfsUrl" Width="200"/>
             <Button Content="Connect" Click="ConnectTfsButton"></Button>
         </StackPanel>
-        <StackPanel Name="ProjectStack" Visibility="Visible" Orientation="Horizontal">
+        <StackPanel Name="ProjectStack" Visibility="Hidden" Orientation="Horizontal">
             <TextBlock>Project</TextBlock>
             <ComboBox Name="ProjectCombo" Width="200" SelectionChanged="ProjectSelected"/>
         </StackPanel>
-        <StackPanel Name="IterationStack" Visibility="Visible" Orientation="Horizontal">
+        <StackPanel Name="TfsProjectStack" Visibility="Hidden" Orientation="Horizontal">
+            <TextBlock>TFS project</TextBlock>
+            <TextBox Name="TfsProject" Width="200" />
+        </StackPanel>
+        <StackPanel Name="IterationStack" Visibility="Hidden" Orientation="Horizontal">
             <TextBlock>Iteration</TextBlock>
             <ComboBox Name="IterationCombo" Width="200" SelectionChanged="IterationSelected"/>
         </StackPanel>
-        <StackPanel Name="BranchStack" Visibility="Visible" Orientation="Horizontal">
+        <StackPanel Name="BranchStack" Visibility="Hidden" Orientation="Horizontal">
             <TextBlock>Branch</TextBlock>
             <TextBox Name="Branch" Width="200" />
         </StackPanel>

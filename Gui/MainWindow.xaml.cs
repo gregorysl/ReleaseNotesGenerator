@@ -1,26 +1,33 @@
 ﻿using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using TfsData;
 using Xceed.Words.NET;
+using Xceed.Wpf.Toolkit;
 
 namespace Gui
 {
     public partial class MainWindow
     {
-        private readonly string _regexString = @".*\\\w+(?:.*)?\\((\w\d.\d+.\d+).\d+)";
-        public static TfsConnector _tfs;
+        private const string RegexString = @".*\\\w+(?:.*)?\\((\w\d.\d+.\d+).\d+)";
+        private static TfsConnector _tfs;
         public MainWindow()
         {
             //DoStuff();
 
             InitializeComponent();
             //Close();
+            Loaded += MainWindow_Loaded;
         }
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+          
+        }
+
 
         private static void DoStuff()
         {
@@ -72,6 +79,7 @@ namespace Gui
 
             if (!_tfs.IsConnected) return;
             ProjectStack.Visibility = Visibility.Visible;
+            TfsProjectStack.Visibility = Visibility.Visible;
             ProjectCombo.ItemsSource = _tfs.Projects;
         }
 
@@ -79,23 +87,22 @@ namespace Gui
         {
             if (ProjectCombo.SelectedIndex == -1) return;
             IterationStack.Visibility = Visibility.Visible;
+            BranchStack.Visibility = Visibility.Visible;
             var projectName = ProjectCombo.SelectedItem.ToString();
+            TfsProject.Text = projectName;
             var iterationPaths = _tfs.GetIterationPaths(projectName);
 
-            
-            var regex = new Regex(_regexString);
+            var regex = new Regex(RegexString);
             var filtered = iterationPaths.Where(x => regex.IsMatch(x)).ToList();
 
             IterationCombo.ItemsSource = filtered;
-
-
         }
 
         private void IterationSelected(object sender, SelectionChangedEventArgs e)
         {
             if (IterationCombo.SelectedIndex == -1) return;
             var iteration = IterationCombo.SelectedItem.ToString();
-            var regex = new Regex(_regexString);
+            var regex = new Regex(RegexString);
             var a = regex.Match(iteration).Groups;
             if (a.Count == 3)
             {
@@ -117,32 +124,25 @@ namespace Gui
             _listBox.ItemsSource = asd;
         }
 
-        private async void GetChangesetTo(object sender, RoutedEventArgs e)
+        private void GetChangesetTo(object sender, RoutedEventArgs e)
         {
-            var changeset = ChangesetTo.Value.GetValueOrDefault();
-            if (changeset <= 1) return;
-            var result = await GetChangeset(changeset);
-
-            ChangesetToText.Text = result;
+            ShowChangesetTitleByChangesetId(ChangesetTo, ChangesetToText);
         }
 
-        private async Task<string> GetChangeset(int changeset)
+        private void GetChangesetFrom(object sender, RoutedEventArgs e)
         {
-            var result = await Dispatcher.Invoke(() => Task.Run(() =>
-            {
-                var title = _tfs.GetChangesetTitleById(changeset);
-                return title;
-            }));
-            return result;
+            ShowChangesetTitleByChangesetId(ChangesetFrom, ChangesetFromText);
         }
 
-        private async void GetChangesetFrom(object sender, RoutedEventArgs e)
+        private async void ShowChangesetTitleByChangesetId(IntegerUpDown input, TextBlock output)
         {
-            var changeset = ChangesetFrom.Value.GetValueOrDefault();
-            if (changeset <= 1) return;
-            var result = await GetChangeset(changeset);
+            var changeset = input.Value.GetValueOrDefault();
 
-            ChangesetFromText.Text = result;
+            string result = "";
+            if (changeset > 1) result = await Task.Run(() => _tfs.GetChangesetTitleById(changeset));
+
+            output.Text = result;
         }
     }
+
 }
