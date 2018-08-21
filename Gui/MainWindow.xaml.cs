@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -45,7 +44,18 @@ namespace Gui
 
             using (var doc = DocX.Load(fileName))
             {
-                //doc.ReplaceText(Tokens.ReleaseNumber, releaseName);
+                doc.ReplaceText("{ReleaseName}", _data.ReleaseName);
+                doc.ReplaceText("{ReleaseDate}", _data.ReleaseDateFormated);
+                doc.ReplaceText("{TfsBranch}", _data.TfsBranch);
+                doc.ReplaceText("{QaBuildName}", _data.QaBuildName);
+                doc.ReplaceText("{QaBuildDate}", _data.QaBuildDateFormated);
+                doc.ReplaceText("{CoreBuildName}", _data.CoreBuildName);
+                doc.ReplaceText("{CoreBuildDate}", _data.CoreBuildDateFormated);
+                doc.ReplaceText("{PsRefreshChangeset}", _data.PsRefreshChangeset);
+                doc.ReplaceText("{PsRefreshDate}", _data.PsRefreshDateFormated);
+                doc.ReplaceText("{PsRefreshName}", _data.PsRefreshName);
+                doc.ReplaceText("{CoreChangeset}", _data.CoreChangeset);
+                doc.ReplaceText("{CoreDate}", _data.CoreDateFormated);
 
                 var secondSection = doc.Paragraphs.FirstOrDefault(x => x.Text == "Code Change sets in this Release");
                 var paragraph = secondSection.InsertParagraphAfterSelf("asd").FontSize(10d);
