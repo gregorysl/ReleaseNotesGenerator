@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Gui"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="700">
+        Title="MainWindow" Height="500" Width="700">
     <StackPanel Orientation="Vertical">
         <StackPanel Orientation="Horizontal">
             <TextBlock>TFS Url</TextBlock>
@@ -32,25 +32,60 @@
         <StackPanel Name="ChangesetFromStack" Visibility="Visible" Orientation="Horizontal">
             <TextBlock>Changeset from</TextBlock>
             <xctk:IntegerUpDown Name="ChangesetFrom" Value="{Binding Path=ChangesetFrom, Mode=TwoWay}" ShowButtonSpinner="False"  Width="200" ValueChanged="GetChangesetFrom"  />
-            <CheckBox Content="Include" VerticalContentAlignment="Center" Name="IncludeFrom" IsChecked="True"/>
+            <CheckBox Content="Include" VerticalContentAlignment="Center" Name="IncludeFrom" IsChecked="{Binding Path=ChangesetFromInclude, Mode=TwoWay}" />
         </StackPanel>
         <TextBlock Name="ChangesetFromText"/>
         <StackPanel Name="ChangesetToStack" Visibility="Visible" Orientation="Horizontal">
             <TextBlock>Changeset to</TextBlock>
             <xctk:IntegerUpDown Name="ChangesetTo" Value="{Binding Path=ChangesetTo, Mode=TwoWay}" ShowButtonSpinner="False" Width="200" ValueChanged="GetChangesetTo" />
-            <CheckBox Content="Include" VerticalContentAlignment="Center" Name="IncludeTo" IsChecked="True"/>
+            <CheckBox Content="Include" VerticalContentAlignment="Center" Name="IncludeTo" IsChecked="{Binding Path=ChangesetToInclude, Mode=TwoWay}"/>
         </StackPanel>
         <TextBlock Name="ChangesetToText"/>
         <Button Name="Convert" Content="Get changesets and Work Items" Click="ConvertClicked"/>
 
+        <TextBlock>Release</TextBlock>
         <StackPanel Name="ReleaseNameStack" Visibility="Visible" Orientation="Horizontal">
-            <TextBlock>ReleaseName</TextBlock>
-            <TextBox Name="ReleaseName" Width="200" />
+            <TextBlock>Name</TextBlock>
+            <TextBox Name="ReleaseName" Text="{Binding Path=ReleaseName, Mode=TwoWay}" Width="200" />
+            <TextBlock>Date</TextBlock>
+            <xctk:DateTimePicker ShowButtonSpinner="False" CultureInfo="en-US" Name="ReleaseDate" Value="{Binding Path=ReleaseDate, Mode=TwoWay}" Format="Custom" FormatString="d-MMMM-yyyy" Width="200" />
         </StackPanel>
-        <StackPanel Name="ReleaseDateStack" Visibility="Visible" Orientation="Horizontal">
-            <TextBlock>Release Date</TextBlock>
-            <DatePicker Name="ReleaseDate" Width="200" />
+
+        <TextBlock>QA build</TextBlock>
+        <StackPanel Name="QaBuildStack" Visibility="Visible" Orientation="Horizontal">
+            <TextBlock>Name</TextBlock>
+            <TextBox Name="QaBuildName" Text="{Binding Path=QaBuildName, Mode=TwoWay}" Width="200" />
+            <TextBlock>Date</TextBlock>
+            <xctk:DateTimePicker ShowButtonSpinner="False" CultureInfo="en-US" Name="QaBuildDate" Value="{Binding Path=QaBuildDate, Mode=TwoWay}" Format="Custom" FormatString="yyyy-MM-dd HH:mm" Width="200" />
         </StackPanel>
+
+        <TextBlock>Core build</TextBlock>
+        <StackPanel Name="CoreBuildStack" Visibility="Visible" Orientation="Horizontal">
+            <TextBlock>Name</TextBlock>
+            <TextBox Name="CoreBuildName" Text="{Binding Path=CoreBuildName, Mode=TwoWay}" Width="200" />
+            <TextBlock>Date</TextBlock>
+            <xctk:DateTimePicker ShowButtonSpinner="False" CultureInfo="en-US" Name="CoreBuildDate" Value="{Binding Path=CoreBuildDate, Mode=TwoWay}" Format="Custom" FormatString="yyyy-MM-dd HH:mm" Width="200" />
+        </StackPanel>
+
+        <TextBlock>Core Changest</TextBlock>
+        <StackPanel Name="CoreChangestStack" Visibility="Visible" Orientation="Horizontal">
+            <TextBlock>Name</TextBlock>
+            <TextBox Name="CoreChangeset" Text="{Binding Path=CoreChangeset, Mode=TwoWay}" Width="200" />
+            <TextBlock>Date</TextBlock>
+            <xctk:DateTimePicker ShowButtonSpinner="False" CultureInfo="en-US" Name="CoreDate" Value="{Binding Path=CoreDate, Mode=TwoWay}" Format="Custom" FormatString="yyyy-MM-dd HH:mm" Width="200" />
+        </StackPanel>
+
+        <TextBlock>PsRefresh</TextBlock>
+        <StackPanel Name="PsRefreshStack" Visibility="Visible" Orientation="Horizontal">
+            <TextBlock>Name</TextBlock>
+            <TextBox Name="PsRefreshName" Text="{Binding Path=PsRefreshName, Mode=TwoWay}" Width="200" />
+            <TextBlock>Date</TextBlock>
+            <xctk:DateTimePicker ShowButtonSpinner="False" CultureInfo="en-US" Name="PsRefreshDate" Value="{Binding Path=PsRefreshDate, Mode=TwoWay}" Format="Custom" FormatString="yyyy-MM-dd HH:mm" Width="200" />
+            <TextBlock>Changeset</TextBlock>
+            <TextBox Name="PsRefreshChangeset" Text="{Binding Path=PsRefreshChangeset, Mode=TwoWay}" Width="200" />
+        </StackPanel>
+        
+
         <xctk:CheckListBox x:Name="_listBox" 
                            Height="250"
                            DisplayMemberPath="Comment"
