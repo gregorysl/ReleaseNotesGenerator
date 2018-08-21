@@ -19,6 +19,7 @@ namespace Gui
         private ReleaseData _data;
         private const string RegexString = @".*\\\w+(?:.*)?\\((\w\d.\d+.\d+).\d+)";
         private static TfsConnector _tfs;
+        public List<string> Categories => GettrimmedSettingList("categories");
         public MainWindow()
         {
             //DoStuff();
@@ -105,7 +106,7 @@ namespace Gui
 
         private void IterationSelected(object sender, SelectionChangedEventArgs e)
         {
-            if (_data.IterationSelected=="") return;
+            if (_data.IterationSelected == "") return;
             var iteration = IterationCombo.SelectedItem.ToString();
             var regex = new Regex(RegexString);
             var matchedGroups = regex.Match(iteration).Groups;
@@ -120,10 +121,18 @@ namespace Gui
 
         private void ConvertClicked(object sender, RoutedEventArgs e)
         {
-            var queryLocation = $"$/FenergoCore/{Branch.Text}";
+            var queryLocation = $"$/FenergoCore/{_data.TfsBranch}";
+            var workItemStateFilter = GettrimmedSettingList("workItemStateFilter");
+            var data = _tfs.GetChangesetsAndWorkItems(_data.IterationSelected, queryLocation,
+                _data.ChangesetFrom, _data.ChangesetTo, Categories, workItemStateFilter);
 
-            //var asd = _tfs.GetChangesets(queryLocation, ChangesetFrom.Value.ToString(), ChangesetTo.Value.ToString());
-            //_listBox.ItemsSource = asd;
+            DoStuff(data);
+            //_listBox.ItemsSource = data.;
+        }
+
+        private static List<string> GettrimmedSettingList(string key)
+        {
+            return ConfigurationManager.AppSettings[key].Split(',').Select(x => x.Trim()).ToList();
         }
 
         private void GetChangesetTo(object sender, RoutedEventArgs e)
