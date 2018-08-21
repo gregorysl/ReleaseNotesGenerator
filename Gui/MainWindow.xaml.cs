@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -36,9 +37,9 @@ namespace Gui
             ConnectTfsButton(null, null);
         }
 
-        private void DoStuff()
+        private void DoStuff(ReleaseData data)
         {
-            var categories = new[] { "UIFramework", "Framework", "Infrastructure", "WebApp", "PSSolution" };
+
             var dTestDocx = @"D:\test.docx";
             string fileName = @"D:\Template.docx";
 
@@ -49,9 +50,9 @@ namespace Gui
                 var secondSection = doc.Paragraphs.FirstOrDefault(x => x.Text == "Code Change sets in this Release");
                 var paragraph = secondSection.InsertParagraphAfterSelf("asd").FontSize(10d);
                 InsertBeforeOrAfter placeholder = paragraph;
-                foreach (var category in categories)
+                foreach (var category in data.CategorizedChanges)
                 {
-                    var p = placeholder.InsertParagraphAfterSelf(category).FontSize(11d).Heading(HeadingType.Heading2);
+                    var p = placeholder.InsertParagraphAfterSelf(category.Name).FontSize(11d).Heading(HeadingType.Heading2);
 
                     var table = p.InsertTableAfterSelf(2, 6);
                     table.Rows[0].Cells[0].Paragraphs[0].Append("TFS").Bold();
@@ -65,7 +66,27 @@ namespace Gui
                     table.Rows[1].Cells[2].Paragraphs[0].Append("{Date}");
                     table.Rows[1].Cells[3].Paragraphs[0].Append("{Desc}");
                     table.Rows[1].Cells[4].Paragraphs[0].Append("{WorkItemId}");
-                    table.Rows[1].Cells[5].Paragraphs[0].Append("{WorkItemI}");
+                    table.Rows[1].Cells[5].Paragraphs[0].Append("{WorkItemTitle}");
+
+                    var rowPattern = table.Rows[1];
+                    foreach (var change in category.Changes)
+                    {
+                        var newItem = table.InsertRow(rowPattern, table.RowCount - 1);
+
+                        newItem.ReplaceText("{TfsID}", change.Id.ToString());
+                        newItem.ReplaceText("{Dev}", change.CommitedBy);
+                        newItem.ReplaceText("{Date}", change.Created.ToString());
+                        newItem.ReplaceText("{Desc}", change.Comment);
+                        newItem.ReplaceText("{WorkItemId}", change.WorkItemId.ToString());
+                        newItem.ReplaceText("{WorkItemTitle}", change.WorkItemTitle.ToString());
+
+                    }
+
+
+
+
+
+                    rowPattern.Remove();
                     placeholder = table;
                 }
 
