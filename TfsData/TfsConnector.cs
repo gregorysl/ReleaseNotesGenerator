@@ -85,7 +85,7 @@ namespace TfsData
 
             return workItems;
         }
-        
+
 
         public List<Changeset> GetChangesets(string queryLocation, string changesetFrom, string changesetTo)
         {
@@ -100,14 +100,17 @@ namespace TfsData
             return list.Where(x => x.CommitterDisplayName != "TFS Service").ToList();
         }
 
-        public List<ClientWorkItem> GetWorkItemsFromChangesets(List<Changeset> changes)
+        public List<ClientWorkItem> GetWorkItemsFromChangesets(List<Changeset> changes, List<string> stateFilter)
         {
-            var workItemIds = changes.SelectMany(x => x.AssociatedWorkItems).ToList().Select(x => x.Id.ToString()).Distinct().ToList();
+            var workItemIds = changes.SelectMany(x => x.AssociatedWorkItems)
+                .Where(x => x.WorkItemType != "Code Review Request").ToList()
+                .Where(x => stateFilter.Contains(x.State))
+                .Select(x => x.Id.ToString()).Distinct().ToList();
             var joinedWorkItems = string.Join(",", workItemIds);
-            var workItems = _itemStore.Query(String.Format(_workItemsByIds, joinedWorkItems));
+            var workItems = _itemStore.Query(string.Format(_workItemsByIds, joinedWorkItems)).Cast<WorkItem>();
 
             var workItemChanges = new List<ClientWorkItem>();
-            foreach (WorkItem workItem in workItems)
+            foreach (var workItem in workItems)
             {
                 workItemChanges.Add(new ClientWorkItem
                 {
