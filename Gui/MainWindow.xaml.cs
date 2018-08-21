@@ -1,9 +1,13 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using DataModel;
 using TfsData;
 using Xceed.Words.NET;
 using Xceed.Wpf.Toolkit;
@@ -12,7 +16,7 @@ namespace Gui
 {
     public partial class MainWindow
     {
-        private DataViewModel _data;
+        private ReleaseData _data;
         private const string RegexString = @".*\\\w+(?:.*)?\\((\w\d.\d+.\d+).\d+)";
         private static TfsConnector _tfs;
         public MainWindow()
@@ -20,19 +24,20 @@ namespace Gui
             //DoStuff();
 
             InitializeComponent();
+
             //Close();
             Loaded += MainWindow_Loaded;
         }
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            _data = new DataViewModel();
+            _data = new ReleaseData();
             DataContext = _data;
             ConnectTfsButton(null, null);
         }
 
-        private static void DoStuff()
+        private void DoStuff()
         {
-            var categories = new[] {"UIFramework", "Framework", "Infrastructure", "WebApp", "PSSolution"};
+            var categories = new[] { "UIFramework", "Framework", "Infrastructure", "WebApp", "PSSolution" };
             var dTestDocx = @"D:\test.docx";
             string fileName = @"D:\Template.docx";
 
@@ -86,12 +91,11 @@ namespace Gui
 
         private void ProjectSelected(object sender, SelectionChangedEventArgs e)
         {
-            if (ProjectCombo.SelectedIndex == -1) return;
+            if (_data.ProjectSelected == "") return;
             IterationStack.Visibility = Visibility.Visible;
             BranchStack.Visibility = Visibility.Visible;
-            var projectName = ProjectCombo.SelectedItem.ToString();
-            TfsProject.Text = projectName;
-            var iterationPaths = _tfs.GetIterationPaths(projectName);
+            TfsProject.Text = _data.ProjectSelected;
+            var iterationPaths = _tfs.GetIterationPaths(_data.ProjectSelected);
 
             var regex = new Regex(RegexString);
             var filtered = iterationPaths.Where(x => regex.IsMatch(x)).ToList();
@@ -101,28 +105,25 @@ namespace Gui
 
         private void IterationSelected(object sender, SelectionChangedEventArgs e)
         {
-            if (IterationCombo.SelectedIndex == -1) return;
+            if (_data.IterationSelected=="") return;
             var iteration = IterationCombo.SelectedItem.ToString();
             var regex = new Regex(RegexString);
-            var a = regex.Match(iteration).Groups;
-            if (a.Count == 3)
-            {
-                ReleaseName.Text = a[1].Value;
-                Branch.Text = a[2].Value;
-            }
-            else
-            {
-                ReleaseName.Text = "";
-                Branch.Text = a[1].Value;
-            }
+            var matchedGroups = regex.Match(iteration).Groups;
+
+            var extractedData = matchedGroups.Count == 3
+                ? new Tuple<string, string>(matchedGroups[1].Value, matchedGroups[2].Value)
+                : new Tuple<string, string>("", matchedGroups[1].Value);
+
+            _data.ReleaseName = extractedData.Item1;
+            _data.TfsBranch = extractedData.Item2;
         }
 
         private void ConvertClicked(object sender, RoutedEventArgs e)
         {
             var queryLocation = $"$/FenergoCore/{Branch.Text}";
 
-            var asd = _tfs.GetChangesets(queryLocation, ChangesetFrom.Value.ToString(), ChangesetTo.Value.ToString());
-            _listBox.ItemsSource = asd;
+            //var asd = _tfs.GetChangesets(queryLocation, ChangesetFrom.Value.ToString(), ChangesetTo.Value.ToString());
+            //_listBox.ItemsSource = asd;
         }
 
         private void GetChangesetTo(object sender, RoutedEventArgs e)
