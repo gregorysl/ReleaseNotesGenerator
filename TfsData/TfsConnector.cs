@@ -86,6 +86,24 @@ namespace TfsData
             return workItems;
         }
 
+        public ReleaseData GetChangesetsAndWorkItems(string iterationPath, string queryLocation, string changesetFrom,
+            string changesetTo, List<string> categories, List<string> stateFilter)
+        {
+            var changes = GetChangesets(queryLocation, changesetFrom, changesetTo);
+            var workItems = GetWorkItemsFromChangesets(changes, stateFilter);
+            var workItems2 = GetWorkItemsInIterationPath(iterationPath);
+
+            workItems2.AddRange(workItems.Where(x => !workItems2.Exists(w => w.Id == x.Id)));
+
+            var categorized = GetCategorizedChanges(queryLocation, changes, categories);
+            var releaseData = new ReleaseData
+            {
+                CategorizedChanges = categorized,
+                WorkItems = workItems2
+            };
+
+            return releaseData;
+        }
 
         public List<Changeset> GetChangesets(string queryLocation, string changesetFrom, string changesetTo)
         {
