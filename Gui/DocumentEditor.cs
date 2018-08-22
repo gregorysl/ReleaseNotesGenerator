@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using DataModel;
 using Xceed.Words.NET;
@@ -7,7 +9,7 @@ namespace Gui
 {
     public class DocumentEditor
     {
-        public void ProcessData(ReleaseData data)
+        public void ProcessData(ReleaseData data, Dictionary<string, List<ChangesetInfo>> categorizedChangesets)
         {
 
             var dTestDocx = @"D:\test.docx";
@@ -22,21 +24,22 @@ namespace Gui
                 doc.ReplaceText("{QaBuildDate}", data.QaBuildDateFormated);
                 doc.ReplaceText("{CoreBuildName}", data.CoreBuildName);
                 doc.ReplaceText("{CoreBuildDate}", data.CoreBuildDateFormated);
-                doc.ReplaceText("{PsRefreshChangeset}", data.PsRefreshChangeset);
-                doc.ReplaceText("{PsRefreshDate}", data.PsRefreshDateFormated);
-                doc.ReplaceText("{PsRefreshName}", data.PsRefreshName);
-                doc.ReplaceText("{CoreChangeset}", data.CoreChangeset);
-                doc.ReplaceText("{CoreDate}", data.CoreDateFormated);
+                doc.ReplaceText("{PsRefreshChangeset}", data.PsRefresh.Id.ToString());
+                doc.ReplaceText("{PsRefreshDate}", data.PsRefresh.Created.ToString("yyyy-MM-dd HH:mm", new CultureInfo("en-US")));
+                doc.ReplaceText("{PsRefreshName}", data.PsRefresh.Comment);
+                doc.ReplaceText("{CoreChangeset}", data.CoreChange.Id.ToString());
+                doc.ReplaceText("{CoreDate}", data.CoreChange.Created.ToString("yyyy-MM-dd HH:mm", new CultureInfo("en-US")));
 
                 var secondSection = doc.Paragraphs.FirstOrDefault(x => x.Text == "Code Change sets in this Release");
                 if (secondSection == null) return;
-                var paragraph = secondSection.InsertParagraphAfterSelf("asd").FontSize(10d);
+                var paragraph = secondSection.InsertParagraphAfterSelf("The following list of code check-ins to TFS was compiled to make up this release:").FontSize(10d);
                 InsertBeforeOrAfter placeholder = paragraph;
-                foreach (var category in data.CategorizedChanges)
+                foreach (var category in categorizedChangesets)
                 {
-                    var p = placeholder.InsertParagraphAfterSelf(category.Name).FontSize(11d).Heading(HeadingType.Heading2);
+                    var p = placeholder.InsertParagraphAfterSelf(category.Key).FontSize(11d).Heading(HeadingType.Heading2);
 
                     var table = p.InsertTableAfterSelf(2, 6);
+                    table.SetWidths(new[] { 100f,150f,150f,200f, 100f, 400f });
                     table.Rows[0].Cells[0].Paragraphs[0].Append("TFS").Bold();
                     table.Rows[0].Cells[1].Paragraphs[0].Append("Developer").Bold();
                     table.Rows[0].Cells[2].Paragraphs[0].Append("Date/Time").Bold();
@@ -52,7 +55,7 @@ namespace Gui
                     rowPattern.Cells[4].Paragraphs[0].Append("{WorkItemId}");
                     rowPattern.Cells[5].Paragraphs[0].Append("{WorkItemTitle}");
 
-                    foreach (var change in category.Changes)
+                    foreach (var change in category.Value)
                     {
                         var newItem = table.InsertRow(rowPattern, table.RowCount - 1);
 
