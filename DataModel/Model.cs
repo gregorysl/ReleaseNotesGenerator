@@ -10,6 +10,8 @@ namespace DataModel
     public class ReleaseData : INotifyPropertyChanged
     {
         private string _url;
+        private ChangesetInfo _psRefresh;
+        private ChangesetInfo _coreChange;
 
         public string Url
         {
@@ -45,24 +47,31 @@ namespace DataModel
         public DateTime CoreBuildDate { get; set; } = DateTime.Now;
 
         public string CoreBuildDateFormated => CoreBuildDate.ToString("yyyy-MM-dd HH:mm", new CultureInfo("en-US"));
-        public string PsRefreshName { get; set; }
-        public string PsRefreshChangeset { get; set; }
-        public DateTime PsRefreshDate { get; set; } = DateTime.Now;
 
-        public string PsRefreshDateFormated => PsRefreshDate.ToString("yyyy-MM-dd HH:mm", new CultureInfo("en-US"));
+        public ChangesetInfo PsRefresh
+        {
+            get => _psRefresh;
+            set
+            {
+                _psRefresh = value;
+                OnPropertyChanged(nameof(PsRefresh));
+            }
+        }
 
-        public string CoreChangeset { get; set; }
-        public DateTime CoreDate { get; set; } = DateTime.Now;
+        public ChangesetInfo CoreChange
+        {
+            get => _coreChange;
+            set
+            {
+                _coreChange = value;
+                OnPropertyChanged(nameof(CoreChange));
+            }
+        }
 
-        public string CoreDateFormated => CoreDate.ToString("yyyy-MM-dd HH:mm", new CultureInfo("en-US"));
-
-
-
+        
 
         public List<ClientWorkItem> WorkItems { get; set; }
-        public List<CategoryChanges> CategorizedChanges { get; set; }
-
-
+        public List<ChangesetInfo> CategorizedChanges { get; set; }
 
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -92,9 +101,10 @@ namespace DataModel
         public string Comment { get; set; }
         public string WorkItemId { get; set; }
         public string WorkItemTitle { get; set; }
+        public List<string> Categories { get; set; }
         public override string ToString()
         {
-            return $"{Id}-{WorkItemTitle}-{WorkItemId}";
+            return $"{Id} {Comment} {CommitedBy} {Created.ToShortDateString()} ";
         }
     }
 }
