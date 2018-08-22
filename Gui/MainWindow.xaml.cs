@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -9,7 +8,6 @@ using System.Windows;
 using System.Windows.Controls;
 using DataModel;
 using TfsData;
-using Xceed.Words.NET;
 using Xceed.Wpf.Toolkit;
 
 namespace Gui
@@ -81,10 +79,10 @@ namespace Gui
             var workItemStateFilter = GettrimmedSettingList("workItemStateFilter");
             var data = _tfs.GetChangesetsAndWorkItems(_data.IterationSelected, queryLocation,
                 _data.ChangesetFrom, _data.ChangesetTo, Categories, workItemStateFilter);
+
             _data.CategorizedChanges = data.CategorizedChanges;
             _data.WorkItems = data.WorkItems;
-            new DocumentEditor().ProcessData(_data);
-            //_listBox.ItemsSource = data.;
+            _dataGrid.ItemsSource = _data.CategorizedChanges;
         }
 
         private static List<string> GettrimmedSettingList(string key)
@@ -110,6 +108,34 @@ namespace Gui
             if (changeset > 1) result = await Task.Run(() => _tfs.GetChangesetTitleById(changeset));
 
             output.Text = result;
+        }
+
+        private void SetAsPsRefreshClick(object sender, RoutedEventArgs e)
+        {
+            ChangesetInfo item = (ChangesetInfo) ((Button) e.Source).DataContext;
+            _data.PsRefresh = item;
+        }
+
+        private void SetAsCoreClick(object sender, RoutedEventArgs e)
+        {
+            ChangesetInfo item = (ChangesetInfo)((Button)e.Source).DataContext;
+            _data.CoreChange = item;
+        }
+
+        private void CreateDocument(object sender, RoutedEventArgs e)
+        {
+
+            var changesets = _data.CategorizedChanges.Where(x=>x.CommitedBy != "TFS Service").ToList();
+            var list = new Dictionary<string, List<ChangesetInfo>>();
+            foreach (var category in Categories)
+            {
+                var cha = changesets.Where(x => x.Categories.Contains(category)).ToList();
+                if (cha.Any())
+                {
+                    list.Add(category, cha);
+                }
+            }
+            new DocumentEditor().ProcessData(_data, list);
         }
     }
 }
