@@ -71,14 +71,15 @@ namespace Gui
                     table.Rows[0].Cells[3].Paragraphs[0].Append("Description").Bold();
                     table.Rows[0].Cells[4].Paragraphs[0].Append("Work Item").Bold();
                     table.Rows[0].Cells[5].Paragraphs[0].Append("Work Item Description").Bold();
-                    table.Rows[1].Cells[0].Paragraphs[0].Append("{TfsID}");
-                    table.Rows[1].Cells[1].Paragraphs[0].Append("{Dev}");
-                    table.Rows[1].Cells[2].Paragraphs[0].Append("{Date}");
-                    table.Rows[1].Cells[3].Paragraphs[0].Append("{Desc}");
-                    table.Rows[1].Cells[4].Paragraphs[0].Append("{WorkItemId}");
-                    table.Rows[1].Cells[5].Paragraphs[0].Append("{WorkItemTitle}");
 
                     var rowPattern = table.Rows[1];
+                    rowPattern.Cells[0].Paragraphs[0].Append("{TfsID}");
+                    rowPattern.Cells[1].Paragraphs[0].Append("{Dev}");
+                    rowPattern.Cells[2].Paragraphs[0].Append("{Date}");
+                    rowPattern.Cells[3].Paragraphs[0].Append("{Desc}");
+                    rowPattern.Cells[4].Paragraphs[0].Append("{WorkItemId}");
+                    rowPattern.Cells[5].Paragraphs[0].Append("{WorkItemTitle}");
+
                     foreach (var change in category.Changes)
                     {
                         var newItem = table.InsertRow(rowPattern, table.RowCount - 1);
@@ -101,7 +102,30 @@ namespace Gui
                 }
 
                 var thirdSection = placeholder.CreateHeadingSection("Product reported Defects in this Release");
-                var fourthSection = thirdSection.CreateHeadingSection("Product Backlog Items and KTRs in this Release");
+                var workItemTable = thirdSection.InsertTableAfterSelf(2, 3);
+                workItemTable.SetWidths(new[] { 100f, 1000f, 100f });
+                workItemTable.Rows[0].Cells[0].Paragraphs[0].Append("Bug Id").Bold();
+                workItemTable.Rows[0].Cells[1].Paragraphs[0].Append("Work Item Description").Bold();
+                workItemTable.Rows[0].Cells[2].Paragraphs[0].Append("Client Project").Bold();
+
+                var placeholderRow = workItemTable.Rows[1];
+                placeholderRow.Cells[0].Paragraphs[0].Append("{TfsID}");
+                placeholderRow.Cells[1].Paragraphs[0].Append("{WorkItemTitle}");
+                placeholderRow.Cells[2].Paragraphs[0].Append("{Client}");
+
+                foreach (var item in data.WorkItems)
+                {
+                    var newItem = workItemTable.InsertRow(placeholderRow, workItemTable.RowCount - 1);
+
+                    newItem.ReplaceText("{TfsID}", item.Id.ToString());
+                    newItem.ReplaceText("{WorkItemTitle}", item.Title);
+                    newItem.ReplaceText("{Client}", item.ClientProject);
+
+                }
+                placeholderRow.Remove();
+
+
+                var fourthSection = workItemTable.CreateHeadingSection("Product Backlog Items and KTRs in this Release");
                 var fifthSection = fourthSection.CreateHeadingSection("Test Report");
                 var sixthSection = fifthSection.CreateHeadingSection("Known issues in this Release");
 
