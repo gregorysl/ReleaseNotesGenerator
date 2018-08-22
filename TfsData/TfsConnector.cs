@@ -96,7 +96,7 @@ namespace TfsData
 
             workItems2.AddRange(workItems.Where(x => !workItems2.Exists(w => w.Id == x.Id)));
             
-            var categorized = GetCategorizedChanges(queryLocation, changes, categories);
+            var categorized = GetChangesWithWorkItemsAndCategories(queryLocation, changes, categories);
             var releaseData = new ReleaseData
             {
                 CategorizedChanges = categorized,
@@ -116,13 +116,12 @@ namespace TfsData
                 : new ChangesetVersionSpec(changesetTo);
             var list = _changesetServer.QueryHistory(queryLocation, VersionSpec.Latest, 0, RecursionType.Full, null, versionSpecFrom,
                 versionSpecTo, int.MaxValue, true, false).OfType<Changeset>().OrderBy(x => x.ChangesetId).ToList();
-            return list.Where(x => x.CommitterDisplayName != "TFS Service").ToList();
+            return list;
         }
 
         public List<ClientWorkItem> GetWorkItemsFromChangesets(List<Changeset> changes, List<string> stateFilter)
         {
-            var workItemIds = changes.SelectMany(x => x.AssociatedWorkItems)
-                .Where(x => x.WorkItemType != "Code Review Request").ToList()
+            var workItemIds = changes.SelectMany(x => x.AssociatedWorkItems).ToList()
                 .Where(x => stateFilter.Contains(x.State))
                 .Select(x => x.Id.ToString()).Distinct().ToList();
             var joinedWorkItems = string.Join(",", workItemIds);
@@ -143,48 +142,40 @@ namespace TfsData
         }
 
 
-        public List<CategoryChanges> GetCategorizedChanges(string queryLocation, List<Changeset> changes, List<string> categories)
+        public List<ChangesetInfo> GetChangesWithWorkItemsAndCategories(string queryLocation, List<Changeset> changes, List<string> categories)
         {
+            var categoryQueryLocation = categories.Select(x => new Tuple<string, string>(x, $"{queryLocation}/{x}")).ToList();
+            var changesets = new List<ChangesetInfo>();
 
-            var categoryChangesList = new List<CategoryChanges>();
-
-            foreach (var category in categories)
+            foreach (var change in changes)
             {
-                var categoryChanges = new CategoryChanges { Name = category };
-                var categoryPath = $"{queryLocation}/{category}";
-                var catList = changes.Where(x => x.Changes.Any(c => c.Item.ServerItem.Contains(categoryPath))).OrderBy(x => x.ChangesetId);
-                foreach (var item in catList)
+                var changeLocations = change.Changes.Select(x => x.Item.ServerItem).ToList();
+                var changeCategories = categoryQueryLocation.Where(x => changeLocations.Any(c => c.StartsWith(x.Item2))).Select(x => x.Item1).ToList();
+                var changesetInfo = new ChangesetInfo
                 {
-                    var changesetInfo = new ChangesetInfo
-                    {
-                        Id = item.ChangesetId,
-                        CommitedBy = item.CommitterDisplayName,
-                        Created = item.CreationDate,
-                        Comment = item.Comment
-                    };
-                    var workItemWithoutCodeReview = item.AssociatedWorkItems.Where(x => x.WorkItemType != "Code Review Request").ToList();
-                    if (!workItemWithoutCodeReview.Any())
-                    {
-                        changesetInfo.WorkItemId = "N/A";
-                        changesetInfo.WorkItemTitle = "N/A";
+                    Id = change.ChangesetId,
+                    CommitedBy = change.CommitterDisplayName,
+                    Created = change.CreationDate,
+                    Comment = change.Comment,
+                    Categories = changeCategories
+                };
+                var workItemWithoutCodeReview = change.AssociatedWorkItems.Where(x => x.WorkItemType != "Code Review Request").ToList();
+                if (!workItemWithoutCodeReview.Any())
+                {
+                    changesetInfo.WorkItemId = "N/A";
+                    changesetInfo.WorkItemTitle = "N/A";
 
-                        categoryChanges.Changes.Add(changesetInfo);
-                    }
-                    foreach (var info in workItemWithoutCodeReview)
-                    {
-                        changesetInfo.WorkItemId = info.Id.ToString();
-                        changesetInfo.WorkItemTitle = info.Title;
-                        categoryChanges.Changes.Add(changesetInfo);
-                    }
+                    changesets.Add(changesetInfo);
+                }
+                foreach (var info in workItemWithoutCodeReview)
+                {
+                    changesetInfo.WorkItemId = info.Id.ToString();
+                    changesetInfo.WorkItemTitle = info.Title;
+                    changesets.Add(changesetInfo);
                 }
 
-                if (categoryChanges.Changes.Count != 0)
-                {
-                    categoryChangesList.Add(categoryChanges);
-                }
             }
-
-            return categoryChangesList;
+            return changesets;
         }
     }
 }
