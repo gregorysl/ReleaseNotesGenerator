@@ -121,7 +121,8 @@ namespace TfsData
 
         public List<ClientWorkItem> GetWorkItemsFromChangesets(List<Changeset> changes, List<string> stateFilter)
         {
-            var workItemIds = changes.SelectMany(x => x.AssociatedWorkItems).ToList()
+            var workItemIds = changes.SelectMany(x => x.AssociatedWorkItems)
+                .Where(x => x.WorkItemType != "Code Review Request" && x.WorkItemType != "Task").ToList()
                 .Where(x => stateFilter.Contains(x.State))
                 .Select(x => x.Id.ToString()).Distinct().ToList();
             var joinedWorkItems = string.Join(",", workItemIds);
