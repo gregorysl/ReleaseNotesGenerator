@@ -69,9 +69,10 @@ namespace TfsData
             }
         }
 
-        public List<ClientWorkItem> GetWorkItemsInIterationPath(string iterationPath)
+        public List<ClientWorkItem> GetWorkItemsInIterationPath(string iterationPath, List<string> stateFilter)
         {
-            var workItemsFromQuery = _itemStore.Query(string.Format(_workItemsForIteration, iterationPath)).Cast<WorkItem>().ToList();
+            var workItemsFromQuery = _itemStore.Query(string.Format(_workItemsForIteration, iterationPath)).Cast<WorkItem>()
+                .Where(x => stateFilter.Contains(x.State)).ToList();
             var workItems = new List<ClientWorkItem>();
             foreach (var workItem in workItemsFromQuery)
             {
@@ -91,15 +92,15 @@ namespace TfsData
         {
             var changes = GetChangesets(queryLocation, changesetFrom, changesetTo);
             var workItems = GetWorkItemsFromChangesets(changes, stateFilter);
-            var workItems2 = GetWorkItemsInIterationPath(iterationPath);
+            var workItems2 = GetWorkItemsInIterationPath(iterationPath,stateFilter);
 
             workItems2.AddRange(workItems.Where(x => !workItems2.Exists(w => w.Id == x.Id)));
-
+            
             var categorized = GetCategorizedChanges(queryLocation, changes, categories);
             var releaseData = new ReleaseData
             {
                 CategorizedChanges = categorized,
-                WorkItems = workItems2
+                WorkItems = workItems2.OrderBy(x=>x.ClientProject).ThenBy(x=>x.Id).ToList()
             };
 
             return releaseData;
