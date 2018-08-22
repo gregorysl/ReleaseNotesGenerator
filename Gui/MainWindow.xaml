@@ -3,10 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Gui"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="MainWindow" Height="500" Width="700">
+        Title="MainWindow" Height="700" Width="800">
     <StackPanel Orientation="Vertical">
         <StackPanel Orientation="Horizontal">
             <TextBlock>TFS Url</TextBlock>
@@ -67,28 +66,36 @@
             <xctk:DateTimePicker ShowButtonSpinner="False" CultureInfo="en-US" Name="CoreBuildDate" Value="{Binding Path=CoreBuildDate, Mode=TwoWay}" Format="Custom" FormatString="yyyy-MM-dd HH:mm" Width="200" />
         </StackPanel>
 
+
+        <DataGrid x:Name="_dataGrid" AutoGenerateColumns="False" Height="200"  IsReadOnly="True" ItemsSource="{Binding CategorizedChanges}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Id" Binding="{Binding Id}" SortDirection="Descending"  />
+                <DataGridTextColumn Header="Commited By" Binding="{Binding CommitedBy}" />
+                <DataGridTextColumn Header="Commited Date" Binding="{Binding Created}" />
+                <DataGridTextColumn Header="Comment" Binding="{Binding Comment}" Width="350">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style>
+                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTemplateColumn Header="Actions" Width="SizeToCells" >
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Click="SetAsPsRefreshClick">PsRefresh</Button>
+                                <Button Click="SetAsCoreClick">Latest Core</Button>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
         <TextBlock>Core Changest</TextBlock>
-        <StackPanel Name="CoreChangestStack" Visibility="Visible" Orientation="Horizontal">
-            <TextBlock>Name</TextBlock>
-            <TextBox Name="CoreChangeset" Text="{Binding Path=CoreChangeset, Mode=TwoWay}" Width="200" />
-            <TextBlock>Date</TextBlock>
-            <xctk:DateTimePicker ShowButtonSpinner="False" CultureInfo="en-US" Name="CoreDate" Value="{Binding Path=CoreDate, Mode=TwoWay}" Format="Custom" FormatString="yyyy-MM-dd HH:mm" Width="200" />
-        </StackPanel>
-
+        <TextBlock Text="{Binding CoreChange}"></TextBlock>
         <TextBlock>PsRefresh</TextBlock>
-        <StackPanel Name="PsRefreshStack" Visibility="Visible" Orientation="Horizontal">
-            <TextBlock>Name</TextBlock>
-            <TextBox Name="PsRefreshName" Text="{Binding Path=PsRefreshName, Mode=TwoWay}" Width="200" />
-            <TextBlock>Date</TextBlock>
-            <xctk:DateTimePicker ShowButtonSpinner="False" CultureInfo="en-US" Name="PsRefreshDate" Value="{Binding Path=PsRefreshDate, Mode=TwoWay}" Format="Custom" FormatString="yyyy-MM-dd HH:mm" Width="200" />
-            <TextBlock>Changeset</TextBlock>
-            <TextBox Name="PsRefreshChangeset" Text="{Binding Path=PsRefreshChangeset, Mode=TwoWay}" Width="200" />
-        </StackPanel>
-        
+        <TextBlock Text="{Binding PsRefresh}"></TextBlock>
 
-        <xctk:CheckListBox x:Name="_listBox" 
-                           Height="250"
-                           DisplayMemberPath="Comment"
-                           ValueMemberPath="ChangesetId"  />
+        <Button Content="Create Document" Click="CreateDocument"></Button>
     </StackPanel>
 </Window>
