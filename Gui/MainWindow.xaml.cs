@@ -40,7 +40,6 @@ namespace Gui
 
             if (!_tfs.IsConnected) return;
             ProjectStack.Visibility = Visibility.Visible;
-            TfsProjectStack.Visibility = Visibility.Visible;
             ProjectCombo.ItemsSource = _tfs.Projects;
         }
         
@@ -49,7 +48,6 @@ namespace Gui
         {
             if (_data.ProjectSelected == "") return;
             IterationStack.Visibility = Visibility.Visible;
-            BranchStack.Visibility = Visibility.Visible;
             TfsProject.Text = _data.ProjectSelected;
             var iterationPaths = _tfs.GetIterationPaths(_data.ProjectSelected);
 

@@ -7,60 +7,43 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="700" Width="800">
     <StackPanel Orientation="Vertical">
-        <StackPanel Name="ProjectStack" Visibility="Hidden" Orientation="Horizontal">
-            <TextBlock>Project</TextBlock>
-            <ComboBox Name="ProjectCombo" SelectedItem="{Binding Path=ProjectSelected, Mode=TwoWay}" Width="200" SelectionChanged="ProjectSelected"/>
+        <StackPanel Orientation="Horizontal">
+            <StackPanel Name="ProjectStack" Visibility="Hidden" Orientation="Horizontal">
+                <TextBlock>Project</TextBlock>
+                <ComboBox Name="ProjectCombo" SelectedItem="{Binding Path=ProjectSelected, Mode=TwoWay}" Width="200" SelectionChanged="ProjectSelected"/>
+            </StackPanel>
+            <StackPanel Name="IterationStack" Visibility="Hidden" Orientation="Horizontal">
+                <TextBlock>Iteration</TextBlock>
+                <ComboBox Name="IterationCombo" SelectedItem="{Binding Path=IterationSelected, Mode=TwoWay}" Width="200" SelectionChanged="IterationSelected"/>
+            </StackPanel>
         </StackPanel>
-        <StackPanel Name="TfsProjectStack" Visibility="Hidden" Orientation="Horizontal">
+        <StackPanel Name="TfsProjectStack" Orientation="Horizontal">
             <TextBlock>TFS project</TextBlock>
             <TextBox Name="TfsProject" Text="{Binding Path=TfsProject, Mode=TwoWay}" Width="200" />
-        </StackPanel>
-        <StackPanel Name="IterationStack" Visibility="Hidden" Orientation="Horizontal">
-            <TextBlock>Iteration</TextBlock>
-            <ComboBox Name="IterationCombo" SelectedItem="{Binding Path=IterationSelected, Mode=TwoWay}" Width="200" SelectionChanged="IterationSelected"/>
-        </StackPanel>
-        <StackPanel Name="BranchStack" Visibility="Hidden" Orientation="Horizontal">
             <TextBlock>Branch</TextBlock>
             <TextBox Name="Branch" Text="{Binding Path=TfsBranch, Mode=TwoWay}" Width="200" />
         </StackPanel>
-        <StackPanel Name="ChangesetFromStack" Visibility="Visible" Orientation="Horizontal">
-            <TextBlock>Changeset from</TextBlock>
-            <xctk:IntegerUpDown Name="ChangesetFrom" Value="{Binding Path=ChangesetFrom, Mode=TwoWay}" ShowButtonSpinner="False"  Width="200" ValueChanged="GetChangesetFrom"  />
-            <CheckBox Content="Include" VerticalContentAlignment="Center" Name="IncludeFrom" IsChecked="{Binding Path=ChangesetFromInclude, Mode=TwoWay}" />
+        <StackPanel Orientation="Horizontal">
+
+            <StackPanel Orientation="Vertical">
+                <StackPanel Name="ChangesetFromStack" Visibility="Visible" Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center">Changeset from</TextBlock>
+                    <CheckBox Content="Include" VerticalContentAlignment="Center" Name="IncludeFrom" IsChecked="{Binding Path=ChangesetFromInclude, Mode=TwoWay}" />
+                    <xctk:IntegerUpDown Name="ChangesetFrom" Value="{Binding Path=ChangesetFrom, Mode=TwoWay}" ShowButtonSpinner="False"  Width="200" ValueChanged="GetChangesetFrom"  />
+                </StackPanel>
+                <TextBlock Name="ChangesetFromText"/>
+            </StackPanel>
+            <StackPanel Orientation="Vertical">
+                <StackPanel Name="ChangesetToStack" Visibility="Visible" Orientation="Horizontal">
+                    <TextBlock  VerticalAlignment="Center">Changeset to</TextBlock>
+                    <CheckBox Content="Include" VerticalContentAlignment="Center" Name="IncludeTo" IsChecked="{Binding Path=ChangesetToInclude, Mode=TwoWay}"/>
+                    <xctk:IntegerUpDown Name="ChangesetTo" Value="{Binding Path=ChangesetTo, Mode=TwoWay}" ShowButtonSpinner="False" Width="200" ValueChanged="GetChangesetTo" />
+                </StackPanel>
+                <TextBlock Name="ChangesetToText"/>
+            </StackPanel>
         </StackPanel>
-        <TextBlock Name="ChangesetFromText"/>
-        <StackPanel Name="ChangesetToStack" Visibility="Visible" Orientation="Horizontal">
-            <TextBlock>Changeset to</TextBlock>
-            <xctk:IntegerUpDown Name="ChangesetTo" Value="{Binding Path=ChangesetTo, Mode=TwoWay}" ShowButtonSpinner="False" Width="200" ValueChanged="GetChangesetTo" />
-            <CheckBox Content="Include" VerticalContentAlignment="Center" Name="IncludeTo" IsChecked="{Binding Path=ChangesetToInclude, Mode=TwoWay}"/>
-        </StackPanel>
-        <TextBlock Name="ChangesetToText"/>
+
         <Button Name="Convert" Content="Get changesets and Work Items" Click="ConvertClicked"/>
-
-        <TextBlock>Release</TextBlock>
-        <StackPanel Name="ReleaseNameStack" Visibility="Visible" Orientation="Horizontal">
-            <TextBlock>Name</TextBlock>
-            <TextBox Name="ReleaseName" Text="{Binding Path=ReleaseName, Mode=TwoWay}" Width="200" />
-            <TextBlock>Date</TextBlock>
-            <xctk:DateTimePicker ShowButtonSpinner="False" CultureInfo="en-US" Name="ReleaseDate" Value="{Binding Path=ReleaseDate, Mode=TwoWay}" Format="Custom" FormatString="d-MMMM-yyyy" Width="200" />
-        </StackPanel>
-
-        <TextBlock>QA build</TextBlock>
-        <StackPanel Name="QaBuildStack" Visibility="Visible" Orientation="Horizontal">
-            <TextBlock>Name</TextBlock>
-            <TextBox Name="QaBuildName" Text="{Binding Path=QaBuildName, Mode=TwoWay}" Width="200" />
-            <TextBlock>Date</TextBlock>
-            <xctk:DateTimePicker ShowButtonSpinner="False" CultureInfo="en-US" Name="QaBuildDate" Value="{Binding Path=QaBuildDate, Mode=TwoWay}" Format="Custom" FormatString="yyyy-MM-dd HH:mm" Width="200" />
-        </StackPanel>
-
-        <TextBlock>Core build</TextBlock>
-        <StackPanel Name="CoreBuildStack" Visibility="Visible" Orientation="Horizontal">
-            <TextBlock>Name</TextBlock>
-            <TextBox Name="CoreBuildName" Text="{Binding Path=CoreBuildName, Mode=TwoWay}" Width="200" />
-            <TextBlock>Date</TextBlock>
-            <xctk:DateTimePicker ShowButtonSpinner="False" CultureInfo="en-US" Name="CoreBuildDate" Value="{Binding Path=CoreBuildDate, Mode=TwoWay}" Format="Custom" FormatString="yyyy-MM-dd HH:mm" Width="200" />
-        </StackPanel>
-
 
         <DataGrid x:Name="_dataGrid" AutoGenerateColumns="False" Height="200"  IsReadOnly="True" ItemsSource="{Binding CategorizedChanges}">
             <DataGrid.Columns>
@@ -91,6 +74,29 @@
         <TextBlock>PsRefresh</TextBlock>
         <TextBlock Text="{Binding PsRefresh}"></TextBlock>
 
+        <TextBlock>Release details</TextBlock>
+        <StackPanel Name="ReleaseNameStack" Visibility="Visible" Orientation="Horizontal">
+            <TextBlock>Name</TextBlock>
+            <TextBox Name="ReleaseName" Text="{Binding Path=ReleaseName, Mode=TwoWay}" Width="200" />
+            <TextBlock>Date</TextBlock>
+            <xctk:DateTimePicker ShowButtonSpinner="False" CultureInfo="en-US" Name="ReleaseDate" Value="{Binding Path=ReleaseDate, Mode=TwoWay}" Format="Custom" FormatString="d-MMMM-yyyy" Width="200" />
+        </StackPanel>
+
+        <TextBlock>QA build</TextBlock>
+        <StackPanel Name="QaBuildStack" Visibility="Visible" Orientation="Horizontal">
+            <TextBlock>Name</TextBlock>
+            <TextBox Name="QaBuildName" Text="{Binding Path=QaBuildName, Mode=TwoWay}" Width="200" />
+            <TextBlock>Date</TextBlock>
+            <xctk:DateTimePicker ShowButtonSpinner="False" CultureInfo="en-US" Name="QaBuildDate" Value="{Binding Path=QaBuildDate, Mode=TwoWay}" Format="Custom" FormatString="yyyy-MM-dd HH:mm" Width="200" />
+        </StackPanel>
+
+        <TextBlock>Core build</TextBlock>
+        <StackPanel Name="CoreBuildStack" Visibility="Visible" Orientation="Horizontal">
+            <TextBlock>Name</TextBlock>
+            <TextBox Name="CoreBuildName" Text="{Binding Path=CoreBuildName, Mode=TwoWay}" Width="200" />
+            <TextBlock>Date</TextBlock>
+            <xctk:DateTimePicker ShowButtonSpinner="False" CultureInfo="en-US" Name="CoreBuildDate" Value="{Binding Path=CoreBuildDate, Mode=TwoWay}" Format="Custom" FormatString="yyyy-MM-dd HH:mm" Width="200" />
+        </StackPanel>
         <Button Content="Create Document" Click="CreateDocument"></Button>
     </StackPanel>
 </Window>
