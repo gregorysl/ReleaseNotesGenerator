@@ -84,6 +84,7 @@ namespace Gui
             _data.CategorizedChanges = data.CategorizedChanges;
             _data.WorkItems = data.WorkItems;
             _dataGrid.ItemsSource = _data.CategorizedChanges;
+            _dataGrid.Items.SortDescriptions.Add(new SortDescription("Id", ListSortDirection.Descending));
         }
 
         private static List<string> GettrimmedSettingList(string key)
