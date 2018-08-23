@@ -12,6 +12,8 @@ namespace DataModel
         private string _url;
         private ChangesetInfo _psRefresh;
         private ChangesetInfo _coreChange;
+        private string _releaseName;
+        private string _tfsBranch;
 
         public string Url
         {
@@ -26,13 +28,28 @@ namespace DataModel
 
         public string ProjectSelected { get; set; }
         public string TfsProject { get; set; }
-        public string TfsBranch { get; set; }
+        public string TfsBranch { get => _tfsBranch;
+            set
+            {
+                _tfsBranch= value;
+                OnPropertyChanged(nameof(TfsBranch));
+            }
+        }
         public string IterationSelected { get; set; }
         public string ChangesetFrom { get; set; }
         public bool ChangesetFromInclude { get; set; }
         public string ChangesetTo { get; set; }
         public bool ChangesetToInclude { get; set; }
-        public string ReleaseName { get; set; }
+
+        public string ReleaseName
+        {
+            get => _releaseName;
+            set
+            {
+                _releaseName = value;
+                OnPropertyChanged(nameof(ReleaseName));
+            }
+        }
 
         public DateTime ReleaseDate { get; set; } = DateTime.Now;
 
@@ -68,7 +85,7 @@ namespace DataModel
             }
         }
 
-        
+
 
         public List<ClientWorkItem> WorkItems { get; set; }
         public List<ChangesetInfo> CategorizedChanges { get; set; }
