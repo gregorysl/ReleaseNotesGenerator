@@ -7,11 +7,6 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="700" Width="800">
     <StackPanel Orientation="Vertical">
-        <StackPanel Orientation="Horizontal">
-            <TextBlock>TFS Url</TextBlock>
-            <TextBox Name="TfsUrl" Text="{Binding Path=Url, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="200"/>
-            <Button Content="Connect" Click="ConnectTfsButton"></Button>
-        </StackPanel>
         <StackPanel Name="ProjectStack" Visibility="Hidden" Orientation="Horizontal">
             <TextBlock>Project</TextBlock>
             <ComboBox Name="ProjectCombo" SelectedItem="{Binding Path=ProjectSelected, Mode=TwoWay}" Width="200" SelectionChanged="ProjectSelected"/>

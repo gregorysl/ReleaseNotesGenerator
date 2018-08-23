@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Configuration;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -31,18 +32,18 @@ namespace Gui
         {
             _data = new ReleaseData();
             DataContext = _data;
-            ConnectTfsButton(null, null);
-        }
-        
-        private void ConnectTfsButton(object sender, RoutedEventArgs e)
-        {
-            _tfs = new TfsConnector(_data.Url);
+            
+            var tfsUrl = ConfigurationManager.AppSettings["tfsUrl"];
+            if (string.IsNullOrWhiteSpace(tfsUrl)) return;
+
+            _tfs = new TfsConnector(tfsUrl);
 
             if (!_tfs.IsConnected) return;
             ProjectStack.Visibility = Visibility.Visible;
             TfsProjectStack.Visibility = Visibility.Visible;
             ProjectCombo.ItemsSource = _tfs.Projects;
         }
+        
 
         private void ProjectSelected(object sender, SelectionChangedEventArgs e)
         {

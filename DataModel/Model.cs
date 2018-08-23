@@ -14,18 +14,7 @@ namespace DataModel
         private ChangesetInfo _coreChange;
         private string _releaseName;
         private string _tfsBranch;
-
-        public string Url
-        {
-            get => _url;
-            set
-            {
-                _url = value;
-
-                OnPropertyChanged(nameof(Url));
-            }
-        }
-
+        
         public string ProjectSelected { get; set; }
         public string TfsProject { get; set; }
         public string TfsBranch { get => _tfsBranch;
