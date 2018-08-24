@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -39,7 +39,7 @@ namespace Gui
                     var p = placeholder.InsertParagraphAfterSelf(category.Key).FontSize(11d).Heading(HeadingType.Heading2);
 
                     var table = p.InsertTableAfterSelf(2, 6);
-                    table.SetWidths(new[] { 100f,150f,150f,200f, 100f, 400f });
+                    table.SetWidthsPercentage(new[] { 10f,15f,15f,20f, 10f, 30f }, null);
                     table.Rows[0].Cells[0].Paragraphs[0].Append("TFS").Bold();
                     table.Rows[0].Cells[1].Paragraphs[0].Append("Developer").Bold();
                     table.Rows[0].Cells[2].Paragraphs[0].Append("Date/Time").Bold();
@@ -67,18 +67,16 @@ namespace Gui
                         newItem.ReplaceText("{WorkItemTitle}", change.WorkItemTitle);
 
                     }
-
-
-
-
-
+                    
                     rowPattern.Remove();
+                    table.AutoFit = AutoFit.ColumnWidth;
                     placeholder = table;
                 }
 
                 var thirdSection = placeholder.CreateHeadingSection("Product reported Defects in this Release");
                 var workItemTable = thirdSection.InsertTableAfterSelf(2, 3);
-                workItemTable.SetWidths(new[] { 100f, 1000f, 100f });
+                workItemTable.SetWidthsPercentage(new[] { 10f, 75f, 15f }, null);
+                workItemTable.AutoFit = AutoFit.ColumnWidth;
                 workItemTable.Rows[0].Cells[0].Paragraphs[0].Append("Bug Id").Bold();
                 workItemTable.Rows[0].Cells[1].Paragraphs[0].Append("Work Item Description").Bold();
                 workItemTable.Rows[0].Cells[2].Paragraphs[0].Append("Client Project").Bold();
