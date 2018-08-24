@@ -160,7 +160,7 @@ namespace TfsData
                     Comment = change.Comment,
                     Categories = changeCategories
                 };
-                var workItemWithoutCodeReview = change.AssociatedWorkItems.Where(x => x.WorkItemType != "Code Review Request").ToList();
+                var workItemWithoutCodeReview = change.AssociatedWorkItems.Where(x => x.WorkItemType != "Code Review Request" && x.WorkItemType != "Task").ToList();
                 if (!workItemWithoutCodeReview.Any())
                 {
                     changesetInfo.WorkItemId = "N/A";
