@@ -73,16 +73,8 @@ namespace TfsData
         {
             var workItemsFromQuery = _itemStore.Query(string.Format(_workItemsForIteration, iterationPath)).Cast<WorkItem>()
                 .Where(x => stateFilter.Contains(x.State)).ToList();
-            var workItems = new List<ClientWorkItem>();
-            foreach (var workItem in workItemsFromQuery)
-            {
-                workItems.Add(new ClientWorkItem
-                {
-                    Id = workItem.Id,
-                    Title = workItem.Title,
-                    ClientProject = workItem.Fields["client.project"].Value.ToString()
-                });
-            }
+
+            var workItems = workItemsFromQuery.Select(workItem => workItem.ToClientWorkItem()).ToList();
 
             return workItems;
         }
@@ -128,18 +120,7 @@ namespace TfsData
             var joinedWorkItems = string.Join(",", workItemIds);
             var workItems = _itemStore.Query(string.Format(_workItemsByIds, joinedWorkItems)).Cast<WorkItem>();
 
-            var workItemChanges = new List<ClientWorkItem>();
-            foreach (var workItem in workItems)
-            {
-                workItemChanges.Add(new ClientWorkItem
-                {
-                    Id = workItem.Id,
-                    Title = workItem.Title,
-                    ClientProject = workItem.Fields["client.project"].Value.ToString()
-                });
-            }
-
-            return workItemChanges;
+            return workItems.Select(workItem => workItem.ToClientWorkItem()).ToList();
         }
 
 
