@@ -126,16 +126,19 @@ namespace Gui
         {
 
             var changesets = _data.CategorizedChanges.Where(x=>x.CommitedBy != "TFS Service").ToList();
-            var list = new Dictionary<string, List<ChangesetInfo>>();
+            var categories = new Dictionary<string, List<ChangesetInfo>>();
             foreach (var category in Categories)
             {
                 var cha = changesets.Where(x => x.Categories.Contains(category)).ToList();
                 if (cha.Any())
                 {
-                    list.Add(category, cha);
+                    categories.Add(category, cha);
                 }
             }
-            new DocumentEditor().ProcessData(_data, list);
+
+            var workItems = _data.WorkItems.Where(x => x.ClientProject != "General");
+            var pbi = _data.WorkItems.Where(x => x.ClientProject == "General");
+            new DocumentEditor().ProcessData(_data, categories, workItems, pbi);
         }
     }
 }
