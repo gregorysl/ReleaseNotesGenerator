@@ -10,10 +10,14 @@ namespace Gui
                 .Heading(HeadingType.Heading1);
         }
 
-        public static Paragraph AppentToFirstParagraph(this Cell c, string text)
+        public static Paragraph FillFirstParagraph(this Cell c, string text)
         {
             return c.Paragraphs[0].Append(text);
+        }
 
+        public static Cell GetCell(this Table t, int row, int col)
+        {
+            return t.Rows[row].Cells[col];
         }
     }
 }
