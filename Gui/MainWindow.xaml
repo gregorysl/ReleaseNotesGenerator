@@ -49,7 +49,7 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Id" Binding="{Binding Id}" SortDirection="Descending"  />
                 <DataGridTextColumn Header="Commited By" Binding="{Binding CommitedBy}" />
-                <DataGridTextColumn Header="Commited Date" Binding="{Binding Created}" />
+                <DataGridTextColumn Header="Commited Date" Binding="{Binding Created, StringFormat=\{0:dd.mm.yyyy HH:MM:ss\}}" />
                 <DataGridTextColumn Header="Comment" Binding="{Binding Comment}" Width="350">
                     <DataGridTextColumn.ElementStyle>
                         <Style>
