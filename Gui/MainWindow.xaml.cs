@@ -72,12 +72,12 @@ namespace Gui
             _data.TfsBranch = extractedData.Item2;
         }
 
-        private void ConvertClicked(object sender, RoutedEventArgs e)
+        private async void ConvertClicked(object sender, RoutedEventArgs e)
         {
             var queryLocation = $"$/FenergoCore/{_data.TfsBranch}";
             var workItemStateFilter = GettrimmedSettingList("workItemStateFilter");
-            var data = _tfs.GetChangesetsAndWorkItems(_data.IterationSelected, queryLocation,
-                _data.ChangesetFrom, _data.ChangesetTo, Categories, workItemStateFilter);
+            var data = await Task.Run(() =>  _tfs.GetChangesetsAndWorkItems(_data.IterationSelected, queryLocation,
+                _data.ChangesetFrom, _data.ChangesetTo, Categories, workItemStateFilter));
 
             _data.CategorizedChanges = data.CategorizedChanges;
             _data.WorkItems = data.WorkItems;
@@ -124,7 +124,6 @@ namespace Gui
 
         private void CreateDocument(object sender, RoutedEventArgs e)
         {
-
             var changesets = _data.CategorizedChanges.Where(x=>x.CommitedBy != "TFS Service").ToList();
             var categories = new Dictionary<string, List<ChangesetInfo>>();
             foreach (var category in Categories)
