@@ -46,10 +46,10 @@ namespace Gui
 
         private void ProjectSelected(object sender, SelectionChangedEventArgs e)
         {
-            if (_data.ProjectSelected == "") return;
+            if (ProjectCombo.SelectedItem == null) return;
             IterationStack.Visibility = Visibility.Visible;
-            _data.TfsProject = _data.ProjectSelected;
-            var iterationPaths = _tfs.GetIterationPaths(_data.ProjectSelected);
+
+            var iterationPaths = _tfs.GetIterationPaths(_data.TfsProject);
 
             var regex = new Regex(RegexString);
             var filtered = iterationPaths.Where(x => regex.IsMatch(x)).ToList();
@@ -74,7 +74,7 @@ namespace Gui
 
         private async void ConvertClicked(object sender, RoutedEventArgs e)
         {
-            var queryLocation = $"$/FenergoCore/{_data.TfsBranch}";
+            var queryLocation = $"$/{_data.TfsProject}/{_data.TfsBranch}";
             var workItemStateFilter = GettrimmedSettingList("workItemStateFilter");
             var data = await Task.Run(() =>  _tfs.GetChangesetsAndWorkItems(_data.IterationSelected, queryLocation,
                 _data.ChangesetFrom, _data.ChangesetTo, Categories, workItemStateFilter));

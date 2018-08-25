@@ -10,7 +10,7 @@
         <StackPanel Orientation="Horizontal">
             <StackPanel Name="ProjectStack" Visibility="Hidden" Orientation="Horizontal">
                 <TextBlock>Project</TextBlock>
-                <ComboBox Name="ProjectCombo" SelectedItem="{Binding Path=ProjectSelected, Mode=TwoWay}" Width="200" SelectionChanged="ProjectSelected"/>
+                <ComboBox Name="ProjectCombo" SelectedItem="{Binding TfsProject}" Width="200" SelectionChanged="ProjectSelected"/>
             </StackPanel>
             <StackPanel Name="IterationStack" Visibility="Hidden" Orientation="Horizontal">
                 <TextBlock>Iteration</TextBlock>

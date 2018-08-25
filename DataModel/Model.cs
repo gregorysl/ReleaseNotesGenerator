@@ -15,7 +15,7 @@ namespace DataModel
         public bool GenerateDocButtonEnabled =>
             !string.IsNullOrWhiteSpace(ReleaseName) && !string.IsNullOrWhiteSpace(QaBuildName) &&
             !string.IsNullOrWhiteSpace(CoreBuildName) && PsRefresh != null && CoreChange != null;
-        private string _url;
+
         private ChangesetInfo _psRefresh;
         private ChangesetInfo _coreChange;
         private string _releaseName;
@@ -23,9 +23,7 @@ namespace DataModel
         private string _qaBuildName;
         private string _coreBuildName;
         private string _tfsProject;
-
-        public string ProjectSelected { get; set; }
-
+        
         public string TfsProject
         {
             get => _tfsProject;
