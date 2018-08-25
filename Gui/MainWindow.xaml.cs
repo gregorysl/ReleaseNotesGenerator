@@ -48,7 +48,7 @@ namespace Gui
         {
             if (_data.ProjectSelected == "") return;
             IterationStack.Visibility = Visibility.Visible;
-            TfsProject.Text = _data.ProjectSelected;
+            _data.TfsProject = _data.ProjectSelected;
             var iterationPaths = _tfs.GetIterationPaths(_data.ProjectSelected);
 
             var regex = new Regex(RegexString);
@@ -59,7 +59,7 @@ namespace Gui
 
         private void IterationSelected(object sender, SelectionChangedEventArgs e)
         {
-            if (_data.IterationSelected == "") return;
+            if (IterationCombo.SelectedItem == null) return;
             var iteration = IterationCombo.SelectedItem.ToString();
             var regex = new Regex(RegexString);
             var matchedGroups = regex.Match(iteration).Groups;

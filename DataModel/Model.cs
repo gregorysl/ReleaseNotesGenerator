@@ -32,6 +32,7 @@ namespace DataModel
             set
             {
                 _tfsProject = value;
+                OnPropertyChanged(nameof(TfsProject));
                 OnPropertyChanged(nameof(DownloadButtonEnabled));
             }
         }
