@@ -9,7 +9,7 @@ namespace TfsData
         private static readonly string ClientProjectField = "client.project";
         public static string GetClientProject(this WorkItem item)
         {
-            var fieldExists = item.Fields.Cast<Field>().Any(x => x.Name == ClientProjectField);
+            var fieldExists = item.Fields[ClientProjectField] != null;
             return fieldExists ? item.Fields[ClientProjectField].Value.ToString() : "";
         }
         public static ClientWorkItem ToClientWorkItem(this WorkItem item)
