@@ -43,7 +43,7 @@
             </StackPanel>
         </StackPanel>
 
-        <Button Name="Convert" Content="Get changesets and Work Items" Click="ConvertClicked"/>
+        <Button Name="Convert" Content="Get changesets and Work Items" IsEnabled="{Binding DownloadButtonEnabled}" Click="ConvertClicked"/>
 
         <DataGrid x:Name="_dataGrid" AutoGenerateColumns="False" Height="200"  IsReadOnly="True" ItemsSource="{Binding CategorizedChanges}">
             <DataGrid.Columns>
@@ -97,6 +97,6 @@
             <TextBlock>Date</TextBlock>
             <xctk:DateTimePicker ShowButtonSpinner="False" CultureInfo="en-US" Name="CoreBuildDate" Value="{Binding Path=CoreBuildDate, Mode=TwoWay}" Format="Custom" FormatString="yyyy-MM-dd HH:mm" Width="200" />
         </StackPanel>
-        <Button Content="Create Document" Click="CreateDocument"></Button>
+        <Button Content="Create Document" Click="CreateDocument" IsEnabled="{Binding GenerateDocButtonEnabled}" />
     </StackPanel>
 </Window>

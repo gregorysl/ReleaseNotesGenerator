@@ -9,19 +9,39 @@ namespace DataModel
 {
     public class ReleaseData : INotifyPropertyChanged
     {
+        public bool DownloadButtonEnabled =>
+            !string.IsNullOrWhiteSpace(TfsProject) && !string.IsNullOrWhiteSpace(TfsBranch);
+
+        public bool GenerateDocButtonEnabled =>
+            !string.IsNullOrWhiteSpace(ReleaseName) && !string.IsNullOrWhiteSpace(QaBuildName) &&
+            !string.IsNullOrWhiteSpace(CoreBuildName) && PsRefresh != null && CoreChange != null;
         private string _url;
         private ChangesetInfo _psRefresh;
         private ChangesetInfo _coreChange;
         private string _releaseName;
         private string _tfsBranch;
-        
+        private string _qaBuildName;
+        private string _coreBuildName;
+        private string _tfsProject;
+
         public string ProjectSelected { get; set; }
-        public string TfsProject { get; set; }
+
+        public string TfsProject
+        {
+            get => _tfsProject;
+            set
+            {
+                _tfsProject = value;
+                OnPropertyChanged(nameof(DownloadButtonEnabled));
+            }
+        }
+
         public string TfsBranch { get => _tfsBranch;
             set
             {
                 _tfsBranch= value;
                 OnPropertyChanged(nameof(TfsBranch));
+                OnPropertyChanged(nameof(DownloadButtonEnabled));
             }
         }
         public string IterationSelected { get; set; }
@@ -37,18 +57,37 @@ namespace DataModel
             {
                 _releaseName = value;
                 OnPropertyChanged(nameof(ReleaseName));
+                OnPropertyChanged(nameof(GenerateDocButtonEnabled));
             }
         }
 
         public DateTime ReleaseDate { get; set; } = DateTime.Now;
 
         public string ReleaseDateFormated => ReleaseDate.ToString("d-MMMM-yyyy", new CultureInfo("en-US"));
-        public string QaBuildName { get; set; }
+
+        public string QaBuildName
+        {
+            get => _qaBuildName;
+            set
+            {
+                _qaBuildName = value;
+                OnPropertyChanged(nameof(GenerateDocButtonEnabled));
+            }
+        }
 
         public DateTime QaBuildDate { get; set; } = DateTime.Now;
 
         public string QaBuildDateFormated => QaBuildDate.ToString("yyyy-MM-dd HH:mm", new CultureInfo("en-US"));
-        public string CoreBuildName { get; set; }
+
+        public string CoreBuildName
+        {
+            get => _coreBuildName;
+            set
+            {
+                _coreBuildName = value;
+                OnPropertyChanged(nameof(GenerateDocButtonEnabled));
+            }
+        }
 
         public DateTime CoreBuildDate { get; set; } = DateTime.Now;
 
@@ -61,6 +100,7 @@ namespace DataModel
             {
                 _psRefresh = value;
                 OnPropertyChanged(nameof(PsRefresh));
+                OnPropertyChanged(nameof(GenerateDocButtonEnabled));
             }
         }
 
@@ -71,6 +111,7 @@ namespace DataModel
             {
                 _coreChange = value;
                 OnPropertyChanged(nameof(CoreChange));
+                OnPropertyChanged(nameof(GenerateDocButtonEnabled));
             }
         }
 
