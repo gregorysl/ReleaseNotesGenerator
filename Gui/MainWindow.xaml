@@ -44,7 +44,7 @@
         </StackPanel>
 
         <Button Name="Convert" Content="Get changesets and Work Items" IsEnabled="{Binding DownloadButtonEnabled}" Click="ConvertClicked"/>
-
+<Grid>
         <DataGrid x:Name="_dataGrid" AutoGenerateColumns="False" Height="200"  IsReadOnly="True" ItemsSource="{Binding CategorizedChanges}">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Id" Binding="{Binding Id}" SortDirection="Descending"  />
@@ -69,6 +69,12 @@
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
+    <StackPanel Name="LoadingBar" Visibility="Hidden" Orientation="Vertical" VerticalAlignment="Center">
+                <ProgressBar IsIndeterminate="True" Opacity="0.5" Height="50"/>
+        <TextBlock FontSize="30" HorizontalAlignment="Center">Loading Data</TextBlock>
+    </StackPanel>
+
+        </Grid>
         <TextBlock>Core Changest</TextBlock>
         <TextBlock Text="{Binding CoreChange}"></TextBlock>
         <TextBlock>PsRefresh</TextBlock>

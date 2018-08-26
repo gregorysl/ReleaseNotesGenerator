@@ -76,9 +76,11 @@ namespace Gui
         {
             var queryLocation = $"$/{_data.TfsProject}/{_data.TfsBranch}";
             var workItemStateFilter = GettrimmedSettingList("workItemStateFilter");
+            LoadingBar.Visibility = Visibility.Visible;
             var data = await Task.Run(() =>  _tfs.GetChangesetsAndWorkItems(_data.IterationSelected, queryLocation,
                 _data.ChangesetFrom, _data.ChangesetTo, Categories, workItemStateFilter));
 
+            LoadingBar.Visibility = Visibility.Hidden;
             _data.CategorizedChanges = data.CategorizedChanges;
             _data.WorkItems = data.WorkItems;
             _dataGrid.ItemsSource = _data.CategorizedChanges;
