@@ -48,7 +48,7 @@ namespace Gui
         {
             if (ProjectCombo.SelectedItem == null) return;
             IterationStack.Visibility = Visibility.Visible;
-
+            _data.TfsProject = ProjectCombo.SelectedItem.ToString();
             var iterationPaths = _tfs.GetIterationPaths(_data.TfsProject);
 
             var regex = new Regex(RegexString);
@@ -61,6 +61,7 @@ namespace Gui
         {
             if (IterationCombo.SelectedItem == null) return;
             var iteration = IterationCombo.SelectedItem.ToString();
+            _data.IterationSelected = iteration;
             var regex = new Regex(RegexString);
             var matchedGroups = regex.Match(iteration).Groups;
 
