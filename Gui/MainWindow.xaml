@@ -5,12 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="MainWindow" Height="700" Width="800">
+        Title="MainWindow" Height="800" Width="800">
     <StackPanel Orientation="Vertical">
         <StackPanel Orientation="Horizontal">
             <StackPanel Name="ProjectStack" Visibility="Hidden" Orientation="Horizontal">
                 <TextBlock>Project</TextBlock>
-                <ComboBox Name="ProjectCombo" SelectedItem="{Binding TfsProject}" Width="200" SelectionChanged="ProjectSelected"/>
+                <ComboBox Name="ProjectCombo" Width="200" SelectionChanged="ProjectSelected"/>
             </StackPanel>
             <StackPanel Name="IterationStack" Visibility="Hidden" Orientation="Horizontal">
                 <TextBlock>Iteration</TextBlock>
@@ -43,38 +43,45 @@
             </StackPanel>
         </StackPanel>
 
-        <Button Name="Convert" Content="Get changesets and Work Items" IsEnabled="{Binding DownloadButtonEnabled}" Click="ConvertClicked"/>
-<Grid>
-        <DataGrid x:Name="_dataGrid" AutoGenerateColumns="False" Height="200"  IsReadOnly="True" ItemsSource="{Binding CategorizedChanges}">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Id" Binding="{Binding Id}" SortDirection="Descending"  />
-                <DataGridTextColumn Header="Commited By" Binding="{Binding CommitedBy}" />
-                <DataGridTextColumn Header="Commited Date" Binding="{Binding Created, StringFormat=\{0:dd.mm.yyyy HH:MM:ss\}}" />
-                <DataGridTextColumn Header="Comment" Binding="{Binding Comment}" Width="350">
-                    <DataGridTextColumn.ElementStyle>
-                        <Style>
-                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
-                <DataGridTemplateColumn Header="Actions" Width="SizeToCells" >
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <StackPanel Orientation="Horizontal">
-                                <Button Click="SetAsPsRefreshClick">PsRefresh</Button>
-                                <Button Click="SetAsCoreClick">Latest Core</Button>
-                            </StackPanel>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </DataGrid.Columns>
-        </DataGrid>
-    <StackPanel Name="LoadingBar" Visibility="Hidden" Orientation="Vertical" VerticalAlignment="Center">
+        <Button Name="Convert" Content="Get changesets and Work Items"   IsEnabled="{Binding DownloadButtonEnabled}" Click="ConvertClicked"/>
+        <Grid>
+            <Grid.Resources>
+                <Style x:Key="MyDataGridCellStyle" TargetType="{x:Type DataGridCell}">
+                    <Setter Property="IsTabStop" Value="False"/>
+                </Style>
+            </Grid.Resources>
+            <DataGrid x:Name="_dataGrid" CanUserAddRows="False" AutoGenerateColumns="False" Height="400" SelectionMode="Extended" SelectionUnit="FullRow" ItemsSource="{Binding CategorizedChanges}">
+                <DataGrid.Columns>
+                    <DataGridCheckBoxColumn Header="" Binding="{Binding Selected, UpdateSourceTrigger=PropertyChanged}"></DataGridCheckBoxColumn>
+                    <DataGridTextColumn IsReadOnly="True"  CellStyle="{StaticResource MyDataGridCellStyle}" Header="Id" Binding="{Binding Id}" SortDirection="Descending"  />
+                    <DataGridTextColumn IsReadOnly="True"  CellStyle="{StaticResource MyDataGridCellStyle}" Header="Commited By" Binding="{Binding CommitedBy}" />
+                    <DataGridTextColumn IsReadOnly="True" CellStyle="{StaticResource MyDataGridCellStyle}" Header="Commited Date" Binding="{Binding Created, StringFormat=\{0:dd.mm.yyyy HH:MM:ss\}}" />
+                    <DataGridTextColumn IsReadOnly="True" CellStyle="{StaticResource MyDataGridCellStyle}" Header="Comment" Binding="{Binding Comment}" Width="350">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style>
+                                <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTemplateColumn Header="Actions" Width="SizeToCells" >
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Click="SetAsPsRefreshClick">PsRefresh</Button>
+                                    <Button Click="SetAsCoreClick">Latest Core</Button>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+            <StackPanel Name="LoadingBar" Visibility="Hidden" Orientation="Vertical" VerticalAlignment="Center">
                 <ProgressBar IsIndeterminate="True" Opacity="0.5" Height="50"/>
-        <TextBlock FontSize="30" HorizontalAlignment="Center">Loading Data</TextBlock>
-    </StackPanel>
+                <TextBlock FontSize="30" HorizontalAlignment="Center">Loading Data</TextBlock>
+            </StackPanel>
 
         </Grid>
+        <CheckBox Content="Include TFSService Check-ins" Click="ToggleButton_OnChecked" />
         <TextBlock>Core Changest</TextBlock>
         <TextBlock Text="{Binding CoreChange}"></TextBlock>
         <TextBlock>PsRefresh</TextBlock>
