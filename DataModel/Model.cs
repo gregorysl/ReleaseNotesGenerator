@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -23,7 +24,7 @@ namespace DataModel
         private string _qaBuildName;
         private string _coreBuildName;
         private string _tfsProject;
-        
+
         public string TfsProject
         {
             get => _tfsProject;
@@ -117,7 +118,8 @@ namespace DataModel
 
 
         public List<ClientWorkItem> WorkItems { get; set; }
-        public List<ChangesetInfo> CategorizedChanges { get; set; }
+
+        public ObservableCollection<ChangesetInfo> CategorizedChanges { get; set; }
 
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -139,8 +141,20 @@ namespace DataModel
         public List<ChangesetInfo> Changes { get; set; } = new List<ChangesetInfo>();
     }
 
-    public class ChangesetInfo
+    public class ChangesetInfo : INotifyPropertyChanged
     {
+        private bool _selected = true;
+
+        public bool Selected
+        {
+            get => _selected;
+            set
+            {
+                _selected = value;
+                OnPropertyChanged(nameof(Selected));
+            }
+        }
+
         public int Id { get; set; }
         public string CommitedBy { get; set; }
         public DateTime Created { get; set; }
@@ -151,6 +165,13 @@ namespace DataModel
         public override string ToString()
         {
             return $"{Id} {Comment} {CommitedBy} {Created.ToShortDateString()} ";
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }
