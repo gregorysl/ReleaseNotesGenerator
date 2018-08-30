@@ -16,6 +16,7 @@ namespace Gui
     public partial class MainWindow
     {
         private ReleaseData _data;
+        private bool _includeTfsService = false;
         private const string RegexString = @".*\\\w+(?:.*)?\\((\w\d.\d+.\d+).\d+)";
         private static TfsConnector _tfs;
         public List<string> Categories => GettrimmedSettingList("categories");
@@ -30,7 +31,9 @@ namespace Gui
         }
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            ProjectCombo.SelectedItem = "FenergoCoreSupport";
             _data = new ReleaseData();
+            _data = new ReleaseData{TfsProject = "FenergoCore",IterationSelected = @"FenergoCoreSupport\Current\R8.3.1.7", ChangesetFrom  = "175971" };
             DataContext = _data;
             
             var tfsUrl = ConfigurationManager.AppSettings["tfsUrl"];
@@ -78,12 +81,15 @@ namespace Gui
             var queryLocation = $"$/{_data.TfsProject}/{_data.TfsBranch}";
             var workItemStateFilter = GettrimmedSettingList("workItemStateFilter");
             LoadingBar.Visibility = Visibility.Visible;
-            var data = await Task.Run(() =>  _tfs.GetChangesetsAndWorkItems(_data.IterationSelected, queryLocation,
+            var downloadedData = await Task.Run(() =>  _tfs.GetChangesetsAndWorkItems(_data.IterationSelected, queryLocation,
                 _data.ChangesetFrom, _data.ChangesetTo, Categories, workItemStateFilter));
 
             LoadingBar.Visibility = Visibility.Hidden;
-            _data.CategorizedChanges = data.CategorizedChanges;
-            _data.WorkItems = data.WorkItems;
+            _data.CategorizedChanges = downloadedData.CategorizedChanges;
+
+            FilterTfsChanges();
+
+            _data.WorkItems = downloadedData.WorkItems;
             _dataGrid.ItemsSource = _data.CategorizedChanges;
             _dataGrid.Items.SortDescriptions.Add(new SortDescription("Id", ListSortDirection.Descending));
         }
@@ -127,7 +133,7 @@ namespace Gui
 
         private void CreateDocument(object sender, RoutedEventArgs e)
         {
-            var changesets = _data.CategorizedChanges.Where(x=>x.CommitedBy != "TFS Service").ToList();
+            var changesets = _data.CategorizedChanges.Where(x=>x.Selected).ToList();
             var categories = new Dictionary<string, List<ChangesetInfo>>();
             foreach (var category in Categories)
             {
@@ -141,6 +147,27 @@ namespace Gui
             var workItems = _data.WorkItems.Where(x => x.ClientProject != "General");
             var pbi = _data.WorkItems.Where(x => x.ClientProject == "General");
             new DocumentEditor().ProcessData(_data, categories, workItems, pbi);
+        }
+
+        private void ToggleButton_OnChecked(object sender, RoutedEventArgs e)
+        {
+            var checkbox = (CheckBox) sender;
+            if (checkbox == null) return;
+            _includeTfsService = checkbox.IsChecked.GetValueOrDefault(false);
+
+            FilterTfsChanges();
+
+        }
+
+        private void FilterTfsChanges()
+        {
+            foreach (var change in _data.CategorizedChanges)
+            {
+                if (change.CommitedBy == "TFS Service")
+                {
+                    change.Selected = _includeTfsService;
+                }
+            }
         }
     }
 }
