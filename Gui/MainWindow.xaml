@@ -55,7 +55,7 @@
                     <DataGridCheckBoxColumn Header="" Binding="{Binding Selected, UpdateSourceTrigger=PropertyChanged}"></DataGridCheckBoxColumn>
                     <DataGridTextColumn IsReadOnly="True"  CellStyle="{StaticResource MyDataGridCellStyle}" Header="Id" Binding="{Binding Id}" SortDirection="Descending"  />
                     <DataGridTextColumn IsReadOnly="True"  CellStyle="{StaticResource MyDataGridCellStyle}" Header="Commited By" Binding="{Binding CommitedBy}" />
-                    <DataGridTextColumn IsReadOnly="True" CellStyle="{StaticResource MyDataGridCellStyle}" Header="Commited Date" Binding="{Binding Created, StringFormat=\{0:dd.mm.yyyy HH:MM:ss\}}" />
+                    <DataGridTextColumn IsReadOnly="True" CellStyle="{StaticResource MyDataGridCellStyle}" Header="Commited Date" Binding="{Binding Created, StringFormat=\{0:dd.MM.yyyy HH:mm:ss\}}" />
                     <DataGridTextColumn IsReadOnly="True" CellStyle="{StaticResource MyDataGridCellStyle}" Header="Comment" Binding="{Binding Comment}" Width="350">
                         <DataGridTextColumn.ElementStyle>
                             <Style>
