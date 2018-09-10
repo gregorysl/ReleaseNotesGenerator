@@ -72,12 +72,13 @@ namespace TfsData
                 }
             }
         }
+        
 
-        public List<ClientWorkItem> GetWorkItemsInIterationPath(string iterationPath, List<string> stateFilter)
+        public List<ClientWorkItem> GetWorkItemsByQueryAdnData(string query, string parameter, List<string> stateFilter)
         {
-            var workItemsFromQuery = _itemStore.Query(string.Format(_workItemsForIteration, iterationPath))
+            var workItemsFromQuery = _itemStore.Query(string.Format(query, parameter))
                 .Cast<WorkItem>()
-                .Where(x => x.Type.ToString() != "Code Review Request" && x.Type.ToString() != "Task").ToList()
+                .Where(x => x.Type.Name.ToString() != "Code Review Request" && x.Type.Name.ToString() != "Task").ToList()
                 .Where(x => stateFilter.Contains(x.State)).ToList();
 
             var workItems = workItemsFromQuery.Select(workItem => workItem.ToClientWorkItem()).ToList();
@@ -89,8 +90,10 @@ namespace TfsData
             string changesetTo, List<string> categories, List<string> stateFilter)
         {
             var changes = GetChangesets(queryLocation, changesetFrom, changesetTo);
-            var workItems = GetWorkItemsFromChangesets(changes, stateFilter);
-            var workItems2 = GetWorkItemsInIterationPath(iterationPath,stateFilter);
+            var changesetWorkItems  = GetWorkItemsIdsFromChangesets(changes, stateFilter);
+            
+            var workItems = GetWorkItemsByQueryAdnData(_workItemsByIds, changesetWorkItems, stateFilter);
+            var workItems2 = GetWorkItemsByQueryAdnData(_workItemsForIteration, iterationPath, stateFilter);
 
             workItems2.AddRange(workItems.Where(x => !workItems2.Exists(w => w.Id == x.Id)));
 
@@ -120,7 +123,7 @@ namespace TfsData
             return list;
         }
 
-        public List<ClientWorkItem> GetWorkItemsFromChangesets(List<Changeset> changes, List<string> stateFilter)
+        public string GetWorkItemsIdsFromChangesets(List<Changeset> changes, List<string> stateFilter)
         {
             var asd = changes.Select(x => x.ArtifactUri.ToString()).ToList();
             var linkFilters = new[]
@@ -134,13 +137,8 @@ namespace TfsData
             var artifacts = _linkingServer.GetReferencingArtifacts(asd.ToArray(), linkFilters);
             var workItemInfos = artifacts.ToClientWorkItems();
             var workItemIds = workItemInfos.Select(x => x.Id).Distinct().ToList();
-               
             var joinedWorkItems = string.Join(",", workItemIds);
-            var workItems = _itemStore.Query(string.Format(_workItemsByIds, joinedWorkItems)).Cast<WorkItem>().ToList()
-                .Where(x => x.Type.ToString() != "Code Review Request" && x.Type.ToString() != "Task").ToList()
-                .Where(x => stateFilter.Contains(x.State)).ToList();
-
-            return workItems.Select(workItem => workItem.ToClientWorkItem()).ToList();
+            return joinedWorkItems;
         }
 
 
