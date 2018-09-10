@@ -22,18 +22,12 @@ namespace Gui
         public List<string> Categories => GettrimmedSettingList("categories");
         public MainWindow()
         {
-            //DoStuff();
-
             InitializeComponent();
-
-            //Close();
             Loaded += MainWindow_Loaded;
         }
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            ProjectCombo.SelectedItem = "FenergoCoreSupport";
             _data = new ReleaseData();
-            _data = new ReleaseData{TfsProject = "FenergoCore",IterationSelected = @"FenergoCoreSupport\Current\R8.3.1.7", ChangesetFrom  = "175971" };
             DataContext = _data;
             
             var tfsUrl = ConfigurationManager.AppSettings["tfsUrl"];
