@@ -75,7 +75,9 @@ namespace TfsData
 
         public List<ClientWorkItem> GetWorkItemsInIterationPath(string iterationPath, List<string> stateFilter)
         {
-            var workItemsFromQuery = _itemStore.Query(string.Format(_workItemsForIteration, iterationPath)).Cast<WorkItem>()
+            var workItemsFromQuery = _itemStore.Query(string.Format(_workItemsForIteration, iterationPath))
+                .Cast<WorkItem>()
+                .Where(x => x.Type.ToString() != "Code Review Request" && x.Type.ToString() != "Task").ToList()
                 .Where(x => stateFilter.Contains(x.State)).ToList();
 
             var workItems = workItemsFromQuery.Select(workItem => workItem.ToClientWorkItem()).ToList();
@@ -114,7 +116,7 @@ namespace TfsData
                 ? VersionSpec.Latest
                 : new ChangesetVersionSpec(changesetTo);
             var list = _changesetServer.QueryHistory(queryLocation, VersionSpec.Latest, 0, RecursionType.Full, null, versionSpecFrom,
-                versionSpecTo, int.MaxValue, false, false).OfType<Changeset>().OrderBy(x => x.ChangesetId).ToList();
+                versionSpecTo, int.MaxValue, true, false).OfType<Changeset>().OrderBy(x => x.ChangesetId).ToList();
             return list;
         }
 
@@ -131,12 +133,12 @@ namespace TfsData
             };
             var artifacts = _linkingServer.GetReferencingArtifacts(asd.ToArray(), linkFilters);
             var workItemInfos = artifacts.ToClientWorkItems();
-            var workItemIds = workItemInfos.Select(x => x.Id).ToList();
-                //.Where(x => x.Type.ToString() != "Code Review Request" && x.Type.ToString() != "Task").ToList()
-                //.Where(x => stateFilter.Contains(x.State))
-                //.Select(x => x.Id.ToString()).Distinct().ToList();
+            var workItemIds = workItemInfos.Select(x => x.Id).Distinct().ToList();
+               
             var joinedWorkItems = string.Join(",", workItemIds);
-            var workItems = _itemStore.Query(string.Format(_workItemsByIds, joinedWorkItems)).Cast<WorkItem>().ToList();
+            var workItems = _itemStore.Query(string.Format(_workItemsByIds, joinedWorkItems)).Cast<WorkItem>().ToList()
+                .Where(x => x.Type.ToString() != "Code Review Request" && x.Type.ToString() != "Task").ToList()
+                .Where(x => stateFilter.Contains(x.State)).ToList();
 
             return workItems.Select(workItem => workItem.ToClientWorkItem()).ToList();
         }

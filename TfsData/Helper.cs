@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using DataModel;
 using Microsoft.TeamFoundation;
-using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
 using ClientWorkItem = DataModel.ClientWorkItem;
 
@@ -15,7 +12,7 @@ namespace TfsData
         public static string GetClientProject(this WorkItem item)
         {
             var fieldExists = item.Fields.Contains(ClientProjectField);
-            return fieldExists ? item.Fields[ClientProjectField].Value.ToString() : "";
+            return fieldExists ? item.Fields[ClientProjectField].Value.ToString() : "N/A";
         }
         public static ClientWorkItem ToClientWorkItem(this WorkItem item)
         {
