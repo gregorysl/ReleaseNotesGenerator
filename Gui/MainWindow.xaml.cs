@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using DataModel;
 using TfsData;
 using Xceed.Wpf.Toolkit;
+using MessageBox = System.Windows.MessageBox;
 
 namespace Gui
 {
@@ -80,13 +81,20 @@ namespace Gui
                 _data.ChangesetFrom, _data.ChangesetTo, Categories, workItemStateFilter,workItemTypeFilter));
 
             LoadingBar.Visibility = Visibility.Hidden;
-            _data.CategorizedChanges = downloadedData.CategorizedChanges;
+            if (!string.IsNullOrWhiteSpace(downloadedData.ErrorMessgage))
+            {
+                MessageBox.Show(downloadedData.ErrorMessgage);
+            }
+            else
+            {
+                _data.CategorizedChanges = downloadedData.CategorizedChanges;
 
-            FilterTfsChanges();
+                FilterTfsChanges();
 
-            _data.WorkItems = downloadedData.WorkItems;
-            _dataGrid.ItemsSource = _data.CategorizedChanges;
-            _dataGrid.Items.SortDescriptions.Add(new SortDescription("Id", ListSortDirection.Descending));
+                _data.WorkItems = downloadedData.WorkItems;
+                _dataGrid.ItemsSource = _data.CategorizedChanges;
+                _dataGrid.Items.SortDescriptions.Add(new SortDescription("Id", ListSortDirection.Descending));
+            }
         }
 
         private static List<string> GettrimmedSettingList(string key)
@@ -141,7 +149,8 @@ namespace Gui
 
             var workItems = _data.WorkItems.Where(x => x.ClientProject != "General");
             var pbi = _data.WorkItems.Where(x => x.ClientProject == "General");
-            new DocumentEditor().ProcessData(_data, categories, workItems, pbi);
+            var message = new DocumentEditor().ProcessData(_data, categories, workItems, pbi);
+            if (!string.IsNullOrWhiteSpace(message)) MessageBox.Show(message);
         }
 
         private void ToggleButton_OnChecked(object sender, RoutedEventArgs e)

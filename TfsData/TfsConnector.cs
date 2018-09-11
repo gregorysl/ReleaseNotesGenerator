@@ -82,31 +82,39 @@ namespace TfsData
         public ReleaseData GetChangesetsAndWorkItems(string iterationPath, string queryLocation, string changesetFrom,
             string changesetTo, List<string> categories, List<string> stateFilter, List<string> workItemTypeFilter)
         {
-            var changes = GetChangesets(queryLocation, changesetFrom, changesetTo);
-            var changesetWorkItems = GetWorkItemsIdsFromChangesets(changes, stateFilter);
-
-            var changesetItems = QueryWorkItems(_workItemsByIds, changesetWorkItems);
-            var iterationPathItems = QueryWorkItems(_workItemsForIteration, iterationPath);
-            var allItems = new List<WorkItem>();
-            allItems.AddRange(changesetItems);
-            allItems.AddRange(iterationPathItems);
-
-            var clientWorkItems = allItems.DistinctBy(x => x.Id)
-                .Where(x => workItemTypeFilter.Contains(x.Type.Name))
-                .Where(x => !stateFilter.Contains(x.State))
-                .Select(workItem => workItem.ToClientWorkItem())
-                .OrderBy(x => x.ClientProject)
-                .ThenBy(x => x.Id).ToList();
-
-
-            var categorized = GetChangesWithWorkItemsAndCategories(queryLocation, changes, categories, clientWorkItems, workItemTypeFilter);
-            var releaseData = new ReleaseData
+            try
             {
-                CategorizedChanges = new ObservableCollection<ChangesetInfo>(categorized),
-                WorkItems = clientWorkItems
-            };
+                var changes = GetChangesets(queryLocation, changesetFrom, changesetTo);
+                var changesetWorkItems = GetWorkItemsIdsFromChangesets(changes, stateFilter);
 
-            return releaseData;
+                var changesetItems = QueryWorkItems(_workItemsByIds, changesetWorkItems);
+                var iterationPathItems = QueryWorkItems(_workItemsForIteration, iterationPath);
+                var allItems = new List<WorkItem>();
+                allItems.AddRange(changesetItems);
+                allItems.AddRange(iterationPathItems);
+
+                var clientWorkItems = allItems.DistinctBy(x => x.Id)
+                    .Where(x => workItemTypeFilter.Contains(x.Type.Name))
+                    .Where(x => !stateFilter.Contains(x.State))
+                    .Select(workItem => workItem.ToClientWorkItem())
+                    .OrderBy(x => x.ClientProject)
+                    .ThenBy(x => x.Id).ToList();
+
+
+                var categorized = GetChangesWithWorkItemsAndCategories(queryLocation, changes, categories,
+                    clientWorkItems, workItemTypeFilter);
+                var releaseData = new ReleaseData
+                {
+                    CategorizedChanges = new ObservableCollection<ChangesetInfo>(categorized),
+                    WorkItems = clientWorkItems
+                };
+
+                return releaseData;
+            }
+            catch (Exception e)
+            {
+                return new ReleaseData {ErrorMessgage = e.Message + "\n" + e.StackTrace};
+            }
         }
 
         public List<Changeset> GetChangesets(string queryLocation, string changesetFrom, string changesetTo)

@@ -10,6 +10,7 @@ namespace DataModel
 {
     public class ReleaseData : INotifyPropertyChanged
     {
+        public string ErrorMessgage { get; set; }
         public bool DownloadButtonEnabled =>
             !string.IsNullOrWhiteSpace(TfsProject) && !string.IsNullOrWhiteSpace(TfsBranch);
 

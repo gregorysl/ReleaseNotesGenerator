@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -9,39 +10,48 @@ namespace Gui
 {
     public class DocumentEditor
     {
-        public void ProcessData(ReleaseData data, Dictionary<string, List<ChangesetInfo>> categorizedChangesets,
+        public string ProcessData(ReleaseData data, Dictionary<string, List<ChangesetInfo>> categorizedChangesets,
             IEnumerable<ClientWorkItem> workItems, IEnumerable<ClientWorkItem> pbi)
         {
-
-            var dTestDocx = @"D:\test.docx";
-            string fileName = @"D:\Template.docx";
-
-            using (var doc = DocX.Load(fileName))
+            try
             {
-                doc.ReplaceText("{ReleaseName}", data.ReleaseName);
-                doc.ReplaceText("{ReleaseDate}", data.ReleaseDateFormated);
-                doc.ReplaceText("{TfsBranch}", data.TfsBranch);
-                doc.ReplaceText("{QaBuildName}", data.QaBuildName);
-                doc.ReplaceText("{QaBuildDate}", data.QaBuildDateFormated);
-                doc.ReplaceText("{CoreBuildName}", data.CoreBuildName);
-                doc.ReplaceText("{CoreBuildDate}", data.CoreBuildDateFormated);
-                doc.ReplaceText("{PsRefreshChangeset}", data.PsRefresh.Id.ToString());
-                doc.ReplaceText("{PsRefreshDate}", data.PsRefresh.Created.ToString("yyyy-MM-dd HH:mm", new CultureInfo("en-US")));
-                doc.ReplaceText("{PsRefreshName}", data.PsRefresh.Comment);
-                doc.ReplaceText("{CoreChangeset}", data.CoreChange.Id.ToString());
-                doc.ReplaceText("{CoreDate}", data.CoreChange.Created.ToString("yyyy-MM-dd HH:mm", new CultureInfo("en-US")));
-                var lastParagraph = doc.Paragraphs[doc.Paragraphs.Count - 1];
-                var secondSection = SecondSection(categorizedChangesets, lastParagraph);
-                var thirdSection = ThirdSection(workItems, secondSection);
-                var fourthSection = FourthSection(pbi, thirdSection);
+                var dTestDocx = @"D:\test.docx";
+                string fileName = @"D:\Template.docx";
 
-                var fifthSection = fourthSection.CreateHeadingSection("Test Report");
-                var sixthSection = fifthSection.CreateHeadingSection("Known issues in this Release");
+                using (var doc = DocX.Load(fileName))
+                {
+                    doc.ReplaceText("{ReleaseName}", data.ReleaseName);
+                    doc.ReplaceText("{ReleaseDate}", data.ReleaseDateFormated);
+                    doc.ReplaceText("{TfsBranch}", data.TfsBranch);
+                    doc.ReplaceText("{QaBuildName}", data.QaBuildName);
+                    doc.ReplaceText("{QaBuildDate}", data.QaBuildDateFormated);
+                    doc.ReplaceText("{CoreBuildName}", data.CoreBuildName);
+                    doc.ReplaceText("{CoreBuildDate}", data.CoreBuildDateFormated);
+                    doc.ReplaceText("{PsRefreshChangeset}", data.PsRefresh.Id.ToString());
+                    doc.ReplaceText("{PsRefreshDate}",
+                        data.PsRefresh.Created.ToString("yyyy-MM-dd HH:mm", new CultureInfo("en-US")));
+                    doc.ReplaceText("{PsRefreshName}", data.PsRefresh.Comment);
+                    doc.ReplaceText("{CoreChangeset}", data.CoreChange.Id.ToString());
+                    doc.ReplaceText("{CoreDate}",
+                        data.CoreChange.Created.ToString("yyyy-MM-dd HH:mm", new CultureInfo("en-US")));
+                    var lastParagraph = doc.Paragraphs[doc.Paragraphs.Count - 1];
+                    var secondSection = SecondSection(categorizedChangesets, lastParagraph);
+                    var thirdSection = ThirdSection(workItems, secondSection);
+                    var fourthSection = FourthSection(pbi, thirdSection);
 
-                doc.SaveAs(dTestDocx);
+                    var fifthSection = fourthSection.CreateHeadingSection("Test Report");
+                    var sixthSection = fifthSection.CreateHeadingSection("Known issues in this Release");
+
+                    doc.SaveAs(dTestDocx);
+                }
+
+                Process.Start(dTestDocx);
+                return String.Empty;
             }
-
-            Process.Start(dTestDocx);
+            catch (Exception e)
+            {
+                return e.Message + "\n" + e.StackTrace;
+            }
         }
 
         private InsertBeforeOrAfter SecondSection(Dictionary<string, List<ChangesetInfo>> categorizedChangesets, InsertBeforeOrAfter lastPart)
