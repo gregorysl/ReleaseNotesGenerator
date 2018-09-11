@@ -74,30 +74,29 @@ namespace TfsData
         }
         
 
-        public List<ClientWorkItem> GetWorkItemsByQueryAdnData(string query, string parameter, List<string> stateFilter)
+        public List<WorkItem> QueryWorkItems(string query, string parameter)
         {
-            var workItemsFromQuery = _itemStore.Query(string.Format(query, parameter))
-                .Cast<WorkItem>()
-                .Where(x => x.Type.Name.ToString() != "Code Review Request" && x.Type.Name.ToString() != "Task").ToList()
-                .Where(x => stateFilter.Contains(x.State)).ToList();
-
-            var workItems = workItemsFromQuery.Select(workItem => workItem.ToClientWorkItem()).ToList();
-
-            return workItems;
+            return _itemStore.Query(string.Format(query, parameter)).Cast<WorkItem>().ToList();
         }
 
         public ReleaseData GetChangesetsAndWorkItems(string iterationPath, string queryLocation, string changesetFrom,
-            string changesetTo, List<string> categories, List<string> stateFilter)
+            string changesetTo, List<string> categories, List<string> stateFilter, List<string> workItemTypeFilter)
         {
             var changes = GetChangesets(queryLocation, changesetFrom, changesetTo);
             var changesetWorkItems  = GetWorkItemsIdsFromChangesets(changes, stateFilter);
             
-            var workItems = GetWorkItemsByQueryAdnData(_workItemsByIds, changesetWorkItems, stateFilter);
-            var workItems2 = GetWorkItemsByQueryAdnData(_workItemsForIteration, iterationPath, stateFilter);
+            var workItems = QueryWorkItems(_workItemsByIds, changesetWorkItems);
+            var workItems2 = QueryWorkItems(_workItemsForIteration, iterationPath);
 
-            workItems2.AddRange(workItems.Where(x => !workItems2.Exists(w => w.Id == x.Id)));
+            workItems2.AddRange(workItems);
+                var allwo = workItems2.DistinctBy(x=>x.Id)
+                .Where(x => x.Type.Name.ToString() != "Code Review Request" && x.Type.Name.ToString() != "Task").ToList()
+                .Where(x => stateFilter.Contains(x.State)).ToList();
 
-            var allWorkItems = workItems2.OrderBy(x => x.ClientProject).ThenBy(x => x.Id).ToList();
+            var clientWorkItems = allwo.Select(workItem => workItem.ToClientWorkItem()).ToList();
+            
+
+            var allWorkItems = clientWorkItems.OrderBy(x => x.ClientProject).ThenBy(x => x.Id).ToList();
 
 
             var categorized = GetChangesWithWorkItemsAndCategories(queryLocation, changes, categories, allWorkItems);
