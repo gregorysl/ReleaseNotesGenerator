@@ -83,27 +83,27 @@ namespace TfsData
             string changesetTo, List<string> categories, List<string> stateFilter, List<string> workItemTypeFilter)
         {
             var changes = GetChangesets(queryLocation, changesetFrom, changesetTo);
-            var changesetWorkItems  = GetWorkItemsIdsFromChangesets(changes, stateFilter);
-            
-            var workItems = QueryWorkItems(_workItemsByIds, changesetWorkItems);
-            var workItems2 = QueryWorkItems(_workItemsForIteration, iterationPath);
+            var changesetWorkItems = GetWorkItemsIdsFromChangesets(changes, stateFilter);
 
-            workItems2.AddRange(workItems);
-                var allwo = workItems2.DistinctBy(x=>x.Id)
-                .Where(x => x.Type.Name.ToString() != "Code Review Request" && x.Type.Name.ToString() != "Task").ToList()
-                .Where(x => stateFilter.Contains(x.State)).ToList();
+            var changesetItems = QueryWorkItems(_workItemsByIds, changesetWorkItems);
+            var iterationPathItems = QueryWorkItems(_workItemsForIteration, iterationPath);
+            var allItems = new List<WorkItem>();
+            allItems.AddRange(changesetItems);
+            allItems.AddRange(iterationPathItems);
 
-            var clientWorkItems = allwo.Select(workItem => workItem.ToClientWorkItem()).ToList();
-            
+            var clientWorkItems = allItems.DistinctBy(x => x.Id)
+                .Where(x => workItemTypeFilter.Contains(x.Type.Name))
+                .Where(x => !stateFilter.Contains(x.State))
+                .Select(workItem => workItem.ToClientWorkItem())
+                .OrderBy(x => x.ClientProject)
+                .ThenBy(x => x.Id).ToList();
 
-            var allWorkItems = clientWorkItems.OrderBy(x => x.ClientProject).ThenBy(x => x.Id).ToList();
 
-
-            var categorized = GetChangesWithWorkItemsAndCategories(queryLocation, changes, categories, allWorkItems);
+            var categorized = GetChangesWithWorkItemsAndCategories(queryLocation, changes, categories, clientWorkItems, workItemTypeFilter);
             var releaseData = new ReleaseData
             {
                 CategorizedChanges = new ObservableCollection<ChangesetInfo>(categorized),
-                WorkItems = allWorkItems
+                WorkItems = clientWorkItems
             };
 
             return releaseData;
@@ -142,7 +142,7 @@ namespace TfsData
 
 
         public List<ChangesetInfo> GetChangesWithWorkItemsAndCategories(string queryLocation, List<Changeset> changes,
-            List<string> categories, List<ClientWorkItem> allWorkItems)
+            List<string> categories, List<ClientWorkItem> allWorkItems, List<string> workItemTypeFilter)
         {
             var workItems = new List<ClientWorkItem>();
 
@@ -161,7 +161,7 @@ namespace TfsData
                     Comment = change.Comment,
                     Categories = changeCategories
                 };
-                var workItemList = change.AssociatedWorkItems.Where(x => x.WorkItemType != "Code Review Request" && x.WorkItemType != "Task").Select(x=>x.Id).ToList();
+                var workItemList = change.AssociatedWorkItems.Where(x => !workItemTypeFilter.Contains(x.WorkItemType)).Select(x=>x.Id).ToList();
                 var workItemWithoutCodeReview = allWorkItems.Where(x => workItemList.Contains(x.Id)).ToList();
                 if (!workItemWithoutCodeReview.Any())
                 {
