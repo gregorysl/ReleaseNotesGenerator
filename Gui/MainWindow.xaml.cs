@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using DataModel;
 using TfsData;
 using Xceed.Wpf.Toolkit;
@@ -37,15 +38,15 @@ namespace Gui
             _tfs = new TfsConnector(tfsUrl);
 
             if (!_tfs.IsConnected) return;
-            ProjectStack.Visibility = Visibility.Visible;
             ProjectCombo.ItemsSource = _tfs.Projects;
         }
         
 
         private void ProjectSelected(object sender, SelectionChangedEventArgs e)
         {
+            IterationCombo.Visibility = Visibility.Hidden;
             if (ProjectCombo.SelectedItem == null) return;
-            IterationStack.Visibility = Visibility.Visible;
+            IterationCombo.Visibility = Visibility.Visible;
             _data.TfsProject = ProjectCombo.SelectedItem.ToString();
             var iterationPaths = _tfs.GetIterationPaths(_data.TfsProject);
 
@@ -104,22 +105,22 @@ namespace Gui
 
         private void GetChangesetTo(object sender, RoutedEventArgs e)
         {
-            ShowChangesetTitleByChangesetId(ChangesetTo, ChangesetToText);
+            ShowChangesetTitleByChangesetId(ChangesetTo);
         }
 
         private void GetChangesetFrom(object sender, RoutedEventArgs e)
         {
-            ShowChangesetTitleByChangesetId(ChangesetFrom, ChangesetFromText);
+            ShowChangesetTitleByChangesetId(ChangesetFrom);
         }
 
-        private async void ShowChangesetTitleByChangesetId(IntegerUpDown input, TextBlock output)
+        private async void ShowChangesetTitleByChangesetId(TextBox input)
         {
-            var changeset = input.Value.GetValueOrDefault();
+            var changeset = System.Convert.ToInt32(input.Text);
 
-            string result = "";
+            var result = "";
             if (changeset > 1) result = await Task.Run(() => _tfs.GetChangesetTitleById(changeset));
 
-            output.Text = result;
+            input.ToolTip = result;
         }
 
         private void SetAsPsRefreshClick(object sender, RoutedEventArgs e)
@@ -172,6 +173,11 @@ namespace Gui
                     change.Selected = _includeTfsService;
                 }
             }
+        }
+        private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
+        {
+            Regex regex = new Regex("[^0-9]+");
+            e.Handled = regex.IsMatch(e.Text);
         }
     }
 }

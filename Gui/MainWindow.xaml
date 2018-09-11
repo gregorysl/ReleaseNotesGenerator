@@ -5,45 +5,62 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="MainWindow" Height="800" Width="800">
+        Title="MainWindow" Height="800" Width="800"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        TextOptions.TextFormattingMode="Ideal" 
+        TextOptions.TextRenderingMode="Auto"        
+        Background="{DynamicResource MaterialDesignPaper}"
+        FontFamily="{DynamicResource MaterialDesignFont}">
     <StackPanel Orientation="Vertical">
-        <StackPanel Orientation="Horizontal">
-            <StackPanel Name="ProjectStack" Visibility="Hidden" Orientation="Horizontal">
-                <TextBlock>Project</TextBlock>
-                <ComboBox Name="ProjectCombo" Width="200" SelectionChanged="ProjectSelected"/>
-            </StackPanel>
-            <StackPanel Name="IterationStack" Visibility="Hidden" Orientation="Horizontal">
-                <TextBlock>Iteration</TextBlock>
-                <ComboBox Name="IterationCombo" SelectedItem="{Binding Path=IterationSelected, Mode=TwoWay}" Width="200" SelectionChanged="IterationSelected"/>
-            </StackPanel>
-        </StackPanel>
-        <StackPanel Name="TfsProjectStack" Orientation="Horizontal">
-            <TextBlock>TFS project</TextBlock>
-            <TextBox Name="TfsProject" Text="{Binding Path=TfsProject, Mode=TwoWay}" Width="200" />
-            <TextBlock>Branch</TextBlock>
-            <TextBox Name="Branch" Text="{Binding Path=TfsBranch, Mode=TwoWay}" Width="200" />
-        </StackPanel>
-        <StackPanel Orientation="Horizontal">
-
-            <StackPanel Orientation="Vertical">
-                <StackPanel Name="ChangesetFromStack" Visibility="Visible" Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center">Changeset from</TextBlock>
-                    <CheckBox Content="Include" VerticalContentAlignment="Center" Name="IncludeFrom" IsChecked="{Binding Path=ChangesetFromInclude, Mode=TwoWay}" />
-                    <xctk:IntegerUpDown Name="ChangesetFrom" Value="{Binding Path=ChangesetFrom, Mode=TwoWay}" ShowButtonSpinner="False"  Width="200" ValueChanged="GetChangesetFrom"  />
+            <materialDesign:Card
+                Width="750"
+                Margin="10"
+                Padding="8">
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel Orientation="Vertical" Width="300" Margin="10">
+                        <ComboBox Name="ProjectCombo" SelectionChanged="ProjectSelected" materialDesign:HintAssist.Hint="Project"
+                              IsEditable="True"
+                              Style="{StaticResource MaterialDesignFloatingHintComboBox}"/>
+                        <ComboBox Name="IterationCombo" 
+                              Visibility="Collapsed"
+                              SelectedItem="{Binding Path=IterationSelected, Mode=TwoWay}" 
+                              SelectionChanged="IterationSelected"
+                              materialDesign:HintAssist.Hint="Iteration"
+                              Style="{StaticResource MaterialDesignFloatingHintComboBox}"/>
+                    </StackPanel>
+                    <StackPanel Name="TfsProjectStack" Orientation="Vertical"  Width="200" Margin="10">
+                        <TextBox Name="TfsProject" Text="{Binding Path=TfsProject, Mode=TwoWay}"
+                             Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                             materialDesign:HintAssist.Hint="TFS project" />
+                        <TextBox Name="Branch" Text="{Binding Path=TfsBranch, Mode=TwoWay}" 
+                             Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                             materialDesign:HintAssist.Hint="Branch" />
+                    </StackPanel>
+                    <StackPanel VerticalAlignment="Center" Orientation="Vertical">
+                        <StackPanel Name="ChangesetFromStack" Visibility="Visible" Orientation="Horizontal">
+                            <TextBox Width="100"
+                                     Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                     materialDesign:HintAssist.Hint="Changeset from"
+                                     Name="ChangesetFrom" Text="{Binding Path=ChangesetFrom, Mode=TwoWay}"  TextChanged="GetChangesetFrom"  PreviewTextInput="NumberValidationTextBox"  />
+                            <ToggleButton Name="IncludeFrom" IsChecked="{Binding Path=ChangesetFromInclude, Mode=TwoWay}"></ToggleButton>
+                            <TextBlock VerticalAlignment="Center">Include</TextBlock>
+                        </StackPanel>
+                        <StackPanel Name="ChangesetToStack" Visibility="Visible" Orientation="Horizontal">
+                            <TextBox Width="100"
+                                     Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                     materialDesign:HintAssist.Hint="Changeset to"
+                                     Name="ChangesetTo" Text="{Binding Path=ChangesetFrom, Mode=TwoWay}"  TextChanged="GetChangesetTo"  PreviewTextInput="NumberValidationTextBox"  />
+                            <ToggleButton Name="IncludeTo" IsChecked="{Binding Path=ChangesetToInclude, Mode=TwoWay}"></ToggleButton>
+                            <TextBlock VerticalAlignment="Center">Include</TextBlock>
+                        </StackPanel>
+                    </StackPanel>
                 </StackPanel>
-                <TextBlock Name="ChangesetFromText"/>
-            </StackPanel>
-            <StackPanel Orientation="Vertical">
-                <StackPanel Name="ChangesetToStack" Visibility="Visible" Orientation="Horizontal">
-                    <TextBlock  VerticalAlignment="Center">Changeset to</TextBlock>
-                    <CheckBox Content="Include" VerticalContentAlignment="Center" Name="IncludeTo" IsChecked="{Binding Path=ChangesetToInclude, Mode=TwoWay}"/>
-                    <xctk:IntegerUpDown Name="ChangesetTo" Value="{Binding Path=ChangesetTo, Mode=TwoWay}" ShowButtonSpinner="False" Width="200" ValueChanged="GetChangesetTo" />
-                </StackPanel>
-                <TextBlock Name="ChangesetToText"/>
-            </StackPanel>
-        </StackPanel>
+            </materialDesign:Card>
 
-        <Button Name="Convert" Content="Get changesets and Work Items"   IsEnabled="{Binding DownloadButtonEnabled}" Click="ConvertClicked"/>
+        <Button Name="Convert" Content="Get changesets and Work Items"   IsEnabled="{Binding DownloadButtonEnabled}" Click="ConvertClicked" HorizontalAlignment="Right"/>
         <Grid>
             <Grid.Resources>
                 <Style x:Key="MyDataGridCellStyle" TargetType="{x:Type DataGridCell}">
