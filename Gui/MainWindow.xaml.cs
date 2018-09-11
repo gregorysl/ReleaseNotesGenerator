@@ -74,9 +74,10 @@ namespace Gui
         {
             var queryLocation = $"$/{_data.TfsProject}/{_data.TfsBranch}";
             var workItemStateFilter = GettrimmedSettingList("workItemStateFilter");
+            var workItemTypeFilter = GettrimmedSettingList("workItemTypeFilter");
             LoadingBar.Visibility = Visibility.Visible;
             var downloadedData = await Task.Run(() =>  _tfs.GetChangesetsAndWorkItems(_data.IterationSelected, queryLocation,
-                _data.ChangesetFrom, _data.ChangesetTo, Categories, workItemStateFilter));
+                _data.ChangesetFrom, _data.ChangesetTo, Categories, workItemStateFilter,workItemTypeFilter));
 
             LoadingBar.Visibility = Visibility.Hidden;
             _data.CategorizedChanges = downloadedData.CategorizedChanges;
