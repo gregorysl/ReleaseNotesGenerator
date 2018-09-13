@@ -115,7 +115,9 @@ namespace Gui
 
         private async void ShowChangesetTitleByChangesetId(TextBox input)
         {
-            var changeset = System.Convert.ToInt32(input.Text);
+            input.ToolTip = "";
+            var parsed = int.TryParse(input.Text, out int changeset);
+            if(!parsed) return;
 
             var result = "";
             if (changeset > 1) result = await Task.Run(() => _tfs.GetChangesetTitleById(changeset));
