@@ -94,8 +94,8 @@ namespace TfsData
                 allItems.AddRange(iterationPathItems);
 
                 var clientWorkItems = allItems.DistinctBy(x => x.Id)
-                    .Where(x => workItemTypeFilter.Contains(x.Type.Name))
-                    .Where(x => !stateFilter.Contains(x.State))
+                    .Where(x => !workItemTypeFilter.Contains(x.Type.Name))
+                    .Where(x => stateFilter.Contains(x.State))
                     .Select(workItem => workItem.ToClientWorkItem())
                     .OrderBy(x => x.ClientProject)
                     .ThenBy(x => x.Id).ToList();
