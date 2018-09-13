@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="MainWindow" Height="800" Width="800"
+        Title="MainWindow" Height="1000" Width="800"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Regular"
@@ -15,50 +15,50 @@
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="{DynamicResource MaterialDesignFont}">
     <StackPanel Orientation="Vertical">
-            <materialDesign:Card
+        <materialDesign:Card
                 Width="750"
                 Margin="10"
                 Padding="8">
-                <StackPanel Orientation="Horizontal">
-                    <StackPanel Orientation="Vertical" Width="300" Margin="10">
-                        <ComboBox Name="ProjectCombo" SelectionChanged="ProjectSelected" materialDesign:HintAssist.Hint="Project"
+            <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Vertical" Width="300" Margin="10">
+                    <ComboBox Name="ProjectCombo" SelectionChanged="ProjectSelected" materialDesign:HintAssist.Hint="Project"
                               IsEditable="True"
                               Style="{StaticResource MaterialDesignFloatingHintComboBox}"/>
-                        <ComboBox Name="IterationCombo" 
+                    <ComboBox Name="IterationCombo" 
                               Visibility="Collapsed"
                               SelectedItem="{Binding Path=IterationSelected, Mode=TwoWay}" 
                               SelectionChanged="IterationSelected"
                               materialDesign:HintAssist.Hint="Iteration"
                               Style="{StaticResource MaterialDesignFloatingHintComboBox}"/>
-                    </StackPanel>
-                    <StackPanel Name="TfsProjectStack" Orientation="Vertical"  Width="200" Margin="10">
-                        <TextBox Name="TfsProject" Text="{Binding Path=TfsProject, Mode=TwoWay}"
+                </StackPanel>
+                <StackPanel Name="TfsProjectStack" Orientation="Vertical"  Width="200" Margin="10">
+                    <TextBox Name="TfsProject" Text="{Binding Path=TfsProject, Mode=TwoWay}"
                              Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                              materialDesign:HintAssist.Hint="TFS project" />
-                        <TextBox Name="Branch" Text="{Binding Path=TfsBranch, Mode=TwoWay}" 
+                    <TextBox Name="Branch" Text="{Binding Path=TfsBranch, Mode=TwoWay}" 
                              Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                              materialDesign:HintAssist.Hint="Branch" />
-                    </StackPanel>
-                    <StackPanel VerticalAlignment="Center" Orientation="Vertical">
-                        <StackPanel Name="ChangesetFromStack" Visibility="Visible" Orientation="Horizontal">
-                            <TextBox Width="100"
+                </StackPanel>
+                <StackPanel VerticalAlignment="Center" Orientation="Vertical">
+                    <StackPanel Name="ChangesetFromStack" Visibility="Visible" Orientation="Horizontal">
+                        <TextBox Width="100"
                                      Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                                      materialDesign:HintAssist.Hint="Changeset from"
                                      Name="ChangesetFrom" Text="{Binding Path=ChangesetFrom, Mode=TwoWay}"  TextChanged="GetChangesetFrom"  PreviewTextInput="NumberValidationTextBox"  />
-                            <ToggleButton Name="IncludeFrom" IsChecked="{Binding Path=ChangesetFromInclude, Mode=TwoWay}"></ToggleButton>
-                            <TextBlock VerticalAlignment="Center">Include</TextBlock>
-                        </StackPanel>
-                        <StackPanel Name="ChangesetToStack" Visibility="Visible" Orientation="Horizontal">
-                            <TextBox Width="100"
+                        <ToggleButton Name="IncludeFrom" IsChecked="{Binding Path=ChangesetFromInclude, Mode=TwoWay}"></ToggleButton>
+                        <TextBlock VerticalAlignment="Center">Include</TextBlock>
+                    </StackPanel>
+                    <StackPanel Name="ChangesetToStack" Visibility="Visible" Orientation="Horizontal">
+                        <TextBox Width="100"
                                      Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                                      materialDesign:HintAssist.Hint="Changeset to"
-                                     Name="ChangesetTo" Text="{Binding Path=ChangesetFrom, Mode=TwoWay}"  TextChanged="GetChangesetTo"  PreviewTextInput="NumberValidationTextBox"  />
-                            <ToggleButton Name="IncludeTo" IsChecked="{Binding Path=ChangesetToInclude, Mode=TwoWay}"></ToggleButton>
-                            <TextBlock VerticalAlignment="Center">Include</TextBlock>
-                        </StackPanel>
+                                     Name="ChangesetTo" Text="{Binding Path=ChangesetTo, Mode=TwoWay}"  TextChanged="GetChangesetTo"  PreviewTextInput="NumberValidationTextBox"  />
+                        <ToggleButton Name="IncludeTo" IsChecked="{Binding Path=ChangesetToInclude, Mode=TwoWay}"></ToggleButton>
+                        <TextBlock VerticalAlignment="Center">Include</TextBlock>
                     </StackPanel>
                 </StackPanel>
-            </materialDesign:Card>
+            </StackPanel>
+        </materialDesign:Card>
 
         <Button Name="Convert" Content="Get changesets and Work Items"   IsEnabled="{Binding DownloadButtonEnabled}" Click="ConvertClicked" HorizontalAlignment="Right"/>
         <Grid>
@@ -104,29 +104,42 @@
         <TextBlock>PsRefresh</TextBlock>
         <TextBlock Text="{Binding PsRefresh}"></TextBlock>
 
-        <TextBlock>Release details</TextBlock>
-        <StackPanel Name="ReleaseNameStack" Visibility="Visible" Orientation="Horizontal">
-            <TextBlock>Name</TextBlock>
-            <TextBox Name="ReleaseName" Text="{Binding Path=ReleaseName, Mode=TwoWay}" Width="200" />
-            <TextBlock>Date</TextBlock>
-            <xctk:DateTimePicker ShowButtonSpinner="False" CultureInfo="en-US" Name="ReleaseDate" Value="{Binding Path=ReleaseDate, Mode=TwoWay}" Format="Custom" FormatString="d-MMMM-yyyy" Width="200" />
-        </StackPanel>
-
-        <TextBlock>QA build</TextBlock>
-        <StackPanel Name="QaBuildStack" Visibility="Visible" Orientation="Horizontal">
-            <TextBlock>Name</TextBlock>
-            <TextBox Name="QaBuildName" Text="{Binding Path=QaBuildName, Mode=TwoWay}" Width="200" />
-            <TextBlock>Date</TextBlock>
-            <xctk:DateTimePicker ShowButtonSpinner="False" CultureInfo="en-US" Name="QaBuildDate" Value="{Binding Path=QaBuildDate, Mode=TwoWay}" Format="Custom" FormatString="yyyy-MM-dd HH:mm" Width="200" />
-        </StackPanel>
-
-        <TextBlock>Core build</TextBlock>
-        <StackPanel Name="CoreBuildStack" Visibility="Visible" Orientation="Horizontal">
-            <TextBlock>Name</TextBlock>
-            <TextBox Name="CoreBuildName" Text="{Binding Path=CoreBuildName, Mode=TwoWay}" Width="200" />
-            <TextBlock>Date</TextBlock>
-            <xctk:DateTimePicker ShowButtonSpinner="False" CultureInfo="en-US" Name="CoreBuildDate" Value="{Binding Path=CoreBuildDate, Mode=TwoWay}" Format="Custom" FormatString="yyyy-MM-dd HH:mm" Width="200" />
-        </StackPanel>
+        <materialDesign:Card Margin="10" Padding="8">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <StackPanel Name="ReleaseNameStack" Visibility="Visible" Orientation="Vertical" Margin="5">
+                    <TextBox Name="ReleaseName" Text="{Binding Path=ReleaseName, Mode=TwoWay}" Width="200"
+                             Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                             materialDesign:HintAssist.Hint="Release Name" />
+                    <DatePicker Name="ReleaseDate" SelectedDate="{Binding Path=ReleaseDate, Mode=TwoWay}"  Width="200" 
+                                materialDesign:HintAssist.Hint="Release Date"
+                                Style="{StaticResource MaterialDesignFloatingHintDatePicker}"/>
+                </StackPanel>
+                <StackPanel Name="QaBuildStack" Visibility="Visible" Orientation="Vertical" Margin="5">
+                    <TextBox Name="QaBuildName" Text="{Binding Path=QaBuildName, Mode=TwoWay}" Width="200"
+                             Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                             materialDesign:HintAssist.Hint="QA build Name" />
+                    <DatePicker Name="QaBuildDate" SelectedDate="{Binding Path=QaBuildDate, Mode=TwoWay}"  Width="200" 
+                                materialDesign:HintAssist.Hint="QA build Date"
+                                Style="{StaticResource MaterialDesignFloatingHintDatePicker}"/>
+                    <materialDesign:TimePicker
+                        Width="200"
+                        Style="{StaticResource MaterialDesignFloatingHintTimePicker}"
+                        materialDesign:HintAssist.Hint="QA build Time" />
+                </StackPanel>
+                <StackPanel Name="CoreBuildStack" Visibility="Visible" Orientation="Vertical" Margin="5">
+                    <TextBox Name="CoreBuildName" Text="{Binding Path=CoreBuildName, Mode=TwoWay}" Width="200"
+                             Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                             materialDesign:HintAssist.Hint="Core build Name" />
+                    <DatePicker Name="CoreBuildDate" SelectedDate="{Binding Path=CoreBuildDate, Mode=TwoWay}"  Width="200" 
+                                materialDesign:HintAssist.Hint="Core build Date"
+                                Style="{StaticResource MaterialDesignFloatingHintDatePicker}"/>
+                    <materialDesign:TimePicker
+                        Width="200"
+                        Style="{StaticResource MaterialDesignFloatingHintTimePicker}"
+                        materialDesign:HintAssist.Hint="Core build Time" />
+                </StackPanel>
+            </StackPanel>
+        </materialDesign:Card>
         <Button Content="Create Document" Click="CreateDocument" IsEnabled="{Binding GenerateDocButtonEnabled}" />
     </StackPanel>
 </Window>
