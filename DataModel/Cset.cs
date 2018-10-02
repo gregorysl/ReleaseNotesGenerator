@@ -40,7 +40,7 @@ namespace DataModel
         public string comment { get; set; }
         public bool commentTruncated { get; set; }
         public bool Selected { get; set; } = true;
-        public List<Work> Works { get; set; } = new List<Work>();
+        public List<int> Works { get; set; } = new List<int>();
         public int wokcount => Works.Count;
     }
 

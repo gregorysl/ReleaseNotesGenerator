@@ -81,11 +81,11 @@ namespace Gui
         private async void ConvertClicked(object sender, RoutedEventArgs e)
         {
             var queryLocation = $"$/{_data.TfsProject}/{_data.TfsBranch}";
-            var workItemStateFilter = GettrimmedSettingList("workItemStateFilter");
-            var workItemTypeFilter = GettrimmedSettingList("workItemTypeFilter");
+            var workItemStateInclude = GettrimmedSettingList("workItemStateInclude");
+            var workItemTypeExclude = GettrimmedSettingList("workItemTypeExclude");
             LoadingBar.Visibility = Visibility.Visible;
             var downloadedData = await Task.Run(() => _tfs.GetChangesetsAndWorkItems(_data.IterationSelected, queryLocation,
-                _data.ChangesetFrom, _data.ChangesetTo, Categories, workItemStateFilter, workItemTypeFilter));
+                _data.ChangesetFrom, _data.ChangesetTo, Categories, workItemStateInclude, workItemTypeExclude));
 
             LoadingBar.Visibility = Visibility.Hidden;
             _data.tfs = downloadedData;
@@ -94,11 +94,15 @@ namespace Gui
             FilterTfsChanges();
             WorkItemProgress.Value = 0;
             WorkItemProgress.Maximum= _data.tfs.Changes.Count;
-
+            var workToDownload = new List<int>();
             foreach (var item in _data.tfs.Changes)
             {
                 var wok = await Task.Run(() => _tfs.GetChangesetWorkItemsRest(item));
-                item.Works = wok;
+                var filteredWok = wok
+                    .Where(x => !workItemTypeExclude.Contains(x.workItemType))
+                    .Where(x => workItemStateInclude.Contains(x.state)).Select(x=>x.id).ToList();
+                workToDownload.AddRange(filteredWok);
+                item.Works = filteredWok;
                 WorkItemProgress.Value += 1;
 
             }
