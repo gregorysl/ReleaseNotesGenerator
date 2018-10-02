@@ -88,14 +88,18 @@ namespace Gui
                 _data.ChangesetFrom, _data.ChangesetTo, Categories, workItemStateFilter, workItemTypeFilter));
 
             LoadingBar.Visibility = Visibility.Hidden;
-
-            _data.Changes = new ObservableCollection<Change>(downloadedData.changes);
-            _dataGrid.ItemsSource = _data.Changes;
+            _data.tfs = downloadedData;
+            //_data.Changes = new ObservableCollection<Change>(downloadedData.changes);
+            _dataGrid.ItemsSource = _data.tfs.Changes;
             FilterTfsChanges();
-            foreach(var item in _data.Changes)
+            WorkItemProgress.Value = 0;
+            WorkItemProgress.Maximum= _data.tfs.Changes.Count;
+
+            foreach (var item in _data.tfs.Changes)
             {
                 var wok = await Task.Run(() => _tfs.GetChangesetWorkItemsRest(item));
                 item.Works = wok;
+                WorkItemProgress.Value += 1;
 
             }
 
@@ -157,21 +161,21 @@ namespace Gui
 
         private void CreateDocument(object sender, RoutedEventArgs e)
         {
-            var changesets = _data.CategorizedChanges.Where(x => x.Selected).ToList();
-            var categories = new Dictionary<string, List<ChangesetInfo>>();
-            foreach (var category in Categories)
-            {
-                var cha = changesets.Where(x => x.Categories.Contains(category)).ToList();
-                if (cha.Any())
-                {
-                    categories.Add(category, cha);
-                }
-            }
+            //var changesets = _data.CategorizedChanges.Where(x => x.Selected).ToList();
+            //var categories = new Dictionary<string, List<ChangesetInfo>>();
+            //foreach (var category in Categories)
+            //{
+            //    var cha = changesets.Where(x => x.Categories.Contains(category)).ToList();
+            //    if (cha.Any())
+            //    {
+            //        categories.Add(category, cha);
+            //    }
+            //}
 
-            var workItems = _data.WorkItems.Where(x => x.ClientProject != "General");
-            var pbi = _data.WorkItems.Where(x => x.ClientProject == "General");
-            var message = new DocumentEditor().ProcessData(_data, categories, workItems, pbi);
-            if (!string.IsNullOrWhiteSpace(message)) MessageBox.Show(message);
+            //var workItems = _data.WorkItems.Where(x => x.ClientProject != "General");
+            //var pbi = _data.WorkItems.Where(x => x.ClientProject == "General");
+            //var message = new DocumentEditor().ProcessData(_data, categories, workItems, pbi);
+            //if (!string.IsNullOrWhiteSpace(message)) MessageBox.Show(message);
         }
 
         private void ToggleButton_OnChecked(object sender, RoutedEventArgs e)
@@ -186,7 +190,7 @@ namespace Gui
 
         private void FilterTfsChanges()
         {
-            foreach (var change in _data.Changes)
+            foreach (var change in _data.tfs.Changes)
             {
                 if (change.checkedInBy.displayName == "TFS Service")
                 {

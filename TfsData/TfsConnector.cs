@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -138,18 +139,19 @@ namespace TfsData
 
 
             var categoryQueryLocation = categories.Select(x => new Tuple<string, string>(x, $"{queryLocation}/{x}")).ToList();
+            var list = new List<DataModel.Change>();
             foreach (var tuple in categoryQueryLocation)
             {
                 using (HttpResponseMessage response = client.GetAsync($"{uri}/_apis/tfvc/changesets?searchCriteria.itemPath={tuple.Item2}{versionSpecFromi}{versionSpecTois}&api-version=1.0").Result)
                 {
                     response.EnsureSuccessStatusCode();
                     string responseBody = response.Content.ReadAsStringAsync().Result;
-                    var list = JsonConvert.DeserializeObject<DataModel.TfsData<DataModel.Change>>(responseBody).value;
-                    tfs.changes.AddRange(list);
-                    tfs.categorized.Add(tuple.Item1, list.Select(x => x.changesetId).ToList());
+                    var deserializedList = JsonConvert.DeserializeObject<DataModel.TfsData<DataModel.Change>>(responseBody).value;
+                    list.AddRange(deserializedList);
+                    tfs.Categorized.Add(tuple.Item1, deserializedList.Select(x => x.changesetId).ToList());
                 }
             }
-            tfs.changes = tfs.changes.OrderBy(x => x.changesetId).ToList();
+            tfs.Changes = new ObservableCollection<DataModel.Change>(list.OrderBy(x => x.changesetId));
             return tfs;
 
         }
@@ -162,7 +164,6 @@ namespace TfsData
                 var list = JsonConvert.DeserializeObject<DataModel.TfsData<DataModel.Work>>(responseBody).value;
                 return list;
             }
-            return new List<Work>();
         }
 
         public List<Changeset> GetChangesets(string queryLocation, string changesetFrom, string changesetTo)

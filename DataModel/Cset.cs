@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace DataModel
 {
     public class tfs
     {
-        public Dictionary<string, List<int>> categorized { get; set; } = new Dictionary<string, List<int>>();
-        public List<Change> changes { get; set; } = new List<Change>();
+        public Dictionary<string, List<int>> Categorized { get; set; } = new Dictionary<string, List<int>>();
+        public ObservableCollection<Change> Changes { get; set; } = new ObservableCollection<Change>();
+        public List<ClientWorkItem> WorkItems { get; set; }
+
     }
     class CSet
     {

@@ -17,7 +17,9 @@ namespace DataModel
         public bool GenerateDocButtonEnabled =>
             !string.IsNullOrWhiteSpace(ReleaseName) && !string.IsNullOrWhiteSpace(QaBuildName) &&
             !string.IsNullOrWhiteSpace(CoreBuildName) && PsRefresh != null && CoreChange != null;
-        public ObservableCollection<Change> Changes = new ObservableCollection<Change>();
+
+        public tfs tfs {get;set;} = new tfs();
+
         private ChangesetInfo _psRefresh;
         private ChangesetInfo _coreChange;
         private string _releaseName;
@@ -118,9 +120,7 @@ namespace DataModel
 
 
 
-        public List<ClientWorkItem> WorkItems { get; set; }
 
-        public ObservableCollection<ChangesetInfo> CategorizedChanges { get; set; }
 
 
         public event PropertyChangedEventHandler PropertyChanged;

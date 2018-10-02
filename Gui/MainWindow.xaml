@@ -67,7 +67,7 @@
                     <Setter Property="IsTabStop" Value="False"/>
                 </Style>
             </Grid.Resources>
-            <DataGrid x:Name="_dataGrid" CanUserAddRows="False" AutoGenerateColumns="False" Height="400" SelectionMode="Extended" SelectionUnit="FullRow" ItemsSource="{Binding Changes}">
+            <DataGrid x:Name="_dataGrid" CanUserAddRows="False" AutoGenerateColumns="False" Height="400" SelectionMode="Extended" SelectionUnit="FullRow" ItemsSource="{Binding tfs.Changes}">
                 <DataGrid.Columns>
                     <DataGridCheckBoxColumn Header="" Binding="{Binding Selected, UpdateSourceTrigger=PropertyChanged}"></DataGridCheckBoxColumn>
                     <DataGridTextColumn IsReadOnly="True"  CellStyle="{StaticResource MyDataGridCellStyle}" Header="Id" Binding="{Binding changesetId}" SortDirection="Descending"  />
@@ -93,6 +93,7 @@
                     </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
+            <ProgressBar Height="30" Name="WorkItemProgress" />
             <StackPanel Name="LoadingBar" Visibility="Hidden" Orientation="Vertical" VerticalAlignment="Center">
                 <ProgressBar IsIndeterminate="True" Opacity="0.5" Height="50"/>
                 <TextBlock FontSize="30" HorizontalAlignment="Center">Loading Data</TextBlock>
