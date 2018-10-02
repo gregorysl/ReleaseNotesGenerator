@@ -89,7 +89,7 @@ namespace Gui
 
             LoadingBar.Visibility = Visibility.Hidden;
             _data.tfs = downloadedData;
-            //_data.Changes = new ObservableCollection<Change>(downloadedData.changes);
+
             _dataGrid.ItemsSource = _data.tfs.Changes;
             FilterTfsChanges();
             WorkItemProgress.Value = 0;
@@ -109,7 +109,8 @@ namespace Gui
             }
 
             var joinedWorkItems = string.Join(",", workToDownload.Distinct().ToList());
-            var changesetItems = _tfs.asd(joinedWorkItems, _data.IterationSelected, workItemStateInclude,workItemTypeExclude);
+            _data.tfs.WorkItems = _tfs.asd(joinedWorkItems, _data.IterationSelected, workItemStateInclude,workItemTypeExclude);
+
             //if (!string.IsNullOrWhiteSpace(downloadedData.ErrorMessgage))
             //{
             //    MessageBox.Show(downloadedData.ErrorMessgage);
@@ -156,33 +157,49 @@ namespace Gui
 
         private void SetAsPsRefreshClick(object sender, RoutedEventArgs e)
         {
-            ChangesetInfo item = (ChangesetInfo)((Button)e.Source).DataContext;
+            Change item = (Change)((Button)e.Source).DataContext;
             _data.PsRefresh = item;
         }
 
         private void SetAsCoreClick(object sender, RoutedEventArgs e)
         {
-            ChangesetInfo item = (ChangesetInfo)((Button)e.Source).DataContext;
+            Change item = (Change)((Button)e.Source).DataContext;
             _data.CoreChange = item;
         }
 
         private void CreateDocument(object sender, RoutedEventArgs e)
         {
-            //var changesets = _data.CategorizedChanges.Where(x => x.Selected).ToList();
-            //var categories = new Dictionary<string, List<ChangesetInfo>>();
-            //foreach (var category in Categories)
-            //{
-            //    var cha = changesets.Where(x => x.Categories.Contains(category)).ToList();
-            //    if (cha.Any())
-            //    {
-            //        categories.Add(category, cha);
-            //    }
-            //}
+            var list = new List<ChangesetInfo>();
+            var selectedChangesets = _data.tfs.Changes.Where(x => x.Selected).ToList();
+            foreach (var item in selectedChangesets)
+            {
+                var change = new ChangesetInfo { Id = item.changesetId, Comment = item.comment, CommitedBy = item.checkedInBy.displayName, Created = item.createdDate, WorkItemId="N/A", WorkItemTitle="N/A" };
+                if (!item.Works.Any()) { list.Add(change); }
+                foreach (var workItemId in item.Works)
+                {
+                    var workItem = _data.tfs.WorkItems.FirstOrDefault(x => x.Id == workItemId);
+                    change.WorkItemId = workItem.Id.ToString();
+                    change.WorkItemTitle = workItem.Title;
+                    list.Add(change);
+                }
+            }
 
-            //var workItems = _data.WorkItems.Where(x => x.ClientProject != "General");
-            //var pbi = _data.WorkItems.Where(x => x.ClientProject == "General");
-            //var message = new DocumentEditor().ProcessData(_data, categories, workItems, pbi);
-            //if (!string.IsNullOrWhiteSpace(message)) MessageBox.Show(message);
+
+
+            var categories = new Dictionary<string, List<ChangesetInfo>>();
+            foreach (var category in _data.tfs.Categorized)
+            {
+                var cha = list.Where(x => category.Value.Contains(x.Id)).ToList();
+                if (cha.Any())
+                {
+                    categories.Add(category.Key, cha);
+                }
+            }
+
+            var workItems = _data.tfs.WorkItems.Where(x => x.ClientProject != "General");
+            var pbi = _data.tfs.WorkItems.Where(x => x.ClientProject == "General");
+            var message = new DocumentEditor().ProcessData(_data, categories, workItems, pbi);
+            if (!string.IsNullOrWhiteSpace(message)) MessageBox.Show(message);
         }
 
         private void ToggleButton_OnChecked(object sender, RoutedEventArgs e)
