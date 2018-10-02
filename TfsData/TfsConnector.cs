@@ -169,7 +169,8 @@ namespace TfsData
                     tfs.Categorized.Add(tuple.Item1, deserializedList.Select(x => x.changesetId).ToList());
                 }
             }
-            tfs.Changes = new ObservableCollection<DataModel.Change>(list.OrderBy(x => x.changesetId));
+            var changesList = list.DistinctBy(x=>x.changesetId).OrderBy(x => x.changesetId).ToList();
+            tfs.Changes = new ObservableCollection<DataModel.Change>(changesList);
             return tfs;
 
         }
