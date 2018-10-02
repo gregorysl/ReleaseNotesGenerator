@@ -92,6 +92,12 @@ namespace Gui
             _data.Changes = new ObservableCollection<Change>(downloadedData.changes);
             _dataGrid.ItemsSource = _data.Changes;
             FilterTfsChanges();
+            foreach(var item in _data.Changes)
+            {
+                var wok = await Task.Run(() => _tfs.GetChangesetWorkItemsRest(item));
+                item.Works = wok;
+
+            }
 
             //if (!string.IsNullOrWhiteSpace(downloadedData.ErrorMessgage))
             //{

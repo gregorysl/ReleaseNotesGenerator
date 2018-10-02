@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -29,14 +28,9 @@ namespace TfsData
         {
             uri = url;
             client = new HttpClient();
-            client.DefaultRequestHeaders.Accept.Add(
-                new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",
-                Convert.ToBase64String(
-                    System.Text.ASCIIEncoding.ASCII.GetBytes(
-                        string.Format("{0}:{1}", username, key))));
-            //var excludedDirs = new[] { "CodeAnalysis", "QA", "_AutomatedBuild" };
+                Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(string.Format("{0}:{1}", username, key))));
 
             _tfsTeamProjectCollection = TfsTeamProjectCollectionFactory.GetTeamProjectCollection(new Uri(url, UriKind.Absolute));
             _itemStore = _tfsTeamProjectCollection.GetService<WorkItemStore>();
@@ -150,7 +144,7 @@ namespace TfsData
                 {
                     response.EnsureSuccessStatusCode();
                     string responseBody = response.Content.ReadAsStringAsync().Result;
-                    var list = JsonConvert.DeserializeObject<ChangeList>(responseBody).value;
+                    var list = JsonConvert.DeserializeObject<DataModel.TfsData<DataModel.Change>>(responseBody).value;
                     tfs.changes.AddRange(list);
                     tfs.categorized.Add(tuple.Item1, list.Select(x => x.changesetId).ToList());
                 }
@@ -159,7 +153,17 @@ namespace TfsData
             return tfs;
 
         }
-      
+      public List<Work> GetChangesetWorkItemsRest(DataModel.Change change)
+        {
+            using (HttpResponseMessage response = client.GetAsync(change.url+"/workItems").Result)
+            {
+                response.EnsureSuccessStatusCode();
+                string responseBody = response.Content.ReadAsStringAsync().Result;
+                var list = JsonConvert.DeserializeObject<DataModel.TfsData<DataModel.Work>>(responseBody).value;
+                return list;
+            }
+            return new List<Work>();
+        }
 
         public List<Changeset> GetChangesets(string queryLocation, string changesetFrom, string changesetTo)
         {
