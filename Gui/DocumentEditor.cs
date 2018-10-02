@@ -27,13 +27,13 @@ namespace Gui
                     doc.ReplaceText("{QaBuildDate}", data.QaBuildDateFormated);
                     doc.ReplaceText("{CoreBuildName}", data.CoreBuildName);
                     doc.ReplaceText("{CoreBuildDate}", data.CoreBuildDateFormated);
-                    doc.ReplaceText("{PsRefreshChangeset}", data.PsRefresh.Id.ToString());
+                    doc.ReplaceText("{PsRefreshChangeset}", data.PsRefresh.changesetId.ToString());
                     doc.ReplaceText("{PsRefreshDate}",
-                        data.PsRefresh.Created.ToString("yyyy-MM-dd HH:mm", new CultureInfo("en-US")));
-                    doc.ReplaceText("{PsRefreshName}", data.PsRefresh.Comment);
-                    doc.ReplaceText("{CoreChangeset}", data.CoreChange.Id.ToString());
+                        data.PsRefresh.createdDate.ToString("yyyy-MM-dd HH:mm", new CultureInfo("en-US")));
+                    doc.ReplaceText("{PsRefreshName}", data.PsRefresh.comment);
+                    doc.ReplaceText("{CoreChangeset}", data.CoreChange.changesetId.ToString());
                     doc.ReplaceText("{CoreDate}",
-                        data.CoreChange.Created.ToString("yyyy-MM-dd HH:mm", new CultureInfo("en-US")));
+                        data.CoreChange.createdDate.ToString("yyyy-MM-dd HH:mm", new CultureInfo("en-US")));
                     var lastParagraph = doc.Paragraphs[doc.Paragraphs.Count - 1];
                     var secondSection = SecondSection(categorizedChangesets, lastParagraph);
                     var thirdSection = ThirdSection(workItems, secondSection);

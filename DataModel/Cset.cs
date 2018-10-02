@@ -42,6 +42,11 @@ namespace DataModel
         public bool Selected { get; set; } = true;
         public List<int> Works { get; set; } = new List<int>();
         public int wokcount => Works.Count;
+
+        public override string ToString()
+        {
+            return $"{changesetId} {comment} {checkedInBy.displayName} {createdDate.ToShortDateString()} WIC{wokcount} ";
+        }
     }
 
     public class Author
