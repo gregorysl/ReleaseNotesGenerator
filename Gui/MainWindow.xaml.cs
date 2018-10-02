@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Configuration;
 using System.Linq;
@@ -25,22 +26,27 @@ namespace Gui
         public MainWindow()
         {
             InitializeComponent();
+            var tfsUrl = ConfigurationManager.AppSettings["tfsUrl"];
+            var tfsUsername = ConfigurationManager.AppSettings["tfsUsername"];
+            var tfsKey = ConfigurationManager.AppSettings["tfsKey"];
+            if (string.IsNullOrWhiteSpace(tfsUrl)) return;
+
+            _tfs = new TfsConnector(tfsUrl, tfsUsername, tfsKey);
+
+            if (!_tfs.IsConnected) return;
+            ProjectCombo.ItemsSource = _tfs.Projects;
             Loaded += MainWindow_Loaded;
         }
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+
             _data = new ReleaseData();
+            ProjectCombo.SelectedItem = "FenergoCoreSupport";
+            _data = new ReleaseData { TfsProject = "FenergoCore", ChangesetFrom = "180899", IterationSelected = @"FenergoCoreSupport\Current\R8.3.1.8", QaBuildName = "R8.4.0_QA.9", CoreBuildName = "R8.4.0_IntTests.16", ReleaseDate = new DateTime(2018, 09, 14), QaBuildDate = new DateTime(2018, 09, 12), CoreBuildDate = new DateTime(2018, 09, 10) };
             DataContext = _data;
-            
-            var tfsUrl = ConfigurationManager.AppSettings["tfsUrl"];
-            if (string.IsNullOrWhiteSpace(tfsUrl)) return;
 
-            _tfs = new TfsConnector(tfsUrl);
-
-            if (!_tfs.IsConnected) return;
-            ProjectCombo.ItemsSource = _tfs.Projects;
         }
-        
+
 
         private void ProjectSelected(object sender, SelectionChangedEventArgs e)
         {
@@ -78,24 +84,30 @@ namespace Gui
             var workItemStateFilter = GettrimmedSettingList("workItemStateFilter");
             var workItemTypeFilter = GettrimmedSettingList("workItemTypeFilter");
             LoadingBar.Visibility = Visibility.Visible;
-            var downloadedData = await Task.Run(() =>  _tfs.GetChangesetsAndWorkItems(_data.IterationSelected, queryLocation,
-                _data.ChangesetFrom, _data.ChangesetTo, Categories, workItemStateFilter,workItemTypeFilter));
+            var downloadedData = await Task.Run(() => _tfs.GetChangesetsAndWorkItems(_data.IterationSelected, queryLocation,
+                _data.ChangesetFrom, _data.ChangesetTo, Categories, workItemStateFilter, workItemTypeFilter));
 
             LoadingBar.Visibility = Visibility.Hidden;
-            if (!string.IsNullOrWhiteSpace(downloadedData.ErrorMessgage))
-            {
-                MessageBox.Show(downloadedData.ErrorMessgage);
-            }
-            else
-            {
-                _data.CategorizedChanges = downloadedData.CategorizedChanges;
 
-                FilterTfsChanges();
+            _data.Changes = new ObservableCollection<Change>(downloadedData.changes);
+            _dataGrid.ItemsSource = _data.Changes;
+            FilterTfsChanges();
 
-                _data.WorkItems = downloadedData.WorkItems;
-                _dataGrid.ItemsSource = _data.CategorizedChanges;
-                _dataGrid.Items.SortDescriptions.Add(new SortDescription("Id", ListSortDirection.Descending));
-            }
+            //if (!string.IsNullOrWhiteSpace(downloadedData.ErrorMessgage))
+            //{
+            //    MessageBox.Show(downloadedData.ErrorMessgage);
+            //}
+            //else
+            //{
+            //    _data.CategorizedChanges = downloadedData.CategorizedChanges;
+            //    _data.Changes = downloadedData.Changes;
+
+
+            //    _data.WorkItems = downloadedData.WorkItems;
+            //    //_dataGrid.ItemsSource = _data.CategorizedChanges;
+            //    _dataGrid.ItemsSource = _data.Changes;
+            //    _dataGrid.Items.SortDescriptions.Add(new SortDescription("Id", ListSortDirection.Descending));
+            //}
         }
 
         private static List<string> GettrimmedSettingList(string key)
@@ -117,7 +129,7 @@ namespace Gui
         {
             input.ToolTip = "";
             var parsed = int.TryParse(input.Text, out int changeset);
-            if(!parsed) return;
+            if (!parsed) return;
 
             var result = "";
             if (changeset > 1) result = await Task.Run(() => _tfs.GetChangesetTitleById(changeset));
@@ -127,7 +139,7 @@ namespace Gui
 
         private void SetAsPsRefreshClick(object sender, RoutedEventArgs e)
         {
-            ChangesetInfo item = (ChangesetInfo) ((Button) e.Source).DataContext;
+            ChangesetInfo item = (ChangesetInfo)((Button)e.Source).DataContext;
             _data.PsRefresh = item;
         }
 
@@ -139,7 +151,7 @@ namespace Gui
 
         private void CreateDocument(object sender, RoutedEventArgs e)
         {
-            var changesets = _data.CategorizedChanges.Where(x=>x.Selected).ToList();
+            var changesets = _data.CategorizedChanges.Where(x => x.Selected).ToList();
             var categories = new Dictionary<string, List<ChangesetInfo>>();
             foreach (var category in Categories)
             {
@@ -158,7 +170,7 @@ namespace Gui
 
         private void ToggleButton_OnChecked(object sender, RoutedEventArgs e)
         {
-            var checkbox = (CheckBox) sender;
+            var checkbox = (CheckBox)sender;
             if (checkbox == null) return;
             _includeTfsService = checkbox.IsChecked.GetValueOrDefault(false);
 
@@ -168,9 +180,9 @@ namespace Gui
 
         private void FilterTfsChanges()
         {
-            foreach (var change in _data.CategorizedChanges)
+            foreach (var change in _data.Changes)
             {
-                if (change.CommitedBy == "TFS Service")
+                if (change.checkedInBy.displayName == "TFS Service")
                 {
                     change.Selected = _includeTfsService;
                 }

@@ -2,12 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using DataModel;
 using Microsoft.TeamFoundation;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.Common;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
+using Newtonsoft.Json;
 
 namespace TfsData
 {
@@ -19,10 +22,20 @@ namespace TfsData
         private readonly ILinking _linkingServer;
         private readonly string _workItemsForIteration = "SELECT [System.Id], [System.Title] FROM WorkItems WHERE [System.IterationPath] UNDER '{0}'";
         private readonly string _workItemsByIds = "SELECT * FROM WorkItems WHERE [System.Id] in ({0})";
+        private static HttpClient client;
+        private string uri;
 
-
-        public TfsConnector(string url)
+        public TfsConnector(string url,string username, string key)
         {
+            uri = url;
+            client = new HttpClient();
+            client.DefaultRequestHeaders.Accept.Add(
+                new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",
+                Convert.ToBase64String(
+                    System.Text.ASCIIEncoding.ASCII.GetBytes(
+                        string.Format("{0}:{1}", username, key))));
             //var excludedDirs = new[] { "CodeAnalysis", "QA", "_AutomatedBuild" };
 
             _tfsTeamProjectCollection = TfsTeamProjectCollectionFactory.GetTeamProjectCollection(new Uri(url, UriKind.Absolute));
@@ -72,50 +85,81 @@ namespace TfsData
                 }
             }
         }
-        
+
 
         public List<WorkItem> QueryWorkItems(string query, string parameter)
         {
             return _itemStore.Query(string.Format(query, parameter)).Cast<WorkItem>().ToList();
         }
 
-        public ReleaseData GetChangesetsAndWorkItems(string iterationPath, string queryLocation, string changesetFrom,
+        public tfs GetChangesetsAndWorkItems(string iterationPath, string queryLocation, string changesetFrom,
             string changesetTo, List<string> categories, List<string> stateFilter, List<string> workItemTypeFilter)
         {
             try
             {
-                var changes = GetChangesets(queryLocation, changesetFrom, changesetTo);
-                var changesetWorkItems = GetWorkItemsIdsFromChangesets(changes, stateFilter);
+                var tfs = new tfs();
+                tfs = GetChangesetsCategories(tfs, queryLocation, changesetFrom, changesetTo, categories);
+                
+                //var changesetWorkItems = GetWorkItemsIdsFromChangesets(all, stateFilter);
 
-                var changesetItems = QueryWorkItems(_workItemsByIds, changesetWorkItems);
-                var iterationPathItems = QueryWorkItems(_workItemsForIteration, iterationPath);
-                var allItems = new List<WorkItem>();
-                allItems.AddRange(changesetItems);
-                allItems.AddRange(iterationPathItems);
+                //var changesetItems = QueryWorkItems(_workItemsByIds, changesetWorkItems);
+                //var iterationPathItems = QueryWorkItems(_workItemsForIteration, iterationPath);
+                //var allItems = new List<WorkItem>();
+                //allItems.AddRange(changesetItems);
+                //allItems.AddRange(iterationPathItems);
 
-                var clientWorkItems = allItems.DistinctBy(x => x.Id)
-                    .Where(x => !workItemTypeFilter.Contains(x.Type.Name))
-                    .Where(x => stateFilter.Contains(x.State))
-                    .Select(workItem => workItem.ToClientWorkItem())
-                    .OrderBy(x => x.ClientProject)
-                    .ThenBy(x => x.Id).ToList();
+                //var clientWorkItems = allItems.DistinctBy(x => x.Id)
+                //    .Where(x => !workItemTypeFilter.Contains(x.Type.Name))
+                //    .Where(x => stateFilter.Contains(x.State))
+                //    .Select(workItem => workItem.ToClientWorkItem())
+                //    .OrderBy(x => x.ClientProject)
+                //    .ThenBy(x => x.Id).ToList();
 
 
-                var categorized = GetChangesWithWorkItemsAndCategories(queryLocation, changes, categories,
-                    clientWorkItems, workItemTypeFilter);
-                var releaseData = new ReleaseData
-                {
-                    CategorizedChanges = new ObservableCollection<ChangesetInfo>(categorized),
-                    WorkItems = clientWorkItems
-                };
+                //var categorized = GetChangesWithWorkItemsAndCategories2(all, categories, clientWorkItems, workItemTypeFilter).DistinctBy(x => x.Id);
+                //var releaseData = new ReleaseData
+                //{
+                //    //CategorizedChanges = new ObservableCollection<ChangesetInfo>(categorized),
+                //    //WorkItems = clientWorkItems
+                //    Changes = all
+                //};
 
-                return releaseData;
+                return tfs;
             }
             catch (Exception e)
             {
-                return new ReleaseData {ErrorMessgage = e.Message + "\n" + e.StackTrace};
+                return new tfs();// { ErrorMessgage = e.Message + "\n" + e.StackTrace };
             }
         }
+
+        private tfs GetChangesetsCategories(tfs tfs, string queryLocation, string changesetFrom, string changesetTo,
+            List<string> categories)
+        {
+            var versionSpecFromi = "&searchCriteria.fromId=" + (changesetFrom.IsNullOrEmpty()
+                ? "1"
+                : changesetFrom);
+            var versionSpecTois = changesetTo.IsNullOrEmpty()
+                ? ""
+                : $"&searchCriteria.toId={changesetTo}";
+
+
+            var categoryQueryLocation = categories.Select(x => new Tuple<string, string>(x, $"{queryLocation}/{x}")).ToList();
+            foreach (var tuple in categoryQueryLocation)
+            {
+                using (HttpResponseMessage response = client.GetAsync($"{uri}/_apis/tfvc/changesets?searchCriteria.itemPath={tuple.Item2}{versionSpecFromi}{versionSpecTois}&api-version=1.0").Result)
+                {
+                    response.EnsureSuccessStatusCode();
+                    string responseBody = response.Content.ReadAsStringAsync().Result;
+                    var list = JsonConvert.DeserializeObject<ChangeList>(responseBody).value;
+                    tfs.changes.AddRange(list);
+                    tfs.categorized.Add(tuple.Item1, list.Select(x => x.changesetId).ToList());
+                }
+            }
+            tfs.changes = tfs.changes.OrderBy(x => x.changesetId).ToList();
+            return tfs;
+
+        }
+      
 
         public List<Changeset> GetChangesets(string queryLocation, string changesetFrom, string changesetTo)
         {
@@ -130,23 +174,24 @@ namespace TfsData
             return list;
         }
 
-        public string GetWorkItemsIdsFromChangesets(List<Changeset> changes, List<string> stateFilter)
-        {
-            var asd = changes.Select(x => x.ArtifactUri.ToString()).ToList();
-            var linkFilters = new[]
-            {
-                new LinkFilter
-                {
-                    FilterType = FilterType.ToolType,
-                    FilterValues = new[] {"WorkItemTracking"}
-                }
-            };
-            var artifacts = _linkingServer.GetReferencingArtifacts(asd.ToArray(), linkFilters);
-            var workItemInfos = artifacts.ToClientWorkItems();
-            var workItemIds = workItemInfos.Select(x => x.Id).Distinct().ToList();
-            var joinedWorkItems = string.Join(",", workItemIds);
-            return joinedWorkItems;
-        }
+        //public string GetWorkItemsIdsFromChangesets(List<DataModel.Change> changes, List<string> stateFilter)
+        //{
+        //    var chann = changes.Select(x => x.url + "/workItems");
+        //    var asd = changes.Select(x => x.ArtifactUri.ToString()).ToList();
+        //    var linkFilters = new[]
+        //    {
+        //        new LinkFilter
+        //        {
+        //            FilterType = FilterType.ToolType,
+        //            FilterValues = new[] {"WorkItemTracking"}
+        //        }
+        //    };
+        //    var artifacts = _linkingServer.GetReferencingArtifacts(asd.ToArray(), linkFilters);
+        //    var workItemInfos = artifacts.ToClientWorkItems();
+        //    var workItemIds = workItemInfos.Select(x => x.Id).Distinct().ToList();
+        //    var joinedWorkItems = string.Join(",", workItemIds);
+        //    return joinedWorkItems;
+        //}
 
 
         public List<ChangesetInfo> GetChangesWithWorkItemsAndCategories(string queryLocation, List<Changeset> changes,
@@ -169,7 +214,43 @@ namespace TfsData
                     Comment = change.Comment,
                     Categories = changeCategories
                 };
-                var workItemList = change.AssociatedWorkItems.Where(x => !workItemTypeFilter.Contains(x.WorkItemType)).Select(x=>x.Id).ToList();
+                var workItemList = change.AssociatedWorkItems.Where(x => !workItemTypeFilter.Contains(x.WorkItemType)).Select(x => x.Id).ToList();
+                var workItemWithoutCodeReview = allWorkItems.Where(x => workItemList.Contains(x.Id)).ToList();
+                if (!workItemWithoutCodeReview.Any())
+                {
+                    changesetInfo.WorkItemId = "N/A";
+                    changesetInfo.WorkItemTitle = "N/A";
+
+                    changesets.Add(changesetInfo);
+                }
+                foreach (var info in workItemWithoutCodeReview)
+                {
+                    changesetInfo.WorkItemId = info.Id.ToString();
+                    changesetInfo.WorkItemTitle = info.Title;
+                    changesets.Add(changesetInfo);
+                }
+
+            }
+            return changesets;
+        }
+        public List<ChangesetInfo> GetChangesWithWorkItemsAndCategories2(List<Changeset> changes,
+            List<string> categories, List<ClientWorkItem> allWorkItems, List<string> workItemTypeFilter)
+        {
+            var workItems = new List<ClientWorkItem>();
+
+            var changesets = new List<ChangesetInfo>();
+
+            foreach (var change in changes)
+            {
+                var changesetInfo = new ChangesetInfo
+                {
+                    Id = change.ChangesetId,
+                    CommitedBy = change.CommitterDisplayName,
+                    Created = change.CreationDate,
+                    Comment = change.Comment,
+                    //Categories = changeCategories
+                };
+                var workItemList = change.AssociatedWorkItems.Where(x => !workItemTypeFilter.Contains(x.WorkItemType)).Select(x => x.Id).ToList();
                 var workItemWithoutCodeReview = allWorkItems.Where(x => workItemList.Contains(x.Id)).ToList();
                 if (!workItemWithoutCodeReview.Any())
                 {
