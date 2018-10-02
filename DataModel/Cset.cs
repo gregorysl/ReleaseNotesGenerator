@@ -11,10 +11,20 @@ namespace DataModel
     class CSet
     {
     }
-    public class ChangeList
+
+    public class Work
+    {
+        public string webUrl { get; set; }
+        public int id { get; set; }
+        public string title { get; set; }
+        public string workItemType { get; set; }
+        public string state { get; set; }
+    }
+
+    public class TfsData<T> where T : class
     {
         public int count { get; set; }
-        public List<Change> value { get; set; }
+        public List<T> value { get; set; }
     }
 
     public class Change
@@ -27,6 +37,8 @@ namespace DataModel
         public string comment { get; set; }
         public bool commentTruncated { get; set; }
         public bool Selected { get; set; } = true;
+        public List<Work> Works { get; set; } = new List<Work>();
+        public int wokcount => Works.Count;
     }
 
     public class Author
