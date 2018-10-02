@@ -17,7 +17,7 @@ namespace DataModel
         public bool GenerateDocButtonEnabled =>
             !string.IsNullOrWhiteSpace(ReleaseName) && !string.IsNullOrWhiteSpace(QaBuildName) &&
             !string.IsNullOrWhiteSpace(CoreBuildName) && PsRefresh != null && CoreChange != null;
-
+        public ObservableCollection<Change> Changes = new ObservableCollection<Change>();
         private ChangesetInfo _psRefresh;
         private ChangesetInfo _coreChange;
         private string _releaseName;
