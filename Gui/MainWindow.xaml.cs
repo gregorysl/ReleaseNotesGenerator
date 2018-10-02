@@ -100,13 +100,16 @@ namespace Gui
                 var wok = await Task.Run(() => _tfs.GetChangesetWorkItemsRest(item));
                 var filteredWok = wok
                     .Where(x => !workItemTypeExclude.Contains(x.workItemType))
-                    .Where(x => workItemStateInclude.Contains(x.state)).Select(x=>x.id).ToList();
+                    .Where(x => workItemStateInclude.Contains(x.state))
+                    .Select(x=>x.id).ToList();
                 workToDownload.AddRange(filteredWok);
                 item.Works = filteredWok;
                 WorkItemProgress.Value += 1;
 
             }
 
+            var joinedWorkItems = string.Join(",", workToDownload.Distinct().ToList());
+            var changesetItems = _tfs.asd(joinedWorkItems, _data.IterationSelected, workItemStateInclude,workItemTypeExclude);
             //if (!string.IsNullOrWhiteSpace(downloadedData.ErrorMessgage))
             //{
             //    MessageBox.Show(downloadedData.ErrorMessgage);

@@ -126,6 +126,24 @@ namespace TfsData
                 return new tfs();// { ErrorMessgage = e.Message + "\n" + e.StackTrace };
             }
         }
+        public List<ClientWorkItem> asd(string joinedWi, string iterationPath, List<string> workItemStateInclude,List<string> workItemTypeExclude)
+        {
+
+            var changesetItems = QueryWorkItems(_workItemsByIds, joinedWi);
+            var iterationPathItems = QueryWorkItems(_workItemsForIteration, iterationPath);
+            var allItems = new List<WorkItem>();
+            allItems.AddRange(changesetItems);
+            allItems.AddRange(iterationPathItems);
+
+            var clientWorkItems = allItems.DistinctBy(x => x.Id)
+                .Where(x => !workItemTypeExclude.Contains(x.Type.Name))
+                .Where(x => workItemStateInclude.Contains(x.State))
+                .Select(workItem => workItem.ToClientWorkItem())
+                .OrderBy(x => x.ClientProject)
+                .ThenBy(x => x.Id).ToList();
+
+            return clientWorkItems;
+        }
 
         private tfs GetChangesetsCategories(tfs tfs, string queryLocation, string changesetFrom, string changesetTo,
             List<string> categories)
