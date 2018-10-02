@@ -84,8 +84,7 @@ namespace Gui
             var workItemStateInclude = GettrimmedSettingList("workItemStateInclude");
             var workItemTypeExclude = GettrimmedSettingList("workItemTypeExclude");
             LoadingBar.Visibility = Visibility.Visible;
-            var downloadedData = await Task.Run(() => _tfs.GetChangesetsAndWorkItems(_data.IterationSelected, queryLocation,
-                _data.ChangesetFrom, _data.ChangesetTo, Categories, workItemStateInclude, workItemTypeExclude));
+            var downloadedData = await Task.Run(() => _tfs.GetChangesetsRest(queryLocation,_data.ChangesetFrom, _data.ChangesetTo, Categories));
 
             LoadingBar.Visibility = Visibility.Hidden;
             _data.tfs = downloadedData;
@@ -109,7 +108,7 @@ namespace Gui
             }
 
             var joinedWorkItems = string.Join(",", workToDownload.Distinct().ToList());
-            _data.tfs.WorkItems = _tfs.asd(joinedWorkItems, _data.IterationSelected, workItemStateInclude,workItemTypeExclude);
+            _data.tfs.WorkItems = _tfs.GetWorkItemsByIdAndIteration(joinedWorkItems, _data.IterationSelected, workItemStateInclude,workItemTypeExclude);
 
             //if (!string.IsNullOrWhiteSpace(downloadedData.ErrorMessgage))
             //{
