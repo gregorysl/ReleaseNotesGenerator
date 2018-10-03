@@ -14,9 +14,7 @@ namespace TfsData
 {
     public class TfsConnector
     {
-        private readonly WorkItemStore _itemStore;
-        private readonly TfsTeamProjectCollection _tfsTeamProjectCollection;
-        private readonly string _workItemsForIteration = "SELECT [System.Id], [System.Title] FROM WorkItems WHERE [System.IterationPath] UNDER '{0}'";
+        private readonly string _workItemsForIteration = "SELECT [System.Id] FROM WorkItems WHERE [System.IterationPath] UNDER '{0}'";
         private readonly string _workItemsByIds = "SELECT * FROM WorkItems WHERE [System.Id] in ({0})";
         private static HttpClient client;
         private string uri;
@@ -28,29 +26,43 @@ namespace TfsData
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",
                 Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(string.Format("{0}:{1}", username, key))));
-
-            _tfsTeamProjectCollection = TfsTeamProjectCollectionFactory.GetTeamProjectCollection(new Uri(url, UriKind.Absolute));
-            _itemStore = _tfsTeamProjectCollection.GetService<WorkItemStore>();
         }
 
-        public bool IsConnected => _tfsTeamProjectCollection.HasAuthenticated;
 
-        //https://secure.fenergo.com/tfs/Product/_apis/projects
-        public List<string> Projects => _itemStore.Projects.Cast<Project>().Select(proj => proj.Name).ToList();
+        public List<string> Projects()
+        {
+            var projects = new List<string>();
+            using (HttpResponseMessage response = client.GetAsync($"{uri}/_apis/projects?$top=999").Result)
+            {
+                response.EnsureSuccessStatusCode();
+                string responseBody = response.Content.ReadAsStringAsync().Result;
+                projects = JsonConvert.DeserializeObject<TfsData<DataModel.Project>>(responseBody).value.Select(x => x.name).OrderBy(x => x).ToList();
+
+            }
+            return projects;
+        }
 
         public ICollection<string> GetIterationPaths(string projectName)
         {
-            var result = new List<string>();
-            var project = _itemStore.Projects.Cast<Project>().FirstOrDefault(x => x.Name == projectName);
-
-            if (project == null) return result;
-
-            foreach (Node node in project.IterationRootNodes)
+            var iterations = new List<string>();
+            using (HttpResponseMessage response = client.GetAsync($"{uri}/{projectName}/_apis/wit/classificationNodes/Iterations?$depth=5").Result)
             {
-                result.Add(node.Path);
-                RecursiveAddIterationPath(node, result);
+                response.EnsureSuccessStatusCode();
+                string responseBody = response.Content.ReadAsStringAsync().Result;
+                var iteration = JsonConvert.DeserializeObject<Iteration>(responseBody);
+                getI(iteration, "", iterations);
             }
-            return result;
+            return iterations;
+        }
+
+        private void getI(Iteration iteration, string v, List<string> list)
+        {
+            v = v + iteration.name + "\\";
+            list.Add(v.TrimEnd('\\'));
+            if (iteration.children != null)
+            {
+                iteration.children.OrderBy(x => x.name).ToList().ForEach(x => getI(x, v, list));
+            }
         }
 
         public string GetChangesetTitleById(int id)
@@ -82,25 +94,31 @@ namespace TfsData
                 }
             }
         }
-
-
-        public List<WorkItem> QueryWorkItems(string query, string parameter)
+        
+        public List<ClientWorkItem> GetWorkItemsByIdAndIteration(List<int> workitemsId, string iterationPath, List<string> workItemStateInclude, List<string> workItemTypeExclude)
         {
-            return _itemStore.Query(string.Format(query, parameter)).Cast<WorkItem>().ToList();
-        }
+            using (HttpResponseMessage response = client.PostAsJsonAsync($"{uri}/_apis/wit/wiql?api-version=1.0",new { query = string.Format(_workItemsForIteration, iterationPath) }).Result)
+            {
+                response.EnsureSuccessStatusCode();
+                string responseBody = response.Content.ReadAsStringAsync().Result;
+                var ids = JsonConvert.DeserializeObject<Rootobject>(responseBody).workItems.Select(x=>x.id).ToList();
+                workitemsId.AddRange(ids);
+            }
 
-        public List<ClientWorkItem> GetWorkItemsByIdAndIteration(string joinedWi, string iterationPath, List<string> workItemStateInclude, List<string> workItemTypeExclude)
-        {
-            var changesetItems = QueryWorkItems(_workItemsByIds, joinedWi);
-            var iterationPathItems = QueryWorkItems(_workItemsForIteration, iterationPath);
-            var allItems = new List<WorkItem>();
-            allItems.AddRange(changesetItems);
-            allItems.AddRange(iterationPathItems);
+            var joinedWorkItems = string.Join(",", workitemsId.Distinct().ToList());
+            List<Fields> changeset = new List<Fields>();
+            using (HttpResponseMessage response = client.GetAsync($"{uri}/_apis/wit/WorkItems?ids={joinedWorkItems}&fields=System.Id,System.WorkItemType,System.Title,System.State,client.project&api-version=1.0").Result)
+            {
+                response.EnsureSuccessStatusCode();
+                string responseBody = response.Content.ReadAsStringAsync().Result;
+                changeset = JsonConvert.DeserializeObject<TfsData<WrappedWi>>(responseBody).value.Select(x=>x.fields).ToList();
 
-            var clientWorkItems = allItems.DistinctBy(x => x.Id)
-                .Where(x => !workItemTypeExclude.Contains(x.Type.Name))
+            }
+                        
+            var clientWorkItems = changeset.DistinctBy(x => x.Id)
+                .Where(x => !workItemTypeExclude.Contains(x.SystemWorkItemType))
                 .Where(x => workItemStateInclude.Contains(x.State))
-                .Select(workItem => workItem.ToClientWorkItem())
+                .Select(x=>x.ToClientWorkItem())
                 .OrderBy(x => x.ClientProject)
                 .ThenBy(x => x.Id).ToList();
 
@@ -132,7 +150,7 @@ namespace TfsData
                     tfs.Categorized.Add(tuple.Item1, deserializedList.Select(x => x.changesetId).ToList());
                 }
             }
-            var changesList = list.DistinctBy(x => x.changesetId).OrderBy(x => x.changesetId).ToList();
+            var changesList = list.DistinctBy(x => x.changesetId).OrderByDescending(x => x.changesetId).ToList();
             tfs.Changes = new ObservableCollection<DataModel.Change>(changesList);
             return tfs;
 

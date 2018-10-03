@@ -33,17 +33,14 @@ namespace Gui
 
             _tfs = new TfsConnector(tfsUrl, tfsUsername, tfsKey);
 
-            if (!_tfs.IsConnected) return;
-            ProjectCombo.ItemsSource = _tfs.Projects;
+            ProjectCombo.ItemsSource = _tfs.Projects();
             Loaded += MainWindow_Loaded;
         }
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
 
             _data = new ReleaseData();
-            ProjectCombo.SelectedItem = "FenergoCoreSupport";
-            _data = new ReleaseData { TfsProject = "FenergoCore", ChangesetFrom = "180899", IterationSelected = @"FenergoCoreSupport\Current\R8.3.1.8", QaBuildName = "R8.4.0_QA.9", CoreBuildName = "R8.4.0_IntTests.16", ReleaseDate = new DateTime(2018, 09, 14), QaBuildDate = new DateTime(2018, 09, 12), CoreBuildDate = new DateTime(2018, 09, 10) };
-            DataContext = _data;
+           DataContext = _data;
 
         }
 
@@ -106,9 +103,8 @@ namespace Gui
                 WorkItemProgress.Value += 1;
 
             }
+            _data.tfs.WorkItems = _tfs.GetWorkItemsByIdAndIteration(workToDownload, _data.IterationSelected, workItemStateInclude, workItemTypeExclude);
 
-            var joinedWorkItems = string.Join(",", workToDownload.Distinct().ToList());
-            _data.tfs.WorkItems = _tfs.GetWorkItemsByIdAndIteration(joinedWorkItems, _data.IterationSelected, workItemStateInclude,workItemTypeExclude);
 
             //if (!string.IsNullOrWhiteSpace(downloadedData.ErrorMessgage))
             //{
@@ -169,7 +165,7 @@ namespace Gui
         private void CreateDocument(object sender, RoutedEventArgs e)
         {
             var list = new List<ChangesetInfo>();
-            var selectedChangesets = _data.tfs.Changes.Where(x => x.Selected).ToList();
+            var selectedChangesets = _data.tfs.Changes.Where(x => x.Selected).OrderBy(x=>x.changesetId).ToList();
             foreach (var item in selectedChangesets)
             {
                 var change = new ChangesetInfo { Id = item.changesetId, Comment = item.comment, CommitedBy = item.checkedInBy.displayName, Created = item.createdDate, WorkItemId="N/A", WorkItemTitle="N/A" };
@@ -215,7 +211,7 @@ namespace Gui
         {
             foreach (var change in _data.tfs.Changes)
             {
-                if (change.checkedInBy.displayName == "TFS Service")
+                if (change.checkedInBy.displayName == "TFS Service" || change.checkedInBy.displayName == "Project Collection Build Service (Product)" || change.comment.Contains("Automatic refresh", StringComparison.OrdinalIgnoreCase))
                 {
                     change.Selected = _includeTfsService;
                 }
