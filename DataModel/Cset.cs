@@ -1,9 +1,54 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace DataModel
 {
+
+
+
+    public class WrappedWi
+    {
+        public int id { get; set; }
+        public int rev { get; set; }
+        public Fields fields { get; set; }
+        public string url { get; set; }
+    }
+
+    public class Fields
+    {
+        [JsonProperty(PropertyName = "System.Id")]
+        public int Id { get; set; }
+
+        [JsonProperty(PropertyName = "System.WorkItemType")]
+        public string SystemWorkItemType { get; set; }
+        
+        [JsonProperty(PropertyName = "System.State")]
+        public string State { get; set; }
+
+        [JsonProperty(PropertyName = "System.Title")]
+        public string Title { get; set; }
+        [JsonProperty(PropertyName = "client.project")]
+        public string ClientProject { get; set; }
+        public override string ToString()
+        {
+            return $"{Id} {Title} {ClientProject}";
+        }
+    }
+
+
+    public class Rootobject
+    {
+        public Workitem[] workItems { get; set; }
+    }
+
+    public class Workitem
+    {
+        public int id { get; set; }
+        public string url { get; set; }
+    }
+
     public class tfs
     {
         public Dictionary<string, List<int>> Categorized { get; set; } = new Dictionary<string, List<int>>();
@@ -15,6 +60,18 @@ namespace DataModel
     {
     }
 
+    public class Project
+    {
+        public string id { get; set; }
+        public string name { get; set; }
+    }
+    public class Iteration
+    {
+        public int id { get; set; }
+        public string name { get; set; }
+        public Iteration[] children { get; set; }
+        public string url { get; set; }
+    }
     public class Work
     {
         public string webUrl { get; set; }
