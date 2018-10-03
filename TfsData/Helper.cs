@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using DataModel;
 using Microsoft.TeamFoundation;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
 using ClientWorkItem = DataModel.ClientWorkItem;
@@ -22,6 +23,15 @@ namespace TfsData
                 Id = item.Id,
                 Title = item.Title,
                 ClientProject = item.GetClientProject()
+            };
+        }
+        public static ClientWorkItem ToClientWorkItem(this Fields item)
+        {
+            return new ClientWorkItem
+            {
+                Id = item.Id,
+                Title = item.Title,
+                ClientProject = item.ClientProject ?? "N/A"
             };
         }
         public static List<ClientWorkItem> ToClientWorkItems(this IEnumerable<Artifact> artifacts)
