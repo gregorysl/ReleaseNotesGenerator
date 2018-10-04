@@ -1,4 +1,5 @@
-﻿using Xceed.Words.NET;
+﻿using System;
+using Xceed.Words.NET;
 
 namespace Gui
 {
@@ -18,6 +19,10 @@ namespace Gui
         public static Cell GetCell(this Table t, int row, int col)
         {
             return t.Rows[row].Cells[col];
+        }
+        public static bool Contains(this string source, string toCheck, StringComparison comp)
+        {
+            return source != null && toCheck != null && source.IndexOf(toCheck, comp) >= 0;
         }
     }
 }

@@ -18,8 +18,10 @@ namespace DataModel
             !string.IsNullOrWhiteSpace(ReleaseName) && !string.IsNullOrWhiteSpace(QaBuildName) &&
             !string.IsNullOrWhiteSpace(CoreBuildName) && PsRefresh != null && CoreChange != null;
 
-        private ChangesetInfo _psRefresh;
-        private ChangesetInfo _coreChange;
+        public tfs tfs {get;set;} = new tfs();
+
+        private Change _psRefresh;
+        private Change _coreChange;
         private string _releaseName;
         private string _tfsBranch;
         private string _qaBuildName;
@@ -94,7 +96,7 @@ namespace DataModel
 
         public string CoreBuildDateFormated => CoreBuildDate.ToString("yyyy-MM-dd HH:mm", new CultureInfo("en-US"));
 
-        public ChangesetInfo PsRefresh
+        public Change PsRefresh
         {
             get => _psRefresh;
             set
@@ -105,7 +107,7 @@ namespace DataModel
             }
         }
 
-        public ChangesetInfo CoreChange
+        public Change CoreChange
         {
             get => _coreChange;
             set
@@ -118,9 +120,7 @@ namespace DataModel
 
 
 
-        public List<ClientWorkItem> WorkItems { get; set; }
 
-        public ObservableCollection<ChangesetInfo> CategorizedChanges { get; set; }
 
 
         public event PropertyChangedEventHandler PropertyChanged;

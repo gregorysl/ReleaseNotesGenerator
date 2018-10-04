@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Configuration;
 using System.Linq;
@@ -25,22 +26,24 @@ namespace Gui
         public MainWindow()
         {
             InitializeComponent();
+            var tfsUrl = ConfigurationManager.AppSettings["tfsUrl"];
+            var tfsUsername = ConfigurationManager.AppSettings["tfsUsername"];
+            var tfsKey = ConfigurationManager.AppSettings["tfsKey"];
+            if (string.IsNullOrWhiteSpace(tfsUrl)) return;
+
+            _tfs = new TfsConnector(tfsUrl, tfsUsername, tfsKey);
+
+            ProjectCombo.ItemsSource = _tfs.Projects();
             Loaded += MainWindow_Loaded;
         }
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+
             _data = new ReleaseData();
-            DataContext = _data;
-            
-            var tfsUrl = ConfigurationManager.AppSettings["tfsUrl"];
-            if (string.IsNullOrWhiteSpace(tfsUrl)) return;
+           DataContext = _data;
 
-            _tfs = new TfsConnector(tfsUrl);
-
-            if (!_tfs.IsConnected) return;
-            ProjectCombo.ItemsSource = _tfs.Projects;
         }
-        
+
 
         private void ProjectSelected(object sender, SelectionChangedEventArgs e)
         {
@@ -75,27 +78,49 @@ namespace Gui
         private async void ConvertClicked(object sender, RoutedEventArgs e)
         {
             var queryLocation = $"$/{_data.TfsProject}/{_data.TfsBranch}";
-            var workItemStateFilter = GettrimmedSettingList("workItemStateFilter");
-            var workItemTypeFilter = GettrimmedSettingList("workItemTypeFilter");
+            var workItemStateInclude = GettrimmedSettingList("workItemStateInclude");
+            var workItemTypeExclude = GettrimmedSettingList("workItemTypeExclude");
             LoadingBar.Visibility = Visibility.Visible;
-            var downloadedData = await Task.Run(() =>  _tfs.GetChangesetsAndWorkItems(_data.IterationSelected, queryLocation,
-                _data.ChangesetFrom, _data.ChangesetTo, Categories, workItemStateFilter,workItemTypeFilter));
+            var downloadedData = await Task.Run(() => _tfs.GetChangesetsRest(queryLocation,_data.ChangesetFrom, _data.ChangesetTo, Categories));
 
             LoadingBar.Visibility = Visibility.Hidden;
-            if (!string.IsNullOrWhiteSpace(downloadedData.ErrorMessgage))
-            {
-                MessageBox.Show(downloadedData.ErrorMessgage);
-            }
-            else
-            {
-                _data.CategorizedChanges = downloadedData.CategorizedChanges;
+            _data.tfs = downloadedData;
 
-                FilterTfsChanges();
+            _dataGrid.ItemsSource = _data.tfs.Changes;
+            FilterTfsChanges();
+            WorkItemProgress.Value = 0;
+            WorkItemProgress.Maximum= _data.tfs.Changes.Count;
+            var workToDownload = new List<int>();
+            foreach (var item in _data.tfs.Changes)
+            {
+                var wok = await Task.Run(() => _tfs.GetChangesetWorkItemsRest(item));
+                var filteredWok = wok
+                    .Where(x => !workItemTypeExclude.Contains(x.workItemType))
+                    .Where(x => workItemStateInclude.Contains(x.state))
+                    .Select(x=>x.id).ToList();
+                workToDownload.AddRange(filteredWok);
+                item.Works = filteredWok;
+                WorkItemProgress.Value += 1;
 
-                _data.WorkItems = downloadedData.WorkItems;
-                _dataGrid.ItemsSource = _data.CategorizedChanges;
-                _dataGrid.Items.SortDescriptions.Add(new SortDescription("Id", ListSortDirection.Descending));
             }
+            _data.tfs.WorkItems = _tfs.GetWorkItemsByIdAndIteration(workToDownload, _data.IterationSelected, workItemStateInclude, workItemTypeExclude);
+
+
+            //if (!string.IsNullOrWhiteSpace(downloadedData.ErrorMessgage))
+            //{
+            //    MessageBox.Show(downloadedData.ErrorMessgage);
+            //}
+            //else
+            //{
+            //    _data.CategorizedChanges = downloadedData.CategorizedChanges;
+            //    _data.Changes = downloadedData.Changes;
+
+
+            //    _data.WorkItems = downloadedData.WorkItems;
+            //    //_dataGrid.ItemsSource = _data.CategorizedChanges;
+            //    _dataGrid.ItemsSource = _data.Changes;
+            //    _dataGrid.Items.SortDescriptions.Add(new SortDescription("Id", ListSortDirection.Descending));
+            //}
         }
 
         private static List<string> GettrimmedSettingList(string key)
@@ -117,7 +142,7 @@ namespace Gui
         {
             input.ToolTip = "";
             var parsed = int.TryParse(input.Text, out int changeset);
-            if(!parsed) return;
+            if (!parsed) return;
 
             var result = "";
             if (changeset > 1) result = await Task.Run(() => _tfs.GetChangesetTitleById(changeset));
@@ -127,38 +152,54 @@ namespace Gui
 
         private void SetAsPsRefreshClick(object sender, RoutedEventArgs e)
         {
-            ChangesetInfo item = (ChangesetInfo) ((Button) e.Source).DataContext;
+            Change item = (Change)((Button)e.Source).DataContext;
             _data.PsRefresh = item;
         }
 
         private void SetAsCoreClick(object sender, RoutedEventArgs e)
         {
-            ChangesetInfo item = (ChangesetInfo)((Button)e.Source).DataContext;
+            Change item = (Change)((Button)e.Source).DataContext;
             _data.CoreChange = item;
         }
 
         private void CreateDocument(object sender, RoutedEventArgs e)
         {
-            var changesets = _data.CategorizedChanges.Where(x=>x.Selected).ToList();
-            var categories = new Dictionary<string, List<ChangesetInfo>>();
-            foreach (var category in Categories)
+            var list = new List<ChangesetInfo>();
+            var selectedChangesets = _data.tfs.Changes.Where(x => x.Selected).OrderBy(x=>x.changesetId).ToList();
+            foreach (var item in selectedChangesets)
             {
-                var cha = changesets.Where(x => x.Categories.Contains(category)).ToList();
-                if (cha.Any())
+                var change = new ChangesetInfo { Id = item.changesetId, Comment = item.comment, CommitedBy = item.checkedInBy.displayName, Created = item.createdDate, WorkItemId="N/A", WorkItemTitle="N/A" };
+                if (!item.Works.Any()) { list.Add(change); }
+                foreach (var workItemId in item.Works)
                 {
-                    categories.Add(category, cha);
+                    var workItem = _data.tfs.WorkItems.FirstOrDefault(x => x.Id == workItemId);
+                    change.WorkItemId = workItem.Id.ToString();
+                    change.WorkItemTitle = workItem.Title;
+                    list.Add(change);
                 }
             }
 
-            var workItems = _data.WorkItems.Where(x => x.ClientProject != "General");
-            var pbi = _data.WorkItems.Where(x => x.ClientProject == "General");
+
+
+            var categories = new Dictionary<string, List<ChangesetInfo>>();
+            foreach (var category in _data.tfs.Categorized)
+            {
+                var cha = list.Where(x => category.Value.Contains(x.Id)).ToList();
+                if (cha.Any())
+                {
+                    categories.Add(category.Key, cha);
+                }
+            }
+
+            var workItems = _data.tfs.WorkItems.Where(x => x.ClientProject != "General");
+            var pbi = _data.tfs.WorkItems.Where(x => x.ClientProject == "General");
             var message = new DocumentEditor().ProcessData(_data, categories, workItems, pbi);
             if (!string.IsNullOrWhiteSpace(message)) MessageBox.Show(message);
         }
 
         private void ToggleButton_OnChecked(object sender, RoutedEventArgs e)
         {
-            var checkbox = (CheckBox) sender;
+            var checkbox = (CheckBox)sender;
             if (checkbox == null) return;
             _includeTfsService = checkbox.IsChecked.GetValueOrDefault(false);
 
@@ -168,9 +209,9 @@ namespace Gui
 
         private void FilterTfsChanges()
         {
-            foreach (var change in _data.CategorizedChanges)
+            foreach (var change in _data.tfs.Changes)
             {
-                if (change.CommitedBy == "TFS Service")
+                if (change.checkedInBy.displayName == "TFS Service" || change.checkedInBy.displayName == "Project Collection Build Service (Product)" || change.comment.Contains("Automatic refresh", StringComparison.OrdinalIgnoreCase))
                 {
                     change.Selected = _includeTfsService;
                 }
