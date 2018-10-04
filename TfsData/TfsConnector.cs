@@ -5,9 +5,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using DataModel;
-using Microsoft.TeamFoundation.Client;
-using Microsoft.TeamFoundation.Common;
-using Microsoft.TeamFoundation.WorkItemTracking.Client;
 using Newtonsoft.Json;
 
 namespace TfsData
@@ -15,7 +12,6 @@ namespace TfsData
     public class TfsConnector
     {
         private readonly string _workItemsForIteration = "SELECT [System.Id] FROM WorkItems WHERE [System.IterationPath] UNDER '{0}'";
-        private readonly string _workItemsByIds = "SELECT * FROM WorkItems WHERE [System.Id] in ({0})";
         private static HttpClient client;
         private string uri;
 
@@ -83,17 +79,6 @@ namespace TfsData
                 return e.Message;
             }
         }
-        private static void RecursiveAddIterationPath(Node node, ICollection<string> result)
-        {
-            foreach (Node item in node.ChildNodes)
-            {
-                result.Add(item.Path);
-                if (item.HasChildNodes)
-                {
-                    RecursiveAddIterationPath(item, result);
-                }
-            }
-        }
         
         public List<ClientWorkItem> GetWorkItemsByIdAndIteration(List<int> workitemsId, string iterationPath, List<string> workItemStateInclude, List<string> workItemTypeExclude)
         {
@@ -129,10 +114,10 @@ namespace TfsData
             List<string> categories)
         {
             var tfs = new tfs();
-            var versionSpecFromi = "&searchCriteria.fromId=" + (changesetFrom.IsNullOrEmpty()
+            var versionSpecFromi = "&searchCriteria.fromId=" + (string.IsNullOrEmpty(changesetFrom)
                 ? "1"
                 : changesetFrom);
-            var versionSpecTois = changesetTo.IsNullOrEmpty()
+            var versionSpecTois = string.IsNullOrEmpty(changesetTo)
                 ? ""
                 : $"&searchCriteria.toId={changesetTo}";
 
