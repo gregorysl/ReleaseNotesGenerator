@@ -27,27 +27,16 @@ namespace TfsData
 
         public List<string> Projects()
         {
-            var projects = new List<string>();
-            using (HttpResponseMessage response = client.GetAsync($"{uri}/_apis/projects?$top=999").Result)
-            {
-                response.EnsureSuccessStatusCode();
-                string responseBody = response.Content.ReadAsStringAsync().Result;
-                projects = JsonConvert.DeserializeObject<TfsData<DataModel.Project>>(responseBody).value.Select(x => x.name).OrderBy(x => x).ToList();
-
-            }
+            var tfsData = client.GetWithResponse<TfsData<Project>>(($"{uri}/_apis/projects?$top=999"));
+            var projects = tfsData.value.Select(x => x.name).OrderBy(x => x).ToList();
             return projects;
         }
 
         public ICollection<string> GetIterationPaths(string projectName)
         {
+            var iterationData = client.GetWithResponse<Iteration>($"{uri}/{projectName}/_apis/wit/classificationNodes/Iterations?$depth=5");
             var iterations = new List<string>();
-            using (HttpResponseMessage response = client.GetAsync($"{uri}/{projectName}/_apis/wit/classificationNodes/Iterations?$depth=5").Result)
-            {
-                response.EnsureSuccessStatusCode();
-                string responseBody = response.Content.ReadAsStringAsync().Result;
-                var iteration = JsonConvert.DeserializeObject<Iteration>(responseBody);
-                getI(iteration, "", iterations);
-            }
+            getI(iterationData, "", iterations);
             return iterations;
         }
 
@@ -65,45 +54,30 @@ namespace TfsData
         {
             try
             {
-
-                using (HttpResponseMessage response = client.GetAsync($"{uri}/_apis/tfvc/changesets/{id}?api-version=1.0").Result)
-                {
-                    response.EnsureSuccessStatusCode();
-                    string responseBody = response.Content.ReadAsStringAsync().Result;
-                    var changeset = JsonConvert.DeserializeObject<DataModel.Change>(responseBody);
-                    return changeset.comment;
-                }
+                var changeset = client.GetWithResponse<Change>($"{uri}/_apis/tfvc/changesets/{id}?api-version=1.0");
+                return changeset.comment;
             }
             catch (Exception e)
             {
                 return e.Message;
             }
         }
-        
+
         public List<ClientWorkItem> GetWorkItemsByIdAndIteration(List<int> workitemsId, string iterationPath, List<string> workItemStateInclude, List<string> workItemTypeExclude)
         {
-            using (HttpResponseMessage response = client.PostAsJsonAsync($"{uri}/_apis/wit/wiql?api-version=1.0",new { query = string.Format(_workItemsForIteration, iterationPath) }).Result)
-            {
-                response.EnsureSuccessStatusCode();
-                string responseBody = response.Content.ReadAsStringAsync().Result;
-                var ids = JsonConvert.DeserializeObject<Rootobject>(responseBody).workItems.Select(x=>x.id).ToList();
-                workitemsId.AddRange(ids);
-            }
+            var response = client.PostWithResponse<Rootobject>($"{uri}/_apis/wit/wiql?api-version=1.0", new { query = string.Format(_workItemsForIteration, iterationPath) });
+            var ids = response.workItems.Select(x => x.id).ToList();
+            workitemsId.AddRange(ids);
 
             var joinedWorkItems = string.Join(",", workitemsId.Distinct().ToList());
-            List<Fields> changeset = new List<Fields>();
-            using (HttpResponseMessage response = client.GetAsync($"{uri}/_apis/wit/WorkItems?ids={joinedWorkItems}&fields=System.Id,System.WorkItemType,System.Title,System.State,client.project&api-version=1.0").Result)
-            {
-                response.EnsureSuccessStatusCode();
-                string responseBody = response.Content.ReadAsStringAsync().Result;
-                changeset = JsonConvert.DeserializeObject<TfsData<WrappedWi>>(responseBody).value.Select(x=>x.fields).ToList();
+            var changesets = client.GetWithResponse<TfsData<WrappedWi>>($"{uri}/_apis/wit/WorkItems?ids={joinedWorkItems}&fields=System.Id,System.WorkItemType,System.Title,System.State,client.project&api-version=1.0");
+            var changeset = changesets.value.Select(x => x.fields).ToList();
 
-            }
-                        
+
             var clientWorkItems = changeset.DistinctBy(x => x.Id)
                 .Where(x => !workItemTypeExclude.Contains(x.SystemWorkItemType))
                 .Where(x => workItemStateInclude.Contains(x.State))
-                .Select(x=>x.ToClientWorkItem())
+                .Select(x => x.ToClientWorkItem())
                 .OrderBy(x => x.ClientProject)
                 .ThenBy(x => x.Id).ToList();
 
@@ -126,14 +100,9 @@ namespace TfsData
             var list = new List<DataModel.Change>();
             foreach (var tuple in categoryQueryLocation)
             {
-                using (HttpResponseMessage response = client.GetAsync($"{uri}/_apis/tfvc/changesets?searchCriteria.itemPath={tuple.Item2}{versionSpecFromi}{versionSpecTois}&api-version=1.0").Result)
-                {
-                    response.EnsureSuccessStatusCode();
-                    string responseBody = response.Content.ReadAsStringAsync().Result;
-                    var deserializedList = JsonConvert.DeserializeObject<DataModel.TfsData<DataModel.Change>>(responseBody).value;
-                    list.AddRange(deserializedList);
-                    tfs.Categorized.Add(tuple.Item1, deserializedList.Select(x => x.changesetId).ToList());
-                }
+                var response = client.GetWithResponse<TfsData<Change>>($"{uri}/_apis/tfvc/changesets?searchCriteria.itemPath={tuple.Item2}{versionSpecFromi}{versionSpecTois}&api-version=1.0").value;
+                list.AddRange(response);
+                tfs.Categorized.Add(tuple.Item1, response.Select(x => x.changesetId).ToList());
             }
             var changesList = list.DistinctBy(x => x.changesetId).OrderByDescending(x => x.changesetId).ToList();
             tfs.Changes = new ObservableCollection<DataModel.Change>(changesList);
