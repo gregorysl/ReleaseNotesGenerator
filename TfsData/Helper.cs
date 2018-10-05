@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net.Http;
 using DataModel;
 using Newtonsoft.Json;
-using ClientWorkItem = DataModel.ClientWorkItem;
 
 namespace TfsData
 {
@@ -16,7 +15,8 @@ namespace TfsData
             {
                 Id = item.Id,
                 Title = item.Title,
-                ClientProject = item.ClientProject ?? "N/A"
+                ClientProject = item.ClientProject ?? "N/A",
+                State = item.State
             };
         }
         public static IEnumerable<TSource> DistinctBy<TSource, TKey>

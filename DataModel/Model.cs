@@ -134,10 +134,11 @@ namespace DataModel
     {
         public int Id { get; set; }
         public string Title { get; set; }
+        public string State { get; set; }
         public string ClientProject { get; set; }
         public override string ToString()
         {
-            return $"{Id} {Title} {ClientProject}";
+            return $"{Id} {Title} {ClientProject} {State}";
         }
     }
     public class CategoryChanges
