@@ -93,13 +93,12 @@
                     </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
-            <ProgressBar Height="30" Name="WorkItemProgress" />
             <StackPanel Name="LoadingBar" Visibility="Hidden" Orientation="Vertical" VerticalAlignment="Center">
                 <ProgressBar IsIndeterminate="True" Opacity="0.5" Height="50"/>
                 <TextBlock FontSize="30" HorizontalAlignment="Center">Loading Data</TextBlock>
             </StackPanel>
-
         </Grid>
+        <ProgressBar Height="30" Name="WorkItemProgress" />
         <CheckBox Content="Include TFSService Check-ins" Click="ToggleButton_OnChecked" />
         <TextBlock>Core Changest</TextBlock>
         <TextBlock Text="{Binding CoreChange}"></TextBlock>
