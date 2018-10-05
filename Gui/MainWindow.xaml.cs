@@ -40,7 +40,7 @@ namespace Gui
         {
 
             _data = new ReleaseData();
-           DataContext = _data;
+            DataContext = _data;
 
         }
 
@@ -78,7 +78,6 @@ namespace Gui
         private async void ConvertClicked(object sender, RoutedEventArgs e)
         {
             var queryLocation = $"$/{_data.TfsProject}/{_data.TfsBranch}";
-            var workItemStateInclude = GettrimmedSettingList("workItemStateInclude");
             var workItemTypeExclude = GettrimmedSettingList("workItemTypeExclude");
             LoadingBar.Visibility = Visibility.Visible;
             var downloadedData = await Task.Run(() => _tfs.GetChangesetsRest(queryLocation,_data.ChangesetFrom, _data.ChangesetTo, Categories));
@@ -96,14 +95,13 @@ namespace Gui
                 var wok = await Task.Run(() => _tfs.GetChangesetWorkItemsRest(item));
                 var filteredWok = wok
                     .Where(x => !workItemTypeExclude.Contains(x.workItemType))
-                    .Where(x => workItemStateInclude.Contains(x.state))
                     .Select(x=>x.id).ToList();
                 workToDownload.AddRange(filteredWok);
                 item.Works = filteredWok;
                 WorkItemProgress.Value += 1;
 
             }
-            _data.tfs.WorkItems = _tfs.GetWorkItemsByIdAndIteration(workToDownload, _data.IterationSelected, workItemStateInclude, workItemTypeExclude);
+            _data.tfs.WorkItems = _tfs.GetWorkItemsByIdAndIteration(workToDownload, _data.IterationSelected, workItemTypeExclude);
 
 
             //if (!string.IsNullOrWhiteSpace(downloadedData.ErrorMessgage))
@@ -191,7 +189,10 @@ namespace Gui
                 }
             }
 
-            var workItems = _data.tfs.WorkItems.Where(x => x.ClientProject != "General");
+            var workItemStateInclude = GettrimmedSettingList("workItemStateInclude");
+            var workItems = _data.tfs.WorkItems
+                .Where(x => workItemStateInclude.Contains(x.State))
+                .Where(x => x.ClientProject != "General");
             var pbi = _data.tfs.WorkItems.Where(x => x.ClientProject == "General");
             var message = new DocumentEditor().ProcessData(_data, categories, workItems, pbi);
             if (!string.IsNullOrWhiteSpace(message)) MessageBox.Show(message);

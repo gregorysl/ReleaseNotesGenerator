@@ -63,7 +63,7 @@ namespace TfsData
             }
         }
 
-        public List<ClientWorkItem> GetWorkItemsByIdAndIteration(List<int> workitemsId, string iterationPath, List<string> workItemStateInclude, List<string> workItemTypeExclude)
+        public List<ClientWorkItem> GetWorkItemsByIdAndIteration(List<int> workitemsId, string iterationPath, List<string> workItemTypeExclude)
         {
             var response = client.PostWithResponse<Rootobject>($"{uri}/_apis/wit/wiql?api-version=1.0", new { query = string.Format(_workItemsForIteration, iterationPath) });
             var ids = response.workItems.Select(x => x.id).ToList();
@@ -76,7 +76,6 @@ namespace TfsData
 
             var clientWorkItems = changeset.DistinctBy(x => x.Id)
                 .Where(x => !workItemTypeExclude.Contains(x.SystemWorkItemType))
-                .Where(x => workItemStateInclude.Contains(x.State))
                 .Select(x => x.ToClientWorkItem())
                 .OrderBy(x => x.ClientProject)
                 .ThenBy(x => x.Id).ToList();
