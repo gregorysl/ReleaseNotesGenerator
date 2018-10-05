@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -132,15 +133,24 @@ namespace DataModel
     }
     public class ClientWorkItem
     {
+        [JsonProperty(PropertyName = "System.Id")]
         public int Id { get; set; }
+        [JsonProperty(PropertyName = "System.Title")]
         public string Title { get; set; }
+        [JsonProperty(PropertyName = "System.State")]
         public string State { get; set; }
+
+        [DefaultValue("N/A")]
+        [JsonProperty(PropertyName = "client.project", DefaultValueHandling = DefaultValueHandling.Populate)]
         public string ClientProject { get; set; }
+        [JsonProperty(PropertyName = "System.WorkItemType")]
+        public string WorkItemType { get; set; }
         public override string ToString()
         {
             return $"{Id} {Title} {ClientProject} {State}";
         }
     }
+
     public class CategoryChanges
     {
         public string Name { get; set; }

@@ -75,8 +75,7 @@ namespace TfsData
 
 
             var clientWorkItems = changeset.DistinctBy(x => x.Id)
-                .Where(x => !workItemTypeExclude.Contains(x.SystemWorkItemType))
-                .Select(x => x.ToClientWorkItem())
+                .Where(x => !workItemTypeExclude.Contains(x.WorkItemType))
                 .OrderBy(x => x.ClientProject)
                 .ThenBy(x => x.Id).ToList();
 

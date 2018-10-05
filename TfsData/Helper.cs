@@ -2,23 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using DataModel;
 using Newtonsoft.Json;
 
 namespace TfsData
 {
     public static class Helper
     {
-        public static ClientWorkItem ToClientWorkItem(this Fields item)
-        {
-            return new ClientWorkItem
-            {
-                Id = item.Id,
-                Title = item.Title,
-                ClientProject = item.ClientProject ?? "N/A",
-                State = item.State
-            };
-        }
         public static IEnumerable<TSource> DistinctBy<TSource, TKey>
             (this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
         {
