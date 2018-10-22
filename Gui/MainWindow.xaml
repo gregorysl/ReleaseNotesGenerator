@@ -70,9 +70,8 @@
             <DataGrid x:Name="_dataGrid" CanUserAddRows="False" AutoGenerateColumns="False" Height="400" SelectionMode="Extended" SelectionUnit="FullRow" ItemsSource="{Binding tfs.Changes}">
                 <DataGrid.Columns>
                     <DataGridCheckBoxColumn Header="" Binding="{Binding Selected, UpdateSourceTrigger=PropertyChanged}"></DataGridCheckBoxColumn>
-                    <DataGridTextColumn IsReadOnly="True"  CellStyle="{StaticResource MyDataGridCellStyle}" Header="Id" Binding="{Binding changesetId}" SortDirection="Descending"  />
-                    <DataGridTextColumn IsReadOnly="True"  CellStyle="{StaticResource MyDataGridCellStyle}" Header="Commited By" Binding="{Binding author}" />
-                    <DataGridTextColumn IsReadOnly="True"  CellStyle="{StaticResource MyDataGridCellStyle}" Header="Commited By" Binding="{Binding wokcount}" />
+                    <DataGridTextColumn IsReadOnly="True" CellStyle="{StaticResource MyDataGridCellStyle}" Header="Id" Binding="{Binding changesetId}" SortDirection="Descending"  />
+                    <DataGridTextColumn IsReadOnly="True" CellStyle="{StaticResource MyDataGridCellStyle}" Header="Commited By" Binding="{Binding author}" />
                     <DataGridTextColumn IsReadOnly="True" CellStyle="{StaticResource MyDataGridCellStyle}" Header="Commited Date" Binding="{Binding createdDate, StringFormat=\{0:dd.MM.yyyy HH:mm:ss\}}" />
                     <DataGridTextColumn IsReadOnly="True" CellStyle="{StaticResource MyDataGridCellStyle}" Header="Comment" Binding="{Binding comment}" Width="350">
                         <DataGridTextColumn.ElementStyle>
@@ -122,10 +121,6 @@
                     <DatePicker Name="QaBuildDate" SelectedDate="{Binding Path=QaBuildDate, Mode=TwoWay}"  Width="200" 
                                 materialDesign:HintAssist.Hint="QA build Date"
                                 Style="{StaticResource MaterialDesignFloatingHintDatePicker}"/>
-                    <materialDesign:TimePicker
-                        Width="200"
-                        Style="{StaticResource MaterialDesignFloatingHintTimePicker}"
-                        materialDesign:HintAssist.Hint="QA build Time" />
                 </StackPanel>
                 <StackPanel Name="CoreBuildStack" Visibility="Visible" Orientation="Vertical" Margin="5">
                     <TextBox Name="CoreBuildName" Text="{Binding Path=CoreBuildName, Mode=TwoWay}" Width="200"
@@ -134,10 +129,6 @@
                     <DatePicker Name="CoreBuildDate" SelectedDate="{Binding Path=CoreBuildDate, Mode=TwoWay}"  Width="200" 
                                 materialDesign:HintAssist.Hint="Core build Date"
                                 Style="{StaticResource MaterialDesignFloatingHintDatePicker}"/>
-                    <materialDesign:TimePicker
-                        Width="200"
-                        Style="{StaticResource MaterialDesignFloatingHintTimePicker}"
-                        materialDesign:HintAssist.Hint="Core build Time" />
                 </StackPanel>
             </StackPanel>
         </materialDesign:Card>
