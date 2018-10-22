@@ -40,6 +40,8 @@ namespace Gui
         {
 
             _data = new ReleaseData();
+            ProjectCombo.SelectedItem = "FenergoCoreSupport";
+            _data = new ReleaseData { TfsProject = "FenergoCore", ChangesetFrom = "180922", TfsBranch = "R8.3.1", IterationSelected = @"FenergoCoreSupport\Current\R8.3.1.8", QaBuildName = "R8.3.1_QA.53", CoreBuildName = "R8.3.1_CLM_Core_IntTests.66", ReleaseDate = new DateTime(2018, 10, 05), QaBuildDate = new DateTime(2018, 10, 3), CoreBuildDate = new DateTime(2018, 10, 05) };
             DataContext = _data;
 
         }
@@ -80,7 +82,7 @@ namespace Gui
             var queryLocation = $"$/{_data.TfsProject}/{_data.TfsBranch}";
             var workItemTypeExclude = GettrimmedSettingList("workItemTypeExclude");
             LoadingBar.Visibility = Visibility.Visible;
-            var downloadedData = await Task.Run(() => _tfs.GetChangesetsRest(queryLocation,_data.ChangesetFrom, _data.ChangesetTo, Categories));
+            var downloadedData = await Task.Run(() => _tfs.GetChangesetsRest(queryLocation, _data.ChangesetFrom, _data.ChangesetTo, Categories));
 
             LoadingBar.Visibility = Visibility.Hidden;
             _data.tfs = downloadedData;
@@ -88,14 +90,14 @@ namespace Gui
             _dataGrid.ItemsSource = _data.tfs.Changes;
             FilterTfsChanges();
             WorkItemProgress.Value = 0;
-            WorkItemProgress.Maximum= _data.tfs.Changes.Count;
+            WorkItemProgress.Maximum = _data.tfs.Changes.Count;
             var workToDownload = new List<int>();
             foreach (var item in _data.tfs.Changes)
             {
                 var wok = await Task.Run(() => _tfs.GetChangesetWorkItemsRest(item));
                 var filteredWok = wok
                     .Where(x => !workItemTypeExclude.Contains(x.workItemType))
-                    .Select(x=>x.id).ToList();
+                    .Select(x => x.id).ToList();
                 workToDownload.AddRange(filteredWok);
                 item.Works = filteredWok;
                 WorkItemProgress.Value += 1;
@@ -163,16 +165,16 @@ namespace Gui
         private void CreateDocument(object sender, RoutedEventArgs e)
         {
             var list = new List<ChangesetInfo>();
-            var selectedChangesets = _data.tfs.Changes.Where(x => x.Selected).OrderBy(x=>x.changesetId).ToList();
+            var selectedChangesets = _data.tfs.Changes.Where(x => x.Selected).OrderBy(x => x.changesetId).ToList();
             foreach (var item in selectedChangesets)
             {
-                var change = new ChangesetInfo { Id = item.changesetId, Comment = item.comment, CommitedBy = item.checkedInBy.displayName, Created = item.createdDate, WorkItemId="N/A", WorkItemTitle="N/A" };
+                var change = new ChangesetInfo { Id = item.changesetId, Comment = item.comment, CommitedBy = item.checkedInBy.displayName, Created = item.createdDate, WorkItemId = "N/A", WorkItemTitle = "N/A" };
                 if (!item.Works.Any()) { list.Add(change); }
                 foreach (var workItemId in item.Works)
                 {
                     var workItem = _data.tfs.WorkItems.FirstOrDefault(x => x.Id == workItemId);
-                    change.WorkItemId = workItem.Id.ToString();
-                    change.WorkItemTitle = workItem.Title;
+
+                    change = new ChangesetInfo { Id = item.changesetId, Comment = item.comment, CommitedBy = item.checkedInBy.displayName, Created = item.createdDate, WorkItemId = workItem.Id.ToString(), WorkItemTitle = workItem.Title };
                     list.Add(change);
                 }
             }
