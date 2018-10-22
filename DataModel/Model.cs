@@ -81,7 +81,7 @@ namespace DataModel
 
         public DateTime QaBuildDate { get; set; } = DateTime.Now;
 
-        public string QaBuildDateFormated => QaBuildDate.ToString("yyyy-MM-dd HH:mm", new CultureInfo("en-US"));
+        public string QaBuildDateFormated => QaBuildDate.ToString("yyyy-MM-dd", new CultureInfo("en-US"));
 
         public string CoreBuildName
         {
@@ -95,7 +95,7 @@ namespace DataModel
 
         public DateTime CoreBuildDate { get; set; } = DateTime.Now;
 
-        public string CoreBuildDateFormated => CoreBuildDate.ToString("yyyy-MM-dd HH:mm", new CultureInfo("en-US"));
+        public string CoreBuildDateFormated => CoreBuildDate.ToString("yyyy-MM-dd", new CultureInfo("en-US"));
 
         public Change PsRefresh
         {
