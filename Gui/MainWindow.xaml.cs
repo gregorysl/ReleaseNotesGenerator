@@ -38,12 +38,8 @@ namespace Gui
         }
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-
             _data = new ReleaseData();
-            ProjectCombo.SelectedItem = "FenergoCoreSupport";
-            _data = new ReleaseData { TfsProject = "FenergoCore", ChangesetFrom = "180922", TfsBranch = "R8.3.1", IterationSelected = @"FenergoCoreSupport\Current\R8.3.1.8", QaBuildName = "R8.3.1_QA.53", CoreBuildName = "R8.3.1_CLM_Core_IntTests.66", ReleaseDate = new DateTime(2018, 10, 05), QaBuildDate = new DateTime(2018, 10, 3), CoreBuildDate = new DateTime(2018, 10, 05) };
             DataContext = _data;
-
         }
 
 

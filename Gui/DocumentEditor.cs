@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
 using DataModel;
 using Xceed.Words.NET;
 
@@ -34,6 +33,12 @@ namespace Gui
                     doc.ReplaceText("{CoreChangeset}", data.CoreChange.changesetId.ToString());
                     doc.ReplaceText("{CoreDate}",
                         data.CoreChange.createdDate.ToString("yyyy-MM-dd HH:mm", new CultureInfo("en-US")));
+                    
+                    doc.InsertTableOfContents("Contents",
+                        TableOfContentsSwitches.O | TableOfContentsSwitches.U | TableOfContentsSwitches.Z | TableOfContentsSwitches.H | TableOfContentsSwitches.T,
+                        "FR HeadNoToc");
+
+                    doc.InsertSectionPageBreak();
                     var lastParagraph = doc.Paragraphs[doc.Paragraphs.Count - 1];
                     var secondSection = SecondSection(categorizedChangesets, lastParagraph);
                     var thirdSection = ThirdSection(workItems, secondSection);
@@ -41,7 +46,7 @@ namespace Gui
 
                     var fifthSection = fourthSection.CreateHeadingSection("Test Report");
                     var sixthSection = fifthSection.CreateHeadingSection("Known issues in this Release");
-
+                    
                     doc.SaveAs(dTestDocx);
                 }
 
