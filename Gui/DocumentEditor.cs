@@ -20,12 +20,12 @@ namespace Gui
                 using (var doc = DocX.Load(fileName))
                 {
                     doc.ReplaceText("{ReleaseName}", data.ReleaseName);
-                    doc.ReplaceText("{ReleaseDate}", data.ReleaseDateFormated);
+                    doc.ReplaceText("{ReleaseDate}", data.ReleaseDate);
                     doc.ReplaceText("{TfsBranch}", data.TfsBranch);
                     doc.ReplaceText("{QaBuildName}", data.QaBuildName);
-                    doc.ReplaceText("{QaBuildDate}", data.QaBuildDateFormated);
+                    doc.ReplaceText("{QaBuildDate}", data.QaBuildDate);
                     doc.ReplaceText("{CoreBuildName}", data.CoreBuildName);
-                    doc.ReplaceText("{CoreBuildDate}", data.CoreBuildDateFormated);
+                    doc.ReplaceText("{CoreBuildDate}", data.CoreBuildDate);
                     doc.ReplaceText("{PsRefreshChangeset}", data.PsRefresh.changesetId.ToString());
                     doc.ReplaceText("{PsRefreshDate}",
                         data.PsRefresh.createdDate.ToString("yyyy-MM-dd HH:mm", new CultureInfo("en-US")));

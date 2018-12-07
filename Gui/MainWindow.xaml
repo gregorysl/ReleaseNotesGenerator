@@ -15,8 +15,8 @@
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="{DynamicResource MaterialDesignFont}">
     <StackPanel Orientation="Vertical">
-        <materialDesign:Card
-                Width="750"
+        <materialDesign:Card 
+                HorizontalAlignment="Center"
                 Margin="10"
                 Padding="8">
             <StackPanel Orientation="Horizontal">
@@ -114,25 +114,22 @@
                     <TextBox Name="ReleaseName" Text="{Binding Path=ReleaseName, Mode=TwoWay}" Width="200"
                              Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                              materialDesign:HintAssist.Hint="Release Name" />
-                    <DatePicker Name="ReleaseDate" SelectedDate="{Binding Path=ReleaseDate, Mode=TwoWay}"  Width="200" 
-                                materialDesign:HintAssist.Hint="Release Date"
-                                Style="{StaticResource MaterialDesignFloatingHintDatePicker}"/>
+                    <xctk:DateTimePicker Text="{Binding Path=ReleaseDate, Mode=TwoWay}" TimePickerVisibility="Collapsed" Width="200" 
+                                         ShowButtonSpinner="False" Format="Custom"  FormatString="d-MMMM-yyyy" CultureInfo="en-IE"  TextAlignment="Left" />
                 </StackPanel>
                 <StackPanel Name="QaBuildStack" Visibility="Visible" Orientation="Vertical" Margin="5">
                     <TextBox Name="QaBuildName" Text="{Binding Path=QaBuildName, Mode=TwoWay}" Width="200"
                              Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                              materialDesign:HintAssist.Hint="QA build Name" />
-                    <DatePicker Name="QaBuildDate" SelectedDate="{Binding Path=QaBuildDate, Mode=TwoWay}"  Width="200" 
-                                materialDesign:HintAssist.Hint="QA build Date"
-                                Style="{StaticResource MaterialDesignFloatingHintDatePicker}"/>
+                    <xctk:DateTimePicker Text="{Binding Path=QaBuildDate, Mode=TwoWay}" TimePickerVisibility="Collapsed" Width="200" 
+                                         ShowButtonSpinner="False" Format="Custom"  FormatString="yyyy-MM-dd" CultureInfo="en-IE" TextAlignment="Left" />
                 </StackPanel>
                 <StackPanel Name="CoreBuildStack" Visibility="Visible" Orientation="Vertical" Margin="5">
                     <TextBox Name="CoreBuildName" Text="{Binding Path=CoreBuildName, Mode=TwoWay}" Width="200"
                              Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                              materialDesign:HintAssist.Hint="Core build Name" />
-                    <DatePicker Name="CoreBuildDate" SelectedDate="{Binding Path=CoreBuildDate, Mode=TwoWay}"  Width="200" 
-                                materialDesign:HintAssist.Hint="Core build Date"
-                                Style="{StaticResource MaterialDesignFloatingHintDatePicker}"/>
+                    <xctk:DateTimePicker Text="{Binding Path=CoreBuildDate, Mode=TwoWay}" TimePickerVisibility="Collapsed" Width="200" 
+                                         ShowButtonSpinner="False" Format="Custom"  FormatString="yyyy-MM-dd" CultureInfo="en-IE" TextAlignment="Left" />
                 </StackPanel>
             </StackPanel>
         </materialDesign:Card>

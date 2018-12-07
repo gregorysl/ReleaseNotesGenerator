@@ -11,14 +11,18 @@ namespace DataModel
 {
     public class ReleaseData : INotifyPropertyChanged
     {
+        [JsonIgnore]
         public string ErrorMessgage { get; set; }
+        [JsonIgnore]
         public bool DownloadButtonEnabled =>
             !string.IsNullOrWhiteSpace(TfsProject) && !string.IsNullOrWhiteSpace(TfsBranch);
 
+        [JsonIgnore]
         public bool GenerateDocButtonEnabled =>
             !string.IsNullOrWhiteSpace(ReleaseName) && !string.IsNullOrWhiteSpace(QaBuildName) &&
             !string.IsNullOrWhiteSpace(CoreBuildName) && PsRefresh != null && CoreChange != null;
 
+        [JsonIgnore]
         public tfs tfs {get;set;} = new tfs();
 
         private Change _psRefresh;
@@ -48,6 +52,7 @@ namespace DataModel
                 OnPropertyChanged(nameof(DownloadButtonEnabled));
             }
         }
+        public string ProjectSelected { get; set; }
         public string IterationSelected { get; set; }
         public string ChangesetFrom { get; set; }
         public bool ChangesetFromInclude { get; set; }
@@ -65,9 +70,7 @@ namespace DataModel
             }
         }
 
-        public DateTime ReleaseDate { get; set; } = DateTime.Now;
-
-        public string ReleaseDateFormated => ReleaseDate.ToString("d-MMMM-yyyy", new CultureInfo("en-US"));
+        public string ReleaseDate { get; set; }
 
         public string QaBuildName
         {
@@ -79,10 +82,8 @@ namespace DataModel
             }
         }
 
-        public DateTime QaBuildDate { get; set; } = DateTime.Now;
-
-        public string QaBuildDateFormated => QaBuildDate.ToString("yyyy-MM-dd", new CultureInfo("en-US"));
-
+        public string QaBuildDate { get; set; }
+        
         public string CoreBuildName
         {
             get => _coreBuildName;
@@ -93,10 +94,9 @@ namespace DataModel
             }
         }
 
-        public DateTime CoreBuildDate { get; set; } = DateTime.Now;
+        public string CoreBuildDate { get; set; }
 
-        public string CoreBuildDateFormated => CoreBuildDate.ToString("yyyy-MM-dd", new CultureInfo("en-US"));
-
+        [JsonIgnore]
         public Change PsRefresh
         {
             get => _psRefresh;
@@ -107,7 +107,7 @@ namespace DataModel
                 OnPropertyChanged(nameof(GenerateDocButtonEnabled));
             }
         }
-
+        [JsonIgnore]
         public Change CoreChange
         {
             get => _coreChange;
@@ -149,12 +149,6 @@ namespace DataModel
         {
             return $"{Id} {Title} {ClientProject} {State}";
         }
-    }
-
-    public class CategoryChanges
-    {
-        public string Name { get; set; }
-        public List<ChangesetInfo> Changes { get; set; } = new List<ChangesetInfo>();
     }
 
     public class ChangesetInfo : INotifyPropertyChanged

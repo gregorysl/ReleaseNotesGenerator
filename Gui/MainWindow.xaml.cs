@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Configuration;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -11,7 +9,6 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using DataModel;
 using TfsData;
-using Xceed.Wpf.Toolkit;
 using MessageBox = System.Windows.MessageBox;
 
 namespace Gui
