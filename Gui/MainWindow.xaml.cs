@@ -69,6 +69,8 @@ namespace Gui
 
         private async void ConvertClicked(object sender, RoutedEventArgs e)
         {
+            App.Data.CoreChange = null;
+            App.Data.PsRefresh = null;
             var queryLocation = $"$/{App.Data.TfsProject}/{App.Data.TfsBranch}";
             var workItemTypeExclude = GettrimmedSettingList("workItemTypeExclude");
             LoadingBar.Visibility = Visibility.Visible;
