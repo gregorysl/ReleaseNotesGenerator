@@ -18,7 +18,6 @@ namespace Gui
 {
     public partial class MainWindow
     {
-        private ReleaseData _data;
         private bool _includeTfsService = false;
         private const string RegexString = @".*\\\w+(?:.*)?\\((\w\d.\d+.\d+).\d+)";
         private static TfsConnector _tfs;
@@ -38,8 +37,7 @@ namespace Gui
         }
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            _data = new ReleaseData();
-            DataContext = _data;
+            DataContext = App.Data;
         }
 
 
@@ -48,8 +46,8 @@ namespace Gui
             IterationCombo.Visibility = Visibility.Hidden;
             if (ProjectCombo.SelectedItem == null) return;
             IterationCombo.Visibility = Visibility.Visible;
-            _data.TfsProject = ProjectCombo.SelectedItem.ToString();
-            var iterationPaths = _tfs.GetIterationPaths(_data.TfsProject);
+            App.Data.TfsProject = ProjectCombo.SelectedItem.ToString();
+            var iterationPaths = _tfs.GetIterationPaths(App.Data.TfsProject);
 
             var regex = new Regex(RegexString);
             var filtered = iterationPaths.Where(x => regex.IsMatch(x)).ToList();
@@ -61,7 +59,7 @@ namespace Gui
         {
             if (IterationCombo.SelectedItem == null) return;
             var iteration = IterationCombo.SelectedItem.ToString();
-            _data.IterationSelected = iteration;
+            App.Data.IterationSelected = iteration;
             var regex = new Regex(RegexString);
             var matchedGroups = regex.Match(iteration).Groups;
 
@@ -69,26 +67,26 @@ namespace Gui
                 ? new Tuple<string, string>(matchedGroups[1].Value, matchedGroups[2].Value)
                 : new Tuple<string, string>("", matchedGroups[1].Value);
 
-            _data.ReleaseName = extractedData.Item1;
-            _data.TfsBranch = extractedData.Item2;
+            App.Data.ReleaseName = extractedData.Item1;
+            App.Data.TfsBranch = extractedData.Item2;
         }
 
         private async void ConvertClicked(object sender, RoutedEventArgs e)
         {
-            var queryLocation = $"$/{_data.TfsProject}/{_data.TfsBranch}";
+            var queryLocation = $"$/{App.Data.TfsProject}/{App.Data.TfsBranch}";
             var workItemTypeExclude = GettrimmedSettingList("workItemTypeExclude");
             LoadingBar.Visibility = Visibility.Visible;
-            var downloadedData = await Task.Run(() => _tfs.GetChangesetsRest(queryLocation, _data.ChangesetFrom, _data.ChangesetTo, Categories));
+            var downloadedData = await Task.Run(() => _tfs.GetChangesetsRest(queryLocation, App.Data.ChangesetFrom, App.Data.ChangesetTo, Categories));
 
             LoadingBar.Visibility = Visibility.Hidden;
-            _data.tfs = downloadedData;
+            App.Data.tfs = downloadedData;
 
-            _dataGrid.ItemsSource = _data.tfs.Changes;
+            _dataGrid.ItemsSource = App.Data.tfs.Changes;
             FilterTfsChanges();
             WorkItemProgress.Value = 0;
-            WorkItemProgress.Maximum = _data.tfs.Changes.Count;
+            WorkItemProgress.Maximum = App.Data.tfs.Changes.Count;
             var workToDownload = new List<int>();
-            foreach (var item in _data.tfs.Changes)
+            foreach (var item in App.Data.tfs.Changes)
             {
                 var wok = await Task.Run(() => _tfs.GetChangesetWorkItemsRest(item));
                 var filteredWok = wok
@@ -99,7 +97,7 @@ namespace Gui
                 WorkItemProgress.Value += 1;
 
             }
-            _data.tfs.WorkItems = _tfs.GetWorkItemsByIdAndIteration(workToDownload, _data.IterationSelected, workItemTypeExclude);
+            App.Data.tfs.WorkItems = _tfs.GetWorkItemsByIdAndIteration(workToDownload, App.Data.IterationSelected, workItemTypeExclude);
 
 
             //if (!string.IsNullOrWhiteSpace(downloadedData.ErrorMessgage))
@@ -108,14 +106,14 @@ namespace Gui
             //}
             //else
             //{
-            //    _data.CategorizedChanges = downloadedData.CategorizedChanges;
-            //    _data.Changes = downloadedData.Changes;
+            //    App._data.CategorizedChanges = downloadedData.CategorizedChanges;
+            //    App._data.Changes = downloadedData.Changes;
 
 
-            //    _data.WorkItems = downloadedData.WorkItems;
-            //    //_dataGrid.ItemsSource = _data.CategorizedChanges;
-            //    _dataGrid.ItemsSource = _data.Changes;
-            //    _dataGrid.Items.SortDescriptions.Add(new SortDescription("Id", ListSortDirection.Descending));
+            //    App._data.WorkItems = downloadedData.WorkItems;
+            //    //App._dataGrid.ItemsSource = App._data.CategorizedChanges;
+            //    App._dataGrid.ItemsSource = App._data.Changes;
+            //    App._dataGrid.Items.SortDescriptions.Add(new SortDescription("Id", ListSortDirection.Descending));
             //}
         }
 
@@ -149,26 +147,26 @@ namespace Gui
         private void SetAsPsRefreshClick(object sender, RoutedEventArgs e)
         {
             Change item = (Change)((Button)e.Source).DataContext;
-            _data.PsRefresh = item;
+            App.Data.PsRefresh = item;
         }
 
         private void SetAsCoreClick(object sender, RoutedEventArgs e)
         {
             Change item = (Change)((Button)e.Source).DataContext;
-            _data.CoreChange = item;
+            App.Data.CoreChange = item;
         }
 
         private void CreateDocument(object sender, RoutedEventArgs e)
         {
             var list = new List<ChangesetInfo>();
-            var selectedChangesets = _data.tfs.Changes.Where(x => x.Selected).OrderBy(x => x.changesetId).ToList();
+            var selectedChangesets = App.Data.tfs.Changes.Where(x => x.Selected).OrderBy(x => x.changesetId).ToList();
             foreach (var item in selectedChangesets)
             {
                 var change = new ChangesetInfo { Id = item.changesetId, Comment = item.comment, CommitedBy = item.checkedInBy.displayName, Created = item.createdDate, WorkItemId = "N/A", WorkItemTitle = "N/A" };
                 if (!item.Works.Any()) { list.Add(change); }
                 foreach (var workItemId in item.Works)
                 {
-                    var workItem = _data.tfs.WorkItems.FirstOrDefault(x => x.Id == workItemId);
+                    var workItem = App.Data.tfs.WorkItems.FirstOrDefault(x => x.Id == workItemId);
 
                     change = new ChangesetInfo { Id = item.changesetId, Comment = item.comment, CommitedBy = item.checkedInBy.displayName, Created = item.createdDate, WorkItemId = workItem.Id.ToString(), WorkItemTitle = workItem.Title };
                     list.Add(change);
@@ -178,7 +176,7 @@ namespace Gui
 
 
             var categories = new Dictionary<string, List<ChangesetInfo>>();
-            foreach (var category in _data.tfs.Categorized)
+            foreach (var category in App.Data.tfs.Categorized)
             {
                 var cha = list.Where(x => category.Value.Contains(x.Id)).ToList();
                 if (cha.Any())
@@ -188,11 +186,11 @@ namespace Gui
             }
 
             var workItemStateInclude = GettrimmedSettingList("workItemStateInclude");
-            var workItems = _data.tfs.WorkItems
+            var workItems = App.Data.tfs.WorkItems
                 .Where(x => workItemStateInclude.Contains(x.State))
                 .Where(x => x.ClientProject != "General");
-            var pbi = _data.tfs.WorkItems.Where(x => x.ClientProject == "General");
-            var message = new DocumentEditor().ProcessData(_data, categories, workItems, pbi);
+            var pbi = App.Data.tfs.WorkItems.Where(x => x.ClientProject == "General");
+            var message = new DocumentEditor().ProcessData(App.Data, categories, workItems, pbi);
             if (!string.IsNullOrWhiteSpace(message)) MessageBox.Show(message);
         }
 
@@ -208,7 +206,7 @@ namespace Gui
 
         private void FilterTfsChanges()
         {
-            foreach (var change in _data.tfs.Changes)
+            foreach (var change in App.Data.tfs.Changes)
             {
                 if (change.checkedInBy.displayName == "TFS Service" || change.checkedInBy.displayName == "Project Collection Build Service (Product)" || change.comment.Contains("Automatic refresh", StringComparison.OrdinalIgnoreCase))
                 {
