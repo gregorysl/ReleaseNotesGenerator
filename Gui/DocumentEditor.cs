@@ -92,7 +92,7 @@ namespace Gui
                     newItem.ReplaceText("{TfsID}", change.Id.ToString());
                     newItem.ReplaceText("{Dev}", change.CommitedBy);
                     newItem.ReplaceText("{Date}", change.Created.ToString());
-                    newItem.ReplaceText("{Desc}", change.Comment);
+                    newItem.ReplaceText("{Desc}", change.Comment??" ");
                     newItem.ReplaceText("{WorkItemId}", change.WorkItemId);
                     newItem.ReplaceText("{WorkItemTitle}", change.WorkItemTitle);
                 }
