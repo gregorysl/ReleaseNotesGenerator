@@ -46,8 +46,7 @@ namespace Gui
             IterationCombo.Visibility = Visibility.Hidden;
             if (ProjectCombo.SelectedItem == null) return;
             IterationCombo.Visibility = Visibility.Visible;
-            App.Data.TfsProject = ProjectCombo.SelectedItem.ToString();
-            var iterationPaths = _tfs.GetIterationPaths(App.Data.TfsProject);
+            var iterationPaths = _tfs.GetIterationPaths(App.Data.ProjectSelected);
 
             var regex = new Regex(RegexString);
             var filtered = iterationPaths.Where(x => regex.IsMatch(x)).ToList();
@@ -218,6 +217,11 @@ namespace Gui
         {
             Regex regex = new Regex("[^0-9]+");
             e.Handled = regex.IsMatch(e.Text);
+        }
+
+        private void CopyClick(object sender, MouseButtonEventArgs e)
+        {
+            App.Data.TfsProject = ProjectCombo.SelectedItem.ToString();
         }
     }
 }
