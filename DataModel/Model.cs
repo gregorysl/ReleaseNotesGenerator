@@ -1,9 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Globalization;
 using System.Runtime.CompilerServices;
 
 
@@ -11,6 +9,17 @@ namespace DataModel
 {
     public class ReleaseData : INotifyPropertyChanged
     {
+        [JsonIgnore]
+        public bool WorkItemsDownloaded
+        {
+            get => _workItemsDownloaded;
+            set
+            {
+                _workItemsDownloaded = value;
+                OnPropertyChanged(nameof(WorkItemsDownloaded));
+            }
+        }
+
         [JsonIgnore]
         public string ErrorMessgage { get; set; }
         [JsonIgnore]
@@ -20,7 +29,8 @@ namespace DataModel
         [JsonIgnore]
         public bool GenerateDocButtonEnabled =>
             !string.IsNullOrWhiteSpace(ReleaseName) && !string.IsNullOrWhiteSpace(QaBuildName) &&
-            !string.IsNullOrWhiteSpace(CoreBuildName) && PsRefresh != null && CoreChange != null;
+            !string.IsNullOrWhiteSpace(CoreBuildName) && PsRefresh != null && CoreChange != null &&
+            WorkItemsDownloaded;
 
         [JsonIgnore]
         public tfs tfs {get;set;} = new tfs();
@@ -32,6 +42,7 @@ namespace DataModel
         private string _qaBuildName;
         private string _coreBuildName;
         private string _tfsProject;
+        private bool _workItemsDownloaded;
 
         public string TfsProject
         {

@@ -79,9 +79,11 @@ namespace Gui
 
             _dataGrid.ItemsSource = App.Data.tfs.Changes;
             FilterTfsChanges();
-            WorkItemProgress.Value = 0;
+            int i = 0;
+            WorkItemProgress.Value = i;
             WorkItemProgress.Maximum = App.Data.tfs.Changes.Count;
             var workToDownload = new List<int>();
+            App.Data.WorkItemsDownloaded = false;
             foreach (var item in App.Data.tfs.Changes)
             {
                 var wok = await Task.Run(() => _tfs.GetChangesetWorkItemsRest(item));
@@ -90,8 +92,12 @@ namespace Gui
                     .Select(x => x.id).ToList();
                 workToDownload.AddRange(filteredWok);
                 item.Works = filteredWok;
-                WorkItemProgress.Value += 1;
-
+                i++;
+                WorkItemProgress.Value = i;
+                if (App.Data.tfs.Changes.Count == i)
+                {
+                    App.Data.WorkItemsDownloaded = true;
+                }
             }
             App.Data.tfs.WorkItems = _tfs.GetWorkItemsByIdAndIteration(workToDownload, App.Data.IterationSelected, workItemTypeExclude);
 
