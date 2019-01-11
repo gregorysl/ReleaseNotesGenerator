@@ -164,13 +164,14 @@ namespace Gui
         {
             var list = new List<ChangesetInfo>();
             var selectedChangesets = App.Data.tfs.Changes.Where(x => x.Selected).OrderBy(x => x.changesetId).ToList();
+            var clientWorkItems = App.Data.tfs.WorkItems;
             foreach (var item in selectedChangesets)
             {
                 var change = new ChangesetInfo { Id = item.changesetId, Comment = item.comment, CommitedBy = item.checkedInBy.displayName, Created = item.createdDate, WorkItemId = "N/A", WorkItemTitle = "N/A" };
                 if (!item.Works.Any()) { list.Add(change); }
                 foreach (var workItemId in item.Works)
                 {
-                    var workItem = App.Data.tfs.WorkItems.FirstOrDefault(x => x.Id == workItemId);
+                    var workItem = clientWorkItems.FirstOrDefault(x => x.Id == workItemId);
 
                     change = new ChangesetInfo { Id = item.changesetId, Comment = item.comment, CommitedBy = item.checkedInBy.displayName, Created = item.createdDate, WorkItemId = workItem.Id.ToString(), WorkItemTitle = workItem.Title };
                     list.Add(change);
@@ -190,10 +191,10 @@ namespace Gui
             }
 
             var workItemStateInclude = GettrimmedSettingList("workItemStateInclude");
-            var workItems = App.Data.tfs.WorkItems
+            var workItems = clientWorkItems
                 .Where(x => workItemStateInclude.Contains(x.State))
                 .Where(x => x.ClientProject != "General");
-            var pbi = App.Data.tfs.WorkItems.Where(x => x.ClientProject == "General");
+            var pbi = clientWorkItems.Where(x => x.ClientProject == "General");
             var message = new DocumentEditor().ProcessData(App.Data, categories, workItems, pbi);
             if (!string.IsNullOrWhiteSpace(message)) MessageBox.Show(message);
         }

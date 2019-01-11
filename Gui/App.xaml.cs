@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Windows;
 using DataModel;
+using Newtonsoft.Json;
 
 namespace Gui
 {
@@ -18,7 +19,7 @@ namespace Gui
         protected override void OnStartup(StartupEventArgs e)
         {
             Data = File.Exists(_saveLocation)
-                ? JsonSerialization.ReadFromJsonFile<ReleaseData>(_saveLocation)
+                ? JsonConvert.DeserializeObject<ReleaseData>(File.ReadAllText(_saveLocation))
                 : new ReleaseData();
 
             base.OnStartup(e);
