@@ -25,9 +25,12 @@ namespace Gui
             var tfsUrl = ConfigurationManager.AppSettings["tfsUrl"];
             var tfsUsername = ConfigurationManager.AppSettings["tfsUsername"];
             var tfsKey = ConfigurationManager.AppSettings["tfsKey"];
+            var adoUrl = ConfigurationManager.AppSettings["adoUrl"];
+            var adoUsername = ConfigurationManager.AppSettings["adoUsername"];
+            var adoKey = ConfigurationManager.AppSettings["adoKey"];
             if (string.IsNullOrWhiteSpace(tfsUrl)) return;
 
-            _tfs = new TfsConnector(tfsUrl, tfsUsername, tfsKey);
+            _tfs = new TfsConnector(tfsUrl, tfsUsername, tfsKey, adoUrl, adoUsername, adoKey);
 
             ProjectCombo.ItemsSource = _tfs.Projects();
             Loaded += MainWindow_Loaded;
@@ -73,52 +76,16 @@ namespace Gui
             App.Data.PsRefresh = null;
             var queryLocation = $"$/{App.Data.TfsProject}/{App.Data.TfsBranch}";
             var workItemTypeExclude = GettrimmedSettingList("workItemTypeExclude");
-            LoadingBar.Visibility = Visibility.Visible;
+            WorkItemProgress.IsIndeterminate = true;
             var downloadedData = await Task.Run(() => _tfs.GetChangesetsRest(queryLocation, App.Data.ChangesetFrom, App.Data.ChangesetTo, Categories));
-
-            LoadingBar.Visibility = Visibility.Hidden;
+            
+            WorkItemProgress.IsIndeterminate = false;
             App.Data.tfs = downloadedData;
 
             _dataGrid.ItemsSource = App.Data.tfs.Changes;
             FilterTfsChanges();
-            int i = 0;
-            WorkItemProgress.Value = i;
-            WorkItemProgress.Maximum = App.Data.tfs.Changes.Count;
-            var workToDownload = new List<int>();
-            App.Data.WorkItemsDownloaded = false;
-            foreach (var item in App.Data.tfs.Changes)
-            {
-                var wok = await Task.Run(() => _tfs.GetChangesetWorkItemsRest(item));
-                var filteredWok = wok
-                    .Where(x => !workItemTypeExclude.Contains(x.workItemType))
-                    .Select(x => x.id).ToList();
-                workToDownload.AddRange(filteredWok);
-                item.Works = filteredWok;
-                i++;
-                WorkItemProgress.Value = i;
-                if (App.Data.tfs.Changes.Count == i)
-                {
-                    App.Data.WorkItemsDownloaded = true;
-                }
-            }
-            App.Data.tfs.WorkItems = _tfs.GetWorkItemsByIdAndIteration(workToDownload, App.Data.IterationSelected, workItemTypeExclude);
 
-
-            //if (!string.IsNullOrWhiteSpace(downloadedData.ErrorMessgage))
-            //{
-            //    MessageBox.Show(downloadedData.ErrorMessgage);
-            //}
-            //else
-            //{
-            //    App._data.CategorizedChanges = downloadedData.CategorizedChanges;
-            //    App._data.Changes = downloadedData.Changes;
-
-
-            //    App._data.WorkItems = downloadedData.WorkItems;
-            //    //App._dataGrid.ItemsSource = App._data.CategorizedChanges;
-            //    App._dataGrid.ItemsSource = App._data.Changes;
-            //    App._dataGrid.Items.SortDescriptions.Add(new SortDescription("Id", ListSortDirection.Descending));
-            //}
+            App.Data.tfs.WorkItems = _tfs.GetWorkItemsAdo(App.Data.IterationSelected, workItemTypeExclude);
         }
 
         private static List<string> GettrimmedSettingList(string key)
@@ -162,28 +129,22 @@ namespace Gui
 
         private void CreateDocument(object sender, RoutedEventArgs e)
         {
-            var list = new List<ChangesetInfo>();
-            var selectedChangesets = App.Data.tfs.Changes.Where(x => x.Selected).OrderBy(x => x.changesetId).ToList();
-            var clientWorkItems = App.Data.tfs.WorkItems;
-            foreach (var item in selectedChangesets)
-            {
-                var change = new ChangesetInfo { Id = item.changesetId, Comment = item.comment, CommitedBy = item.checkedInBy.displayName, Created = item.createdDate, WorkItemId = "N/A", WorkItemTitle = "N/A" };
-                if (!item.Works.Any()) { list.Add(change); }
-                foreach (var workItemId in item.Works)
+            var selectedChangesets = App.Data.tfs.Changes
+                .Where(x => x.Selected)
+                .OrderBy(x => x.changesetId)
+                .Select(item => new ChangesetInfo
                 {
-                    var workItem = clientWorkItems.FirstOrDefault(x => x.Id == workItemId);
-
-                    change = new ChangesetInfo { Id = item.changesetId, Comment = item.comment, CommitedBy = item.checkedInBy.displayName, Created = item.createdDate, WorkItemId = workItem.Id.ToString(), WorkItemTitle = workItem.Title };
-                    list.Add(change);
-                }
-            }
-
+                    Id = item.changesetId,
+                    Comment = item.comment,
+                    CommitedBy = item.checkedInBy.displayName,
+                    Created = item.createdDate
+                }).ToList();
 
 
             var categories = new Dictionary<string, List<ChangesetInfo>>();
             foreach (var category in App.Data.tfs.Categorized)
             {
-                var cha = list.Where(x => category.Value.Contains(x.Id)).ToList();
+                var cha = selectedChangesets.Where(x => category.Value.Contains(x.Id)).ToList();
                 if (cha.Any())
                 {
                     categories.Add(category.Key, cha);
@@ -191,10 +152,11 @@ namespace Gui
             }
 
             var workItemStateInclude = GettrimmedSettingList("workItemStateInclude");
-            var workItems = clientWorkItems
-                .Where(x => workItemStateInclude.Contains(x.State))
-                .Where(x => x.ClientProject != "General");
-            var pbi = clientWorkItems.Where(x => x.ClientProject == "General");
+            var adoclientWorkItems = App.Data.tfs.WorkItems;
+            var workItems = adoclientWorkItems
+                .Where(x => workItemStateInclude.Contains(x.State) | x.BoardColumn == "Tested")
+                .Where(x => x.ClientProject != "General").OrderBy(x => x.ClientProject);
+            var pbi = adoclientWorkItems.Where(x => x.ClientProject == "General");
             var message = new DocumentEditor().ProcessData(App.Data, categories, workItems, pbi);
             if (!string.IsNullOrWhiteSpace(message)) MessageBox.Show(message);
         }

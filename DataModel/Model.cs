@@ -10,17 +10,6 @@ namespace DataModel
     public class ReleaseData : INotifyPropertyChanged
     {
         [JsonIgnore]
-        public bool WorkItemsDownloaded
-        {
-            get => _workItemsDownloaded;
-            set
-            {
-                _workItemsDownloaded = value;
-                OnPropertyChanged(nameof(WorkItemsDownloaded));
-            }
-        }
-
-        [JsonIgnore]
         public string ErrorMessgage { get; set; }
         [JsonIgnore]
         public bool DownloadButtonEnabled =>
@@ -28,9 +17,10 @@ namespace DataModel
 
         [JsonIgnore]
         public bool GenerateDocButtonEnabled =>
-            !string.IsNullOrWhiteSpace(ReleaseName) && !string.IsNullOrWhiteSpace(QaBuildName) &&
-            !string.IsNullOrWhiteSpace(CoreBuildName) && PsRefresh != null && CoreChange != null &&
-            WorkItemsDownloaded;
+            !string.IsNullOrWhiteSpace(ReleaseName) &&
+            !string.IsNullOrWhiteSpace(QaBuildName) &&
+            PsRefresh != null &&
+            CoreChange != null;
 
         [JsonIgnore]
         public tfs tfs {get;set;} = new tfs();
@@ -40,7 +30,6 @@ namespace DataModel
         private string _releaseName;
         private string _tfsBranch;
         private string _qaBuildName;
-        private string _coreBuildName;
         private string _tfsProject;
         private bool _workItemsDownloaded;
 
@@ -95,18 +84,6 @@ namespace DataModel
 
         public string QaBuildDate { get; set; }
         
-        public string CoreBuildName
-        {
-            get => _coreBuildName;
-            set
-            {
-                _coreBuildName = value;
-                OnPropertyChanged(nameof(GenerateDocButtonEnabled));
-            }
-        }
-
-        public string CoreBuildDate { get; set; }
-
         [JsonIgnore]
         public Change PsRefresh
         {
@@ -154,8 +131,15 @@ namespace DataModel
         [DefaultValue("N/A")]
         [JsonProperty(PropertyName = "client.project", DefaultValueHandling = DefaultValueHandling.Populate)]
         public string ClientProject { get; set; }
+
+        [DefaultValue("N/A")]
+        [JsonProperty("Custom.14b2b676-45e8-46bf-891e-b9f5dbaebce0", DefaultValueHandling = DefaultValueHandling.Populate)]
+        public string ClientProject2 { get; set; }
+
         [JsonProperty(PropertyName = "System.WorkItemType")]
         public string WorkItemType { get; set; }
+        [JsonProperty(PropertyName = "System.BoardColumn")]
+        public string BoardColumn { get; set; }
         public override string ToString()
         {
             return $"{Id} {Title} {ClientProject} {State}";
@@ -180,8 +164,6 @@ namespace DataModel
         public string CommitedBy { get; set; }
         public DateTime Created { get; set; }
         public string Comment { get; set; }
-        public string WorkItemId { get; set; }
-        public string WorkItemTitle { get; set; }
         public List<string> Categories { get; set; }
         public override string ToString()
         {

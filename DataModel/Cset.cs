@@ -36,9 +36,6 @@ namespace DataModel
         public List<ClientWorkItem> WorkItems { get; set; }
 
     }
-    class CSet
-    {
-    }
 
     public class Project
     {
@@ -72,17 +69,15 @@ namespace DataModel
         public int changesetId { get; set; }
         public string url { get; set; }
         public Author author { get; set; }
-        public Checkedinby checkedInBy { get; set; }
+        public Author checkedInBy { get; set; }
         public DateTime createdDate { get; set; }
         public string comment { get; set; }
-        public bool commentTruncated { get; set; }
         public bool Selected { get; set; } = true;
         public List<int> Works { get; set; } = new List<int>();
-        public int wokcount => Works.Count;
 
         public override string ToString()
         {
-            return $"{changesetId} {comment} {checkedInBy.displayName} {createdDate.ToShortDateString()} WIC{wokcount} ";
+            return $"{changesetId} {comment} {checkedInBy.displayName} {createdDate.ToShortDateString()}";
         }
     }
 
@@ -99,14 +94,4 @@ namespace DataModel
             return displayName;
         }
     }
-
-    public class Checkedinby
-    {
-        public string id { get; set; }
-        public string displayName { get; set; }
-        public string uniqueName { get; set; }
-        public string url { get; set; }
-        public string imageUrl { get; set; }
-    }
-
 }

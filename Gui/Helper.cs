@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using Newtonsoft.Json;
-using Xceed.Words.NET;
+using Xceed.Document.NET;
 
 namespace Gui
 {

@@ -92,10 +92,6 @@
                     </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
-            <StackPanel Name="LoadingBar" Visibility="Hidden" Orientation="Vertical" VerticalAlignment="Center">
-                <ProgressBar IsIndeterminate="True" Opacity="0.5" Height="50"/>
-                <TextBlock FontSize="30" HorizontalAlignment="Center">Loading Data</TextBlock>
-            </StackPanel>
         </Grid>
         <ProgressBar Height="30" Name="WorkItemProgress" />
         <CheckBox Content="Include TFSService Check-ins" Click="ToggleButton_OnChecked" />
@@ -105,26 +101,17 @@
         <TextBlock Text="{Binding PsRefresh}"></TextBlock>
 
         <materialDesign:Card Margin="10" Padding="8">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <StackPanel Name="ReleaseNameStack" Visibility="Visible" Orientation="Vertical" Margin="5">
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                <StackPanel Name="ReleaseNameStack" Visibility="Visible" Orientation="Horizontal" Margin="5">
                     <TextBox Name="ReleaseName" Text="{Binding Path=ReleaseName, Mode=TwoWay}" Width="200"
                              Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                              materialDesign:HintAssist.Hint="Release Name" />
                     <xctk:DateTimePicker Text="{Binding Path=ReleaseDate, Mode=TwoWay}" TimePickerVisibility="Collapsed" Width="200" 
                                          ShowButtonSpinner="False" Format="Custom"  FormatString="d-MMMM-yyyy" CultureInfo="en-IE"  TextAlignment="Left" />
-                </StackPanel>
-                <StackPanel Name="QaBuildStack" Visibility="Visible" Orientation="Vertical" Margin="5">
                     <TextBox Name="QaBuildName" Text="{Binding Path=QaBuildName, Mode=TwoWay}" Width="200"
                              Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                              materialDesign:HintAssist.Hint="QA build Name" />
                     <xctk:DateTimePicker Text="{Binding Path=QaBuildDate, Mode=TwoWay}" TimePickerVisibility="Collapsed" Width="200" 
-                                         ShowButtonSpinner="False" Format="Custom"  FormatString="yyyy-MM-dd" CultureInfo="en-IE" TextAlignment="Left" />
-                </StackPanel>
-                <StackPanel Name="CoreBuildStack" Visibility="Visible" Orientation="Vertical" Margin="5">
-                    <TextBox Name="CoreBuildName" Text="{Binding Path=CoreBuildName, Mode=TwoWay}" Width="200"
-                             Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                             materialDesign:HintAssist.Hint="Core build Name" />
-                    <xctk:DateTimePicker Text="{Binding Path=CoreBuildDate, Mode=TwoWay}" TimePickerVisibility="Collapsed" Width="200" 
                                          ShowButtonSpinner="False" Format="Custom"  FormatString="yyyy-MM-dd" CultureInfo="en-IE" TextAlignment="Left" />
                 </StackPanel>
             </StackPanel>

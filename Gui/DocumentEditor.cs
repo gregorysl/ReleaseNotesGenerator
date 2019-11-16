@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using DataModel;
+using Xceed.Document.NET;
 using Xceed.Words.NET;
 
 namespace Gui
@@ -14,7 +16,7 @@ namespace Gui
         {
             try
             {
-                var dTestDocx = @"D:\test.docx";
+                var dTestDocx = $@"D:\{data.ReleaseName} Patch Release Notes.docx";
                 string fileName = @"D:\Template.docx";
 
                 using (var doc = DocX.Load(fileName))
@@ -24,8 +26,6 @@ namespace Gui
                     doc.ReplaceText("{TfsBranch}", data.TfsBranch);
                     doc.ReplaceText("{QaBuildName}", data.QaBuildName);
                     doc.ReplaceText("{QaBuildDate}", data.QaBuildDate);
-                    doc.ReplaceText("{CoreBuildName}", data.CoreBuildName);
-                    doc.ReplaceText("{CoreBuildDate}", data.CoreBuildDate);
                     doc.ReplaceText("{PsRefreshChangeset}", data.PsRefresh.changesetId.ToString());
                     doc.ReplaceText("{PsRefreshDate}",
                         data.PsRefresh.createdDate.ToString("yyyy-MM-dd HH:mm", new CultureInfo("en-US")));
@@ -33,7 +33,7 @@ namespace Gui
                     doc.ReplaceText("{CoreChangeset}", data.CoreChange.changesetId.ToString());
                     doc.ReplaceText("{CoreDate}",
                         data.CoreChange.createdDate.ToString("yyyy-MM-dd HH:mm", new CultureInfo("en-US")));
-                    
+
                     doc.InsertTableOfContents("Contents",
                         TableOfContentsSwitches.O | TableOfContentsSwitches.U | TableOfContentsSwitches.Z | TableOfContentsSwitches.H | TableOfContentsSwitches.T,
                         "FR HeadNoToc");
@@ -45,7 +45,7 @@ namespace Gui
                     var fourthSection = FourthSection(pbi, thirdSection);
 
                     var fifthSection = fourthSection.CreateHeadingSection("Test Report");
-                    var sixthSection = fifthSection.CreateHeadingSection("Known issues in this Release");
+                    var sixthSection = SixthSection(fifthSection);
                     
                     doc.SaveAs(dTestDocx);
                 }
@@ -68,22 +68,18 @@ namespace Gui
             {
                 var p = newLastPart.InsertParagraphAfterSelf(category.Key).FontSize(11d).Heading(HeadingType.Heading2);
 
-                var table = p.InsertTableAfterSelf(2, 6);
-                table.SetWidthsPercentage(new[] {10f, 15f, 15f, 20f, 10f, 30f}, null);
+                var table = p.InsertTableAfterSelf(2, 4);
+                table.SetWidthsPercentage(new[] {10f, 25, 30f, 35f}, null);
                 table.GetCell(0,0).FillFirstParagraph("TFS").Bold();
                 table.GetCell(0,1).FillFirstParagraph("Developer").Bold();
                 table.GetCell(0,2).FillFirstParagraph("Date/Time").Bold();
                 table.GetCell(0,3).FillFirstParagraph("Description").Bold();
-                table.GetCell(0,4).FillFirstParagraph("Work Item").Bold();
-                table.GetCell(0,5).FillFirstParagraph("Work Item Description").Bold();
 
                 var rowPattern = table.Rows[1];
                 table.GetCell(1,0).FillFirstParagraph("{TfsID}");
                 table.GetCell(1,1).FillFirstParagraph("{Dev}");
                 table.GetCell(1,2).FillFirstParagraph("{Date}");
                 table.GetCell(1,3).FillFirstParagraph("{Desc}");
-                table.GetCell(1,4).FillFirstParagraph("{WorkItemId}");
-                table.GetCell(1,5).FillFirstParagraph("{WorkItemTitle}");
 
                 foreach (var change in category.Value)
                 {
@@ -93,8 +89,6 @@ namespace Gui
                     newItem.ReplaceText("{Dev}", change.CommitedBy);
                     newItem.ReplaceText("{Date}", change.Created.ToString());
                     newItem.ReplaceText("{Desc}", change.Comment??" ");
-                    newItem.ReplaceText("{WorkItemId}", change.WorkItemId);
-                    newItem.ReplaceText("{WorkItemTitle}", change.WorkItemTitle);
                 }
 
                 rowPattern.Remove();
@@ -133,31 +127,36 @@ namespace Gui
             placeholderRow.Remove();
             return table;
         }
-
+        
         private Table FourthSection(IEnumerable<ClientWorkItem> pbi, InsertBeforeOrAfter lastPart)
         {
+            var pbiList = pbi.ToList();
             var paragraph = CreateSectionWithParagraph(lastPart,"Product Backlog Items in this Release",
                 "This section gives a list of PBIs that were delivered in this release");
+            var table = paragraph.InsertTableAfterSelf(2, pbiList.Count +2);
+            table.SetWidthsPercentage(new[] {25f, 75f}, null);
+            table.AutoFit = AutoFit.ColumnWidth;
+            table.GetCell(0,0).FillFirstParagraph("Bug Id").Bold();
+            table.GetCell(0,1).FillFirstParagraph("Work Item Description").Bold();
+          
+            for (int i = 0; i < pbiList.Count -1; i++)
+            {
+                var item = pbiList[i];
+                table.GetCell(i+1,0).FillFirstParagraph(item.Id.ToString());
+                table.GetCell(i+1,1).FillFirstParagraph(item.Title);
+            }
+            return table;
+        }
+        private Table SixthSection(InsertBeforeOrAfter lastPart)
+        {
+            var paragraph = CreateSectionWithParagraph(lastPart,"Known issues in this Release",
+                "This section gives a list of bugs that were identified throughout testing of this release");
             var table = paragraph.InsertTableAfterSelf(2, 2);
             table.SetWidthsPercentage(new[] {25f, 75f}, null);
             table.AutoFit = AutoFit.ColumnWidth;
             table.GetCell(0,0).FillFirstParagraph("Bug Id").Bold();
             table.GetCell(0,1).FillFirstParagraph("Work Item Description").Bold();
 
-            var placeholderRow = table.Rows[1];
-            table.GetCell(1,0).FillFirstParagraph("{TfsID}");
-            table.GetCell(1,1).FillFirstParagraph("{WorkItemTitle}");
-
-            foreach (var item in pbi)
-            {
-                var newItem = table.InsertRow(placeholderRow, table.RowCount - 1);
-
-                newItem.ReplaceText("{TfsID}", item.Id.ToString());
-                newItem.ReplaceText("{WorkItemTitle}", item.Title);
-                newItem.ReplaceText("{Client}", item.ClientProject);
-            }
-
-            placeholderRow.Remove();
             return table;
         }
 
