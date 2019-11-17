@@ -17,9 +17,8 @@ namespace Gui
             try
             {
                 var templatePath = Path.Combine(documentLocaion, _templateName);
-                if (!File.Exists(templatePath)) return $"Template file not found in following location ${templatePath}";
-
-                var dTestDocx = $@"D:\{data.ReleaseName} Patch Release Notes1.docx";
+                var releasePath = Path.Combine(documentLocaion, "{data.ReleaseName} Patch Release Notes.docx");
+                if (!File.Exists(templatePath)) return $"Template file not found in following location {templatePath}";
 
                 using (var doc = DocX.Load(templatePath))
                 {
@@ -46,11 +45,11 @@ namespace Gui
                         .CreateHeadingSection("Test Report")
                         .KnownIssuesSection();
 
-                    doc.SaveAs(dTestDocx);
+                    doc.SaveAs(releasePath);
                 }
 
-                Process.Start(dTestDocx);
-                return string.Empty;
+                Process.Start(releasePath);
+                return $"Successfully generated document! You can find it in following location {releasePath}";
             }
             catch (Exception e)
             {

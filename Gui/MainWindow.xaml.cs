@@ -16,7 +16,7 @@ namespace Gui
     public partial class MainWindow
     {
         private bool _includeTfsService = false;
-        private string _documentLocation;
+        private readonly string _documentLocation;
         private const string RegexString = @".*\\\w+(?:.*)?\\((\w\d.\d+.\d+).\d+)";
         private static TfsConnector _tfs;
         public List<string> Categories => GettrimmedSettingList("categories");
@@ -77,7 +77,6 @@ namespace Gui
             App.Data.CoreChange = null;
             App.Data.PsRefresh = null;
             var queryLocation = $"$/{App.Data.TfsProject}/{App.Data.TfsBranch}";
-            var workItemTypeExclude = GettrimmedSettingList("workItemTypeExclude");
             WorkItemProgress.IsIndeterminate = true;
             var downloadedData = await Task.Run(() => _tfs.GetChangesetsRest(queryLocation, App.Data.ChangesetFrom, App.Data.ChangesetTo, Categories));
             
@@ -87,7 +86,7 @@ namespace Gui
             _dataGrid.ItemsSource = App.Data.tfs.Changes;
             FilterTfsChanges();
 
-            App.Data.tfs.WorkItems = _tfs.GetWorkItemsAdo(App.Data.IterationSelected, workItemTypeExclude);
+            App.Data.tfs.WorkItems = _tfs.GetWorkItemsAdo(App.Data.IterationSelected);
         }
 
         private static List<string> GettrimmedSettingList(string key)
