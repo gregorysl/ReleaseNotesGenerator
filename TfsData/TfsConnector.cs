@@ -70,7 +70,7 @@ namespace TfsData
             }
         }
 
-        public List<ClientWorkItem> GetWorkItemsAdo(string iterationPath, List<string> workItemTypeExclude)
+        public List<ClientWorkItem> GetWorkItemsAdo(string iterationPath)
         {
             var response = _ado.PostWithResponse<Rootobject>($"{_adourl}/_apis/wit/wiql?api-version=5.1", new { query = string.Format(_workItemsForIteration, iterationPath) });
             var ids = response.workItems.Select(x => x.id).ToList();
@@ -83,7 +83,6 @@ namespace TfsData
 
 
             var clientWorkItems = changeset.DistinctBy(x => x.Id)
-                .Where(x => !workItemTypeExclude.Contains(x.WorkItemType))
                 .OrderBy(x => x.ClientProject)
                 .ThenBy(x => x.Id).ToList();
 
