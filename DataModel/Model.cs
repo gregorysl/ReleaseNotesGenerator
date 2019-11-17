@@ -156,6 +156,7 @@ namespace DataModel
         public int Id { get; set; }
         public string CommitedBy { get; set; }
         public DateTime Created { get; set; }
+        [DefaultValue("")]
         public string Comment { get; set; }
         public List<string> Categories { get; set; }
         public override string ToString()

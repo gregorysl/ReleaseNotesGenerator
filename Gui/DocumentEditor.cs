@@ -27,12 +27,10 @@ namespace Gui
                     doc.ReplaceText("{QaBuildName}", data.QaBuildName);
                     doc.ReplaceText("{QaBuildDate}", data.QaBuildDate);
                     doc.ReplaceText("{PsRefreshChangeset}", data.PsRefresh.changesetId.ToString());
-                    doc.ReplaceText("{PsRefreshDate}",
-                        data.PsRefresh.createdDate.ToString("yyyy-MM-dd HH:mm", new CultureInfo("en-US")));
+                    doc.ReplaceText("{PsRefreshDate}",FormatData(data.PsRefresh.createdDate));
                     doc.ReplaceText("{PsRefreshName}", data.PsRefresh.comment);
                     doc.ReplaceText("{CoreChangeset}", data.CoreChange.changesetId.ToString());
-                    doc.ReplaceText("{CoreDate}",
-                        data.CoreChange.createdDate.ToString("yyyy-MM-dd HH:mm", new CultureInfo("en-US")));
+                    doc.ReplaceText("{CoreDate}",FormatData(data.CoreChange.createdDate));
 
                     doc.InsertTableOfContents("Contents",
                         TableOfContentsSwitches.O | TableOfContentsSwitches.U | TableOfContentsSwitches.Z | TableOfContentsSwitches.H | TableOfContentsSwitches.T,
@@ -59,6 +57,11 @@ namespace Gui
             }
         }
 
+        private static string FormatData(DateTime date)
+        {
+            return date.ToString("yyyy-MM-dd HH:mm", new CultureInfo("en-US"));
+        }
+
         private InsertBeforeOrAfter SecondSection(Dictionary<string, List<ChangesetInfo>> categorizedChangesets, InsertBeforeOrAfter lastPart)
         {
             var paragraph = CreateSectionWithParagraph(lastPart, "Code Change sets in this Release",
@@ -68,31 +71,23 @@ namespace Gui
             {
                 var p = newLastPart.InsertParagraphAfterSelf(category.Key).FontSize(11d).Heading(HeadingType.Heading2);
 
-                var table = p.InsertTableAfterSelf(2, 4);
+                var table = p.InsertTableAfterSelf(category.Value.Count +2, 4);
                 table.SetWidthsPercentage(new[] {10f, 25, 30f, 35f}, null);
+                table.AutoFit = AutoFit.ColumnWidth;
                 table.GetCell(0,0).FillFirstParagraph("TFS").Bold();
                 table.GetCell(0,1).FillFirstParagraph("Developer").Bold();
                 table.GetCell(0,2).FillFirstParagraph("Date/Time").Bold();
                 table.GetCell(0,3).FillFirstParagraph("Description").Bold();
-
-                var rowPattern = table.Rows[1];
-                table.GetCell(1,0).FillFirstParagraph("{TfsID}");
-                table.GetCell(1,1).FillFirstParagraph("{Dev}");
-                table.GetCell(1,2).FillFirstParagraph("{Date}");
-                table.GetCell(1,3).FillFirstParagraph("{Desc}");
-
-                foreach (var change in category.Value)
+                
+                for (int i = 0; i < category.Value.Count - 1; i++)
                 {
-                    var newItem = table.InsertRow(rowPattern, table.RowCount - 1);
-
-                    newItem.ReplaceText("{TfsID}", change.Id.ToString());
-                    newItem.ReplaceText("{Dev}", change.CommitedBy);
-                    newItem.ReplaceText("{Date}", change.Created.ToString());
-                    newItem.ReplaceText("{Desc}", change.Comment??" ");
+                    var item = category.Value[i];
+                    table.GetCell(i + 1, 0).FillFirstParagraph(item.Id.ToString());
+                    table.GetCell(i + 1, 1).FillFirstParagraph(item.CommitedBy);
+                    table.GetCell(i + 1, 2).FillFirstParagraph(item.Created.ToString());
+                    table.GetCell(i + 1, 3).FillFirstParagraph(item.Comment);
                 }
 
-                rowPattern.Remove();
-                table.AutoFit = AutoFit.ColumnWidth;
                 newLastPart = table;
             }
 
@@ -101,30 +96,24 @@ namespace Gui
 
         private Table ThirdSection(IEnumerable<ClientWorkItem> workItems, InsertBeforeOrAfter lastPart)
         {
+            var workItemList = workItems.ToList();
             var paragraph = CreateSectionWithParagraph(lastPart, "Product reported Defects in this Release",
                 "This section gives a list of Client-facing defects that were fixed in this release");
-            var table = paragraph.InsertTableAfterSelf(2, 3);
+            var table = paragraph.InsertTableAfterSelf(workItemList.Count +2, 3);
             table.SetWidthsPercentage(new[] {10f, 75f, 15f}, null);
             table.AutoFit = AutoFit.ColumnWidth;
             table.GetCell(0,0).FillFirstParagraph("Bug Id").Bold();
             table.GetCell(0,1).FillFirstParagraph("Work Item Description").Bold();
             table.GetCell(0,2).FillFirstParagraph("Client Project").Bold();
 
-            var placeholderRow = table.Rows[1];
-            table.GetCell(1,0).FillFirstParagraph("{TfsID}");
-            table.GetCell(1,1).FillFirstParagraph("{WorkItemTitle}");
-            table.GetCell(1,2).FillFirstParagraph("{Client}");
-
-            foreach (var item in workItems)
+            for (int i = 0; i < workItemList.Count - 1; i++)
             {
-                var newItem = table.InsertRow(placeholderRow, table.RowCount - 1);
-
-                newItem.ReplaceText("{TfsID}", item.Id.ToString());
-                newItem.ReplaceText("{WorkItemTitle}", item.Title);
-                newItem.ReplaceText("{Client}", item.ClientProject);
+                var item = workItemList[i];
+                table.GetCell(i + 1, 0).FillFirstParagraph(item.Id.ToString());
+                table.GetCell(i + 1, 1).FillFirstParagraph(item.Title);
+                table.GetCell(i + 1, 2).FillFirstParagraph(item.ClientProject);
             }
 
-            placeholderRow.Remove();
             return table;
         }
         
@@ -133,7 +122,7 @@ namespace Gui
             var pbiList = pbi.ToList();
             var paragraph = CreateSectionWithParagraph(lastPart,"Product Backlog Items in this Release",
                 "This section gives a list of PBIs that were delivered in this release");
-            var table = paragraph.InsertTableAfterSelf(2, pbiList.Count +2);
+            var table = paragraph.InsertTableAfterSelf(pbiList.Count +2, 2);
             table.SetWidthsPercentage(new[] {25f, 75f}, null);
             table.AutoFit = AutoFit.ColumnWidth;
             table.GetCell(0,0).FillFirstParagraph("Bug Id").Bold();
