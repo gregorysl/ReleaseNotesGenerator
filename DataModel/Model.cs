@@ -127,15 +127,8 @@ namespace DataModel
         public string Title { get; set; }
         [JsonProperty(PropertyName = "System.State")]
         public string State { get; set; }
-
-        [DefaultValue("N/A")]
         [JsonProperty(PropertyName = "client.project", DefaultValueHandling = DefaultValueHandling.Populate)]
         public string ClientProject { get; set; }
-
-        [DefaultValue("N/A")]
-        [JsonProperty("Custom.14b2b676-45e8-46bf-891e-b9f5dbaebce0", DefaultValueHandling = DefaultValueHandling.Populate)]
-        public string ClientProject2 { get; set; }
-
         [JsonProperty(PropertyName = "System.WorkItemType")]
         public string WorkItemType { get; set; }
         [JsonProperty(PropertyName = "System.BoardColumn")]

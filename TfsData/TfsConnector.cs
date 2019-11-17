@@ -72,7 +72,6 @@ namespace TfsData
 
         public List<ClientWorkItem> GetWorkItemsAdo(string iterationPath, List<string> workItemTypeExclude)
         {
-            iterationPath = iterationPath.Replace("FenergoCoreSupport", @"ClientOperations");
             var response = _ado.PostWithResponse<Rootobject>($"{_adourl}/_apis/wit/wiql?api-version=5.1", new { query = string.Format(_workItemsForIteration, iterationPath) });
             var ids = response.workItems.Select(x => x.id).ToList();
             if (!ids.Any()) return new List<ClientWorkItem>();
@@ -80,7 +79,6 @@ namespace TfsData
             var joinedWorkItems = string.Join(",", ids.Distinct().ToList());
             var changesets = _ado.GetWithResponse<TfsData<WrappedWi>>($"{_adourl}/_apis/wit/WorkItems?ids={joinedWorkItems}&api-version=5.1");
             changesets.value.ForEach(x => x.fields.Id = x.id);
-            changesets.value.ForEach(x => x.fields.ClientProject = x.fields.ClientProject2);
             var changeset = changesets.value.Select(x => x.fields).ToList();
 
 
