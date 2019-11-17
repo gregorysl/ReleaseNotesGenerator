@@ -28,7 +28,7 @@ namespace Gui
         {
             return source != null && toCheck != null && source.IndexOf(toCheck, comp) >= 0;
         }
-        public static InsertBeforeOrAfter SecondSection(Dictionary<string, List<ChangesetInfo>> categorizedChangesets, InsertBeforeOrAfter lastPart)
+        public static InsertBeforeOrAfter ChangesetsSection(this InsertBeforeOrAfter lastPart,Dictionary<string, List<ChangesetInfo>> categorizedChangesets)
         {
             var paragraph = lastPart.CreateSectionWithParagraph("Code Change sets in this Release",
                 "The following list of code check-ins to TFS was compiled to make up this release");
@@ -60,7 +60,7 @@ namespace Gui
             return newLastPart;
         }
 
-        public static Table ThirdSection(IEnumerable<ClientWorkItem> workItems, InsertBeforeOrAfter lastPart)
+        public static Table WorkItemSection(this InsertBeforeOrAfter lastPart,IEnumerable<ClientWorkItem> workItems)
         {
             var workItemList = workItems.ToList();
             var paragraph = lastPart.CreateSectionWithParagraph("Product reported Defects in this Release",
@@ -83,7 +83,7 @@ namespace Gui
             return table;
         }
 
-        public static Table FourthSection(IEnumerable<ClientWorkItem> pbi, InsertBeforeOrAfter lastPart)
+        public static Table PbiSection(this InsertBeforeOrAfter lastPart,IEnumerable<ClientWorkItem> pbi)
         {
             var pbiList = pbi.ToList();
             var paragraph = lastPart.CreateSectionWithParagraph("Product Backlog Items in this Release",
@@ -102,7 +102,7 @@ namespace Gui
             }
             return table;
         }
-        public static Table SixthSection(InsertBeforeOrAfter lastPart)
+        public static Table KnownIssuesSection(this InsertBeforeOrAfter lastPart)
         {
             var paragraph = lastPart.CreateSectionWithParagraph("Known issues in this Release",
                 "This section gives a list of bugs that were identified throughout testing of this release");
