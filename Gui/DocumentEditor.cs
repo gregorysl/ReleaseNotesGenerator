@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using DataModel;
 using Xceed.Document.NET;
 using Xceed.Words.NET;
@@ -9,15 +10,18 @@ namespace Gui
 {
     public class DocumentEditor
     {
-        public string ProcessData(ReleaseData data, Dictionary<string, List<ChangesetInfo>> categorizedChangesets,
+        private readonly string _templateName = "Template.docx";
+        public string ProcessData(string documentLocaion,ReleaseData data, Dictionary<string, List<ChangesetInfo>> categorizedChangesets,
             IEnumerable<ClientWorkItem> workItems, IEnumerable<ClientWorkItem> pbi)
         {
             try
             {
-                var dTestDocx = $@"D:\{data.ReleaseName} Patch Release Notes.docx";
-                string fileName = @"D:\Template.docx";
+                var templatePath = Path.Combine(documentLocaion, _templateName);
+                if (!File.Exists(templatePath)) return $"Template file not found in following location ${templatePath}";
 
-                using (var doc = DocX.Load(fileName))
+                var dTestDocx = $@"D:\{data.ReleaseName} Patch Release Notes1.docx";
+
+                using (var doc = DocX.Load(templatePath))
                 {
                     doc.ReplaceText("{ReleaseName}", data.ReleaseName);
                     doc.ReplaceText("{ReleaseDate}", data.ReleaseDate);

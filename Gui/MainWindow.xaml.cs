@@ -16,6 +16,7 @@ namespace Gui
     public partial class MainWindow
     {
         private bool _includeTfsService = false;
+        private string _documentLocation;
         private const string RegexString = @".*\\\w+(?:.*)?\\((\w\d.\d+.\d+).\d+)";
         private static TfsConnector _tfs;
         public List<string> Categories => GettrimmedSettingList("categories");
@@ -28,6 +29,7 @@ namespace Gui
             var adoUrl = ConfigurationManager.AppSettings["adoUrl"];
             var adoUsername = ConfigurationManager.AppSettings["adoUsername"];
             var adoKey = ConfigurationManager.AppSettings["adoKey"];
+            _documentLocation = ConfigurationManager.AppSettings["documentLocation"];
             if (string.IsNullOrWhiteSpace(tfsUrl)) return;
 
             _tfs = new TfsConnector(tfsUrl, tfsUsername, tfsKey, adoUrl, adoUsername, adoKey);
@@ -157,7 +159,7 @@ namespace Gui
                 .Where(x => workItemStateInclude.Contains(x.State) | x.BoardColumn == "Tested")
                 .Where(x => x.ClientProject != "General").OrderBy(x => x.ClientProject);
             var pbi = adoclientWorkItems.Where(x => x.ClientProject == "General");
-            var message = new DocumentEditor().ProcessData(App.Data, categories, workItems, pbi);
+            var message = new DocumentEditor().ProcessData(_documentLocation, App.Data, categories, workItems, pbi);
             if (!string.IsNullOrWhiteSpace(message)) MessageBox.Show(message);
         }
 
