@@ -17,7 +17,7 @@ namespace Gui
             try
             {
                 var templatePath = Path.Combine(documentLocaion, _templateName);
-                var releasePath = Path.Combine(documentLocaion, "{data.ReleaseName} Patch Release Notes.docx");
+                var releasePath = Path.Combine(documentLocaion, $"{data.ReleaseName} Patch Release Notes.docx");
                 if (!File.Exists(templatePath)) return $"Template file not found in following location {templatePath}";
 
                 using (var doc = DocX.Load(templatePath))
