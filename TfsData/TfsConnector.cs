@@ -37,7 +37,7 @@ namespace TfsData
 
         public List<string> Projects()
         {
-            var tfsData = _ado.GetWithResponse<TfsData<Project>>(($"{_adourl}/_apis/projects?$top=999"));
+            var tfsData = _ado.GetWithResponse<DataWrapper<Project>>(($"{_adourl}/_apis/projects?$top=999"));
             var projects = tfsData.value.Select(x => x.name).OrderBy(x => x).ToList();
             return projects;
         }
@@ -77,7 +77,7 @@ namespace TfsData
             if (!ids.Any()) return new List<ClientWorkItem>();
 
             var joinedWorkItems = string.Join(",", ids.Distinct().ToList());
-            var changesets = _ado.GetWithResponse<TfsData<WrappedWi>>($"{_adourl}/_apis/wit/WorkItems?ids={joinedWorkItems}&api-version=5.1");
+            var changesets = _ado.GetWithResponse<DataWrapper<WrappedWi>>($"{_adourl}/_apis/wit/WorkItems?ids={joinedWorkItems}&api-version=5.1");
             changesets.value.ForEach(x => x.fields.Id = x.id);
             var changeset = changesets.value.Select(x => x.fields).ToList();
 
@@ -89,42 +89,24 @@ namespace TfsData
             return clientWorkItems;
         }
 
-        public tfs GetChangesetsRest(string queryLocation, string changesetFrom, string changesetTo,
+        public DataModel.DownloadedItems GetChangesetsRest(string queryLocation, string changesetFrom, string changesetTo,
             List<string> categories)
         {
-            var tfsClass = new tfs();
-            var versionSpecFromi = "&searchCriteria.fromId=" + (string.IsNullOrEmpty(changesetFrom)
-                ? "1"
-                : changesetFrom);
-            var versionSpecTois = string.IsNullOrEmpty(changesetTo)
-                ? ""
-                : $"&searchCriteria.toId={changesetTo}";
-
-
-            var categoryQueryLocation = categories.Select(x => new Tuple<string, string>(x, $"{queryLocation}/{x}")).ToList();
+            var tfsClass = new DownloadedItems();
+            string from = !string.IsNullOrEmpty(changesetFrom) ? "&searchCriteria.fromId=" + changesetFrom : "";
+            string to = !string.IsNullOrEmpty(changesetTo) ? "&searchCriteria.toId=" + changesetTo : "";
             var list = new List<Change>();
-            foreach (var tuple in categoryQueryLocation)
+            foreach (var category in categories)
             {
-                var response = _tfs.GetWithResponse<TfsData<Change>>($"{_tfsurl}/_apis/tfvc/changesets?searchCriteria.itemPath={tuple.Item2}{versionSpecFromi}{versionSpecTois}&api-version=1.0").value;
+                var itemPath = $"searchCriteria.itemPath={queryLocation}/{category}";
+                var response = _tfs.GetWithResponse<DataWrapper<Change>>($"{_tfsurl}/_apis/tfvc/changesets?{itemPath}{from}{to}&api-version=1.0").value;
                 list.AddRange(response);
-                tfsClass.Categorized.Add(tuple.Item1, response.Select(x => x.changesetId).ToList());
+                tfsClass.Categorized.Add(category, response.Select(x => x.changesetId).ToList());
             }
             var changesList = list.DistinctBy(x => x.changesetId).OrderByDescending(x => x.changesetId).ToList();
             tfsClass.Changes = new ObservableCollection<Change>(changesList);
             return tfsClass;
 
         }
-
-        public List<Work> GetChangesetWorkItemsRest(Change change)
-        {
-            using (var response = _tfs.GetAsync(change.url + "/workItems").Result)
-            {
-                response.EnsureSuccessStatusCode();
-                string responseBody = response.Content.ReadAsStringAsync().Result;
-                var list = JsonConvert.DeserializeObject<TfsData<Work>>(responseBody).value;
-                return list;
-            }
-        }
-
     }
 }

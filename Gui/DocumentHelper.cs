@@ -62,7 +62,7 @@ namespace Gui
             var heading = "Product reported Defects in this Release";
             var subHeading = "This section gives a list of Client-facing defects that were fixed in this release";
             var paragraph = lastPart.CreateSectionWithParagraph(heading, subHeading);
-            var table = paragraph.CreateTableWithHeader(headers, columnSizes, workItemList.Count + 1);
+            var table = paragraph.CreateTableWithHeader(headers, columnSizes, workItemList.Count);
 
             for (var i = 0; i < workItemList.Count - 1; i++)
             {

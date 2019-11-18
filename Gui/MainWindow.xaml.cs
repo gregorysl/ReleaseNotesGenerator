@@ -81,12 +81,12 @@ namespace Gui
             var downloadedData = await Task.Run(() => _tfs.GetChangesetsRest(queryLocation, App.Data.ChangesetFrom, App.Data.ChangesetTo, Categories));
             
             WorkItemProgress.IsIndeterminate = false;
-            App.Data.tfs = downloadedData;
+            App.Data.DownloadedItems = downloadedData;
 
-            _dataGrid.ItemsSource = App.Data.tfs.Changes;
+            _dataGrid.ItemsSource = App.Data.DownloadedItems.Changes;
             FilterTfsChanges();
 
-            App.Data.tfs.WorkItems = _tfs.GetWorkItemsAdo(App.Data.IterationSelected);
+            App.Data.DownloadedItems.WorkItems = _tfs.GetWorkItemsAdo(App.Data.IterationSelected);
         }
 
         private static List<string> GettrimmedSettingList(string key)
@@ -130,7 +130,7 @@ namespace Gui
 
         private void CreateDocument(object sender, RoutedEventArgs e)
         {
-            var selectedChangesets = App.Data.tfs.Changes
+            var selectedChangesets = App.Data.DownloadedItems.Changes
                 .Where(x => x.Selected)
                 .OrderBy(x => x.changesetId)
                 .Select(item => new ChangesetInfo
@@ -143,7 +143,7 @@ namespace Gui
 
 
             var categories = new Dictionary<string, List<ChangesetInfo>>();
-            foreach (var category in App.Data.tfs.Categorized)
+            foreach (var category in App.Data.DownloadedItems.Categorized)
             {
                 var cha = selectedChangesets.Where(x => category.Value.Contains(x.Id)).ToList();
                 if (cha.Any())
@@ -153,9 +153,9 @@ namespace Gui
             }
 
             var workItemStateInclude = GettrimmedSettingList("workItemStateInclude");
-            var adoclientWorkItems = App.Data.tfs.WorkItems;
+            var adoclientWorkItems = App.Data.DownloadedItems.WorkItems;
             var workItems = adoclientWorkItems
-                .Where(x => workItemStateInclude.Contains(x.State) | x.BoardColumn == "Tested")
+                .Where(x => workItemStateInclude.Contains(x.State))
                 .Where(x => x.ClientProject != "General").OrderBy(x => x.ClientProject);
             var pbi = adoclientWorkItems.Where(x => x.ClientProject == "General");
             var message = new DocumentEditor().ProcessData(_documentLocation, App.Data, categories, workItems, pbi);
@@ -174,7 +174,7 @@ namespace Gui
 
         private void FilterTfsChanges()
         {
-            foreach (var change in App.Data.tfs.Changes)
+            foreach (var change in App.Data.DownloadedItems.Changes)
             {
                 if (change.checkedInBy.displayName == "TFS Service" || change.checkedInBy.displayName == "Project Collection Build Service (Product)" || change.comment.Contains("Automatic refresh", StringComparison.OrdinalIgnoreCase))
                 {

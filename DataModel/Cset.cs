@@ -29,7 +29,7 @@ namespace DataModel
         public string url { get; set; }
     }
 
-    public class tfs
+    public class DownloadedItems
     {
         public Dictionary<string, List<int>> Categorized { get; set; } = new Dictionary<string, List<int>>();
         public ObservableCollection<Change> Changes { get; set; } = new ObservableCollection<Change>();
@@ -49,16 +49,8 @@ namespace DataModel
         public Iteration[] children { get; set; }
         public string url { get; set; }
     }
-    public class Work
-    {
-        public string webUrl { get; set; }
-        public int id { get; set; }
-        public string title { get; set; }
-        public string workItemType { get; set; }
-        public string state { get; set; }
-    }
 
-    public class TfsData<T> where T : class
+    public class DataWrapper<T> where T : class
     {
         public int count { get; set; }
         public List<T> value { get; set; }

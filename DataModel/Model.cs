@@ -23,7 +23,7 @@ namespace DataModel
             CoreChange != null;
 
         [JsonIgnore]
-        public tfs tfs {get;set;} = new tfs();
+        public DownloadedItems DownloadedItems {get;set;} = new DownloadedItems();
 
         private Change _psRefresh;
         private Change _coreChange;
@@ -127,7 +127,7 @@ namespace DataModel
         public string Title { get; set; }
         [JsonProperty(PropertyName = "System.State")]
         public string State { get; set; }
-        [JsonProperty(PropertyName = "client.project", DefaultValueHandling = DefaultValueHandling.Populate)]
+        [JsonProperty(PropertyName = "Custom.ClientProject", DefaultValueHandling = DefaultValueHandling.Populate)]
         public string ClientProject { get; set; }
         [JsonProperty(PropertyName = "System.WorkItemType")]
         public string WorkItemType { get; set; }
