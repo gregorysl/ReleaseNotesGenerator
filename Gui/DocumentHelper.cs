@@ -38,7 +38,7 @@ namespace Gui
                 var headers = new[] { "TFS", "Developer", "Date/Time", "Description" };
                 var columnSizes = new[] { 10f, 25, 30f, 35f };
                 var p = newLastPart.InsertParagraphAfterSelf(category.Key).FontSize(11d).Heading(HeadingType.Heading2);
-                var table = p.CreateTableWithHeader(headers, columnSizes, category.Value.Count + 1);
+                var table = p.CreateTableWithHeader(headers, columnSizes, category.Value.Count);
 
                 for (var i = 0; i < category.Value.Count - 1; i++)
                 {
@@ -62,7 +62,7 @@ namespace Gui
             var heading = "Product reported Defects in this Release";
             var subHeading = "This section gives a list of Client-facing defects that were fixed in this release";
             var paragraph = lastPart.CreateSectionWithParagraph(heading, subHeading);
-            var table = paragraph.CreateTableWithHeader(headers, columnSizes, workItemList.Count + 2);
+            var table = paragraph.CreateTableWithHeader(headers, columnSizes, workItemList.Count + 1);
 
             for (var i = 0; i < workItemList.Count - 1; i++)
             {
@@ -110,7 +110,7 @@ namespace Gui
 
         public static void FillRow(this Table table, int row, string[] data, bool bold = false)
         {
-            for (var i = 0; i < data.Length - 1; i++)
+            for (var i = 0; i < data.Length; i++)
             {
                 var paragraph = table.GetCell(row, i).FillFirstParagraph(data[i]);
                 if (bold) paragraph.Bold();
@@ -120,7 +120,7 @@ namespace Gui
         public static Table CreateTableWithHeader(this InsertBeforeOrAfter lastPart, string[] headers,
             float[] columnSizes, int rows)
         {
-            var table = lastPart.InsertTableAfterSelf(2, 2);
+            var table = lastPart.InsertTableAfterSelf(rows, headers.Length);
             table.SetWidthsPercentage(columnSizes, null);
             table.AutoFit = AutoFit.ColumnWidth;
             table.FillRow(0, headers, true);
