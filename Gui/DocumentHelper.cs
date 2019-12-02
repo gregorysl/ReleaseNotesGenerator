@@ -33,18 +33,18 @@ namespace Gui
             var subHeading = "The following list of code check-ins to TFS was compiled to make up this release";
             var paragraph = lastPart.CreateSectionWithParagraph(heading, subHeading);
             InsertBeforeOrAfter newLastPart = paragraph;
-            foreach (var category in categorizedChangesets)
+            foreach (var category in categorizedChangesets.Where(x => x.Value.Count > 0))
             {
                 var headers = new[] { "TFS", "Developer", "Date/Time", "Description" };
                 var columnSizes = new[] { 10f, 25, 30f, 35f };
                 var p = newLastPart.InsertParagraphAfterSelf(category.Key).FontSize(11d).Heading(HeadingType.Heading2);
-                var table = p.CreateTableWithHeader(headers, columnSizes, category.Value.Count);
+                var table = p.CreateTableWithHeader(headers, columnSizes, category.Value.Count +1);
 
-                for (var i = 0; i < category.Value.Count - 1; i++)
+                for (var i = 0; i < category.Value.Count; i++)
                 {
                     var item = category.Value[i];
                     var rowData = new[] { item.Id.ToString(), item.CommitedBy, item.Created.ToString(), item.Comment };
-                    table.FillRow(i + 1, rowData);
+                    table.FillRow(i+1, rowData);
                 }
 
                 newLastPart = table;
@@ -120,6 +120,7 @@ namespace Gui
         public static Table CreateTableWithHeader(this InsertBeforeOrAfter lastPart, string[] headers,
             float[] columnSizes, int rows)
         {
+            rows = rows >= 1 ? rows : 1;
             var table = lastPart.InsertTableAfterSelf(rows, headers.Length);
             table.SetWidthsPercentage(columnSizes, null);
             table.AutoFit = AutoFit.ColumnWidth;
