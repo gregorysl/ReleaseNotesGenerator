@@ -85,8 +85,6 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DocumentEditor.cs" />
-    <Compile Include="DocumentHelper.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -126,6 +124,10 @@
     <ProjectReference Include="..\DataModel\DataModel.csproj">
       <Project>{686C7A00-8AC2-409A-BB85-98B401877AED}</Project>
       <Name>DataModel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ReleaseNotesService\ReleaseNotesService.csproj">
+      <Project>{461D722E-EB35-4DED-979A-F8E994FCEEA6}</Project>
+      <Name>ReleaseNotesService</Name>
     </ProjectReference>
     <ProjectReference Include="..\TfsData\TfsData.csproj">
       <Project>{F88C7DF3-6632-4FA0-B2B7-67F022A726D2}</Project>

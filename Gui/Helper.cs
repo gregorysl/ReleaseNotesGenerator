@@ -1,18 +1,8 @@
-﻿using System;
-using System.Globalization;
-using System.IO;
+﻿using System.IO;
 using Newtonsoft.Json;
 
 namespace Gui
 {
-    public static class Helpers
-    {
-        public static string FormatData(this DateTime date)
-        {
-            return date.ToString("yyyy-MM-dd HH:mm", new CultureInfo("en-US"));
-        }
-    }
-
     public static class JsonSerialization
     {
         public static void WriteToJsonFile<T>(string filePath, T objectToWrite, bool append = false) where T : new()

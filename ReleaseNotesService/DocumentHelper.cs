@@ -4,7 +4,7 @@ using System.Linq;
 using DataModel;
 using Xceed.Document.NET;
 
-namespace Gui
+namespace ReleaseNotesService
 {
     public static class DocumentHelper
     {
@@ -83,7 +83,7 @@ namespace Gui
             var heading = "Product Backlog Items in this Release";
             var subHeading = "This section gives a list of PBIs that were delivered in this release";
             var paragraph = lastPart.CreateSectionWithParagraph(heading, subHeading);
-            var table = paragraph.CreateTableWithHeader(headers, columnSizes, pbiList.Count + 2);
+            var table = paragraph.CreateTableWithHeader(headers, columnSizes, pbiList.Count);
 
             for (var i = 0; i < pbiList.Count - 1; i++)
             {

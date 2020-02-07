@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using DataModel;
+using ReleaseNotesService;
 using TfsData;
 using MessageBox = System.Windows.MessageBox;
 
@@ -154,10 +155,8 @@ namespace Gui
 
             var workItemStateInclude = GettrimmedSettingList("workItemStateInclude");
             var adoclientWorkItems = App.Data.DownloadedItems.WorkItems;
-            var workItems = adoclientWorkItems
-                .Where(x => workItemStateInclude.Contains(x.State))
-                .Where(x => x.ClientProject != "General").OrderBy(x => x.ClientProject);
-            var pbi = adoclientWorkItems.Where(x => x.ClientProject == "General");
+            var workItems = adoclientWorkItems.Where(x => workItemStateInclude.Contains(x.State) && x.ClientProject != null).OrderBy(x => x.ClientProject);
+            var pbi = adoclientWorkItems.Where(x => workItemStateInclude.Contains(x.State) && x.ClientProject == null).OrderBy(x=>x.Id);
             var message = new DocumentEditor().ProcessData(_documentLocation, App.Data, categories, workItems, pbi);
             if (!string.IsNullOrWhiteSpace(message)) MessageBox.Show(message);
         }
