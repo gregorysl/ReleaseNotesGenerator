@@ -73,13 +73,13 @@ namespace Gui
             App.Data.TfsBranch = extractedData.Item2;
         }
 
-        private async void ConvertClicked(object sender, RoutedEventArgs e)
+        private async void DownloadClicked(object sender, RoutedEventArgs e)
         {
             App.Data.CoreChange = null;
             App.Data.PsRefresh = null;
             var queryLocation = $"$/{App.Data.TfsProject}/{App.Data.TfsBranch}";
             WorkItemProgress.IsIndeterminate = true;
-            var downloadedData = await Task.Run(() => _tfs.GetChangesetsRest(queryLocation, App.Data.ChangesetFrom, App.Data.ChangesetTo, Categories));
+            var downloadedData = await Task.Run(() => _tfs.GetChangesetsRest(queryLocation, App.Data.ChangesetFrom, App.Data.ChangesetTo));
             
             WorkItemProgress.IsIndeterminate = false;
             App.Data.DownloadedItems = downloadedData;

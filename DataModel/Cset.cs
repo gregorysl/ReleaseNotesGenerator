@@ -42,6 +42,15 @@ namespace DataModel
         public string id { get; set; }
         public string name { get; set; }
     }
+    public class Item
+    {
+        public string path { get; set; }
+        public bool isFolder { get; set; }
+        public override string ToString()
+        {
+            return $"{path} folder:{isFolder}";
+        }
+    }
     public class Iteration
     {
         public int id { get; set; }

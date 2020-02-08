@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading.Tasks;
 using DataModel;
 using Newtonsoft.Json;
 
@@ -89,20 +90,28 @@ namespace TfsData
             return clientWorkItems;
         }
 
-        public DataModel.DownloadedItems GetChangesetsRest(string queryLocation, string changesetFrom, string changesetTo,
-            List<string> categories)
+        public DataModel.DownloadedItems GetChangesetsRest(string queryLocation, string changesetFrom, string changesetTo)
         {
+            var cats = _tfs
+                .GetWithResponse<DataWrapper<Item>>(
+                    $"{_tfsurl}/_apis/tfvc/items?scopePath={queryLocation}&api-version=3.1&recursionLevel=OneLevel")
+                .value.Where(x => x.isFolder && x.path != queryLocation).ToList();
+
             var tfsClass = new DownloadedItems();
             string from = !string.IsNullOrEmpty(changesetFrom) ? "&searchCriteria.fromId=" + changesetFrom : "";
             string to = !string.IsNullOrEmpty(changesetTo) ? "&searchCriteria.toId=" + changesetTo : "";
             var list = new List<Change>();
-            foreach (var category in categories)
+            Parallel.ForEach(cats, category =>
             {
-                var itemPath = $"searchCriteria.itemPath={queryLocation}/{category}";
-                var response = _tfs.GetWithResponse<DataWrapper<Change>>($"{_tfsurl}/_apis/tfvc/changesets?{itemPath}{from}{to}&api-version=1.0").value;
+                var itemPath = $"searchCriteria.itemPath={category.path}";
+                var response = _tfs
+                    .GetWithResponse<DataWrapper<Change>>(
+                        $"{_tfsurl}/_apis/tfvc/changesets?{itemPath}{from}{to}&$top=1000&api-version=1.0").value;
+                if (!response.Any()) return;
                 list.AddRange(response);
-                tfsClass.Categorized.Add(category, response.Select(x => x.changesetId).ToList());
-            }
+                tfsClass.Categorized.Add(category.path, response.Select(x => x.changesetId).ToList());
+
+            });
             var changesList = list.DistinctBy(x => x.changesetId).OrderByDescending(x => x.changesetId).ToList();
             tfsClass.Changes = new ObservableCollection<Change>(changesList);
             return tfsClass;
