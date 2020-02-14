@@ -23,10 +23,7 @@ namespace ReleaseNotesService
         {
             return t.Rows[row].Cells[col];
         }
-        public static bool Contains(this string source, string toCheck, StringComparison comp)
-        {
-            return source != null && toCheck != null && source.IndexOf(toCheck, comp) >= 0;
-        }
+
         public static InsertBeforeOrAfter ChangesetsSection(this InsertBeforeOrAfter lastPart, Dictionary<string, List<ChangesetInfo>> categorizedChangesets)
         {
             var heading = "Code Change sets in this Release";
@@ -83,9 +80,9 @@ namespace ReleaseNotesService
             var heading = "Product Backlog Items in this Release";
             var subHeading = "This section gives a list of PBIs that were delivered in this release";
             var paragraph = lastPart.CreateSectionWithParagraph(heading, subHeading);
-            var table = paragraph.CreateTableWithHeader(headers, columnSizes, pbiList.Count);
+            var table = paragraph.CreateTableWithHeader(headers, columnSizes, pbiList.Count + 1);
 
-            for (var i = 0; i < pbiList.Count - 1; i++)
+            for (var i = 0; i < pbiList.Count; i++)
             {
                 var item = pbiList[i];
                 var rowData = new[] { item.Id.ToString(), item.Title };
