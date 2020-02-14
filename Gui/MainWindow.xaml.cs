@@ -86,8 +86,12 @@ namespace Gui
 
             _dataGrid.ItemsSource = App.Data.DownloadedItems.Changes;
             FilterTfsChanges();
+            
+            var reg = new Regex(@".*\[(\d*)\].*");
+            var changesetWorkItemsId = downloadedData.Changes.Where(x => reg.Match(x.comment).Success)
+                .Select(x => reg.Match(x.comment).Groups[1].Captures[0].Value).Select(x=>Convert.ToInt32(x)).ToList();
 
-            App.Data.DownloadedItems.WorkItems = _tfs.GetWorkItemsAdo(App.Data.IterationSelected);
+            App.Data.DownloadedItems.WorkItems = _tfs.GetWorkItemsAdo(App.Data.IterationSelected, changesetWorkItemsId);
         }
 
         private static List<string> GettrimmedSettingList(string key)

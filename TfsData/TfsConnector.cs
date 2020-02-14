@@ -32,7 +32,7 @@ namespace TfsData
             var client = new HttpClient();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",
-                Convert.ToBase64String(Encoding.ASCII.GetBytes($"{username}:{key}")));
+                Convert.ToBase64String(Encoding.ASCII.GetBytes($":{key}")));
             return client;
         }
 
@@ -71,10 +71,11 @@ namespace TfsData
             }
         }
 
-        public List<ClientWorkItem> GetWorkItemsAdo(string iterationPath)
+        public List<ClientWorkItem> GetWorkItemsAdo(string iterationPath, List<int> additional)
         {
             var response = _ado.PostWithResponse<Rootobject>($"{_adourl}/_apis/wit/wiql?api-version=5.1", new { query = string.Format(_workItemsForIteration, iterationPath) });
             var ids = response.workItems.Select(x => x.id).ToList();
+            ids.AddRange(additional);
             if (!ids.Any()) return new List<ClientWorkItem>();
 
             var joinedWorkItems = string.Join(",", ids.Distinct().ToList());
@@ -109,7 +110,7 @@ namespace TfsData
                         $"{_tfsurl}/_apis/tfvc/changesets?{itemPath}{from}{to}&$top=1000&api-version=1.0").value;
                 if (!response.Any()) return;
                 list.AddRange(response);
-                tfsClass.Categorized.Add(category.path, response.Select(x => x.changesetId).ToList());
+                tfsClass.Categorized.Add(category.path.Replace(queryLocation,"").Trim('/'), response.Select(x => x.changesetId).ToList());
 
             });
             var changesList = list.DistinctBy(x => x.changesetId).OrderByDescending(x => x.changesetId).ToList();
