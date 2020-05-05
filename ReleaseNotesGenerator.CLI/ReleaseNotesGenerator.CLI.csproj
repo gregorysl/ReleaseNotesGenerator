@@ -51,10 +51,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DataModel\DataModel.csproj">
-      <Project>{686C7A00-8AC2-409A-BB85-98B401877AED}</Project>
-      <Name>DataModel</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ReleaseNotesService\ReleaseNotesService.csproj">
       <Project>{461d722e-eb35-4ded-979a-f8e994fceea6}</Project>
       <Name>ReleaseNotesService</Name>

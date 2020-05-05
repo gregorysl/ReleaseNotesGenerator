@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Globalization;
-using DataModel;
+using TfsData;
 
 namespace ReleaseNotesService
 {

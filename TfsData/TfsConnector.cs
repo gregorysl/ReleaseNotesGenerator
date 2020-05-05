@@ -6,7 +6,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
-using DataModel;
 using Newtonsoft.Json;
 
 namespace TfsData
@@ -91,7 +90,7 @@ namespace TfsData
             return clientWorkItems;
         }
 
-        public DataModel.DownloadedItems GetChangesetsRest(string queryLocation, string changesetFrom, string changesetTo)
+        public DownloadedItems GetChangesetsRest(string queryLocation, string changesetFrom, string changesetTo)
         {
             var cats = _tfs
                 .GetWithResponse<DataWrapper<Item>>(

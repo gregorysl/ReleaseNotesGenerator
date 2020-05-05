@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using DataModel;
+using TfsData;
 using Xceed.Document.NET;
 using Xceed.Words.NET;
 
