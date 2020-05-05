@@ -59,14 +59,9 @@ namespace ReleaseNotesGenerator.CLI
             
             red.PsRefresh = downloadedData.Changes.First(x => changesetTo == x.changesetId.ToString());
 
-
             var workItemStateInclude = GettrimmedSettingList("workItemStateInclude");
-            var adoclientWorkItems = downloadedData.WorkItems;
-            var downloadedItemsChanges = downloadedData.Changes;
-            var downloadedItemsCategorized = downloadedData.Categorized;
-
-            var message = _generator.CreateDoc(downloadedItemsChanges, downloadedItemsCategorized,
-                adoclientWorkItems, workItemStateInclude, red, documentLocation);
+            
+            var message = _generator.CreateDoc(downloadedData, workItemStateInclude, red, documentLocation);
 
             if (!string.IsNullOrWhiteSpace(message)) Console.WriteLine(message);
         }

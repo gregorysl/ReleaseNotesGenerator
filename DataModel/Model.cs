@@ -19,14 +19,9 @@ namespace DataModel
         public bool GenerateDocButtonEnabled =>
             !string.IsNullOrWhiteSpace(ReleaseName) &&
             !string.IsNullOrWhiteSpace(QaBuildName) &&
-            PsRefresh != null &&
-            CoreChange != null;
-
-        [JsonIgnore]
-        public DownloadedItems DownloadedItems { get; set; } = new DownloadedItems();
+            PsRefresh != null;
 
         private Change _psRefresh;
-        private Change _coreChange;
         private string _releaseName;
         private string _tfsBranch;
         private string _qaBuildName;
@@ -95,24 +90,7 @@ namespace DataModel
                 OnPropertyChanged(nameof(PsRefresh));
                 OnPropertyChanged(nameof(GenerateDocButtonEnabled));
             }
-        }
-        [JsonIgnore]
-        public Change CoreChange
-        {
-            get => _coreChange;
-            set
-            {
-                _coreChange = value;
-                OnPropertyChanged(nameof(CoreChange));
-                OnPropertyChanged(nameof(GenerateDocButtonEnabled));
-            }
-        }
-
-
-
-
-
-
+        } 
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)

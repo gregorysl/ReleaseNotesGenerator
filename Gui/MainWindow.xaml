@@ -88,7 +88,6 @@
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
                                     <Button Click="SetAsPsRefreshClick">PsRefresh</Button>
-                                    <Button Click="SetAsCoreClick">Latest Core</Button>
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
@@ -98,8 +97,6 @@
         </Grid>
         <ProgressBar Height="30" Name="WorkItemProgress" />
         <CheckBox Content="Include TFSService Check-ins" Click="ToggleButton_OnChecked" />
-        <TextBlock>Core Changest</TextBlock>
-        <TextBlock Text="{Binding CoreChange}"></TextBlock>
         <TextBlock>PsRefresh</TextBlock>
         <TextBlock Text="{Binding PsRefresh}"></TextBlock>
 

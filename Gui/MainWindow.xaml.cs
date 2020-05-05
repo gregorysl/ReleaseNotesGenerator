@@ -21,7 +21,7 @@ namespace Gui
         private const string RegexString = @".*\\\w+(?:.*)?\\((\w\d.\d+.\d+).\d+)";
         private static TfsConnector _tfs;
         private static Generator _generator;
-        private DownloadedItems downloadedData;
+        private DownloadedItems _downloadedData;
         public List<string> Categories => GettrimmedSettingList("categories");
         public MainWindow()
         {
@@ -86,11 +86,11 @@ namespace Gui
             var iteration = App.Data.IterationSelected;
 
 
-            downloadedData = await _generator.DownloadData(tfsProject, branch, changesetFrom, changesetTo, iteration, _includeTfsService);
+            _downloadedData = await _generator.DownloadData(tfsProject, branch, changesetFrom, changesetTo, iteration, _includeTfsService);
 
             WorkItemProgress.IsIndeterminate = false;
             
-            _dataGrid.ItemsSource = downloadedData.Changes;
+            _dataGrid.ItemsSource = _downloadedData.Changes;
         }
 
         private static List<string> GettrimmedSettingList(string key)
@@ -126,40 +126,10 @@ namespace Gui
             App.Data.PsRefresh = item;
         }
 
-        private void SetAsCoreClick(object sender, RoutedEventArgs e)
-        {
-            Change item = (Change)((Button)e.Source).DataContext;
-            App.Data.CoreChange = item;
-        }
-
         private void CreateDocument(object sender, RoutedEventArgs e)
         {
-            var selectedChangesets = App.Data.DownloadedItems.Changes
-                .Where(x => x.Selected)
-                .OrderBy(x => x.changesetId)
-                .Select(item => new ChangesetInfo
-                {
-                    Id = item.changesetId,
-                    Comment = item.comment,
-                    CommitedBy = item.checkedInBy.displayName,
-                    Created = item.createdDate
-                }).ToList();
-
-            var categories = new Dictionary<string, List<ChangesetInfo>>();
-            foreach (var category in App.Data.DownloadedItems.Categorized)
-            {
-                var cha = selectedChangesets.Where(x => category.Value.Contains(x.Id)).ToList();
-                if (cha.Any())
-                {
-                    categories.Add(category.Key, cha);
-                }
-            }
-
             var workItemStateInclude = GettrimmedSettingList("workItemStateInclude");
-            var adoclientWorkItems = App.Data.DownloadedItems.WorkItems;
-            var workItems = adoclientWorkItems.Where(x => workItemStateInclude.Contains(x.State) && x.ClientProject != null).OrderBy(x => x.ClientProject);
-            var pbi = adoclientWorkItems.Where(x => workItemStateInclude.Contains(x.State) && x.ClientProject == null).OrderBy(x => x.Id);
-            var message = new DocumentEditor().ProcessData(_documentLocation, App.Data, categories, workItems, pbi);
+            var message = _generator.CreateDoc(_downloadedData, workItemStateInclude, App.Data, _documentLocation);
             if (!string.IsNullOrWhiteSpace(message)) MessageBox.Show(message);
         }
 
@@ -169,20 +139,10 @@ namespace Gui
             if (checkbox == null) return;
             _includeTfsService = checkbox.IsChecked.GetValueOrDefault(false);
 
-            FilterTfsChanges();
+            _downloadedData.FilterTfsChanges();
 
         }
 
-        private void FilterTfsChanges()
-        {
-            foreach (var change in App.Data.DownloadedItems.Changes)
-            {
-                if (change.checkedInBy.displayName == "TFS Service" || change.checkedInBy.displayName == "Project Collection Build Service (Product)" || change.comment.Contains("Automatic refresh", StringComparison.OrdinalIgnoreCase))
-                {
-                    change.Selected = _includeTfsService;
-                }
-            }
-        }
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
         {
             Regex regex = new Regex("[^0-9]+");

@@ -16,11 +16,8 @@ namespace ReleaseNotesService {
             _tfs = tfs;
         }
 
-        public string CreateDoc (ObservableCollection<Change> downloadedItemsChanges,
-            Dictionary<string, List<int>> downloadedItemsCategorized,
-            List<ClientWorkItem> adoclientWorkItems, List<string> workItemStateInclude, ReleaseData releaseData,
-            string documentLocation) {
-            var selectedChangesets = downloadedItemsChanges
+        public string CreateDoc(DownloadedItems downloadedData, List<string> workItemStateInclude, ReleaseData releaseData, string documentLocation) {
+            var selectedChangesets = downloadedData.Changes
                 .Where (x => x.Selected)
                 .OrderBy (x => x.changesetId)
                 .Select (item => new ChangesetInfo {
@@ -30,14 +27,14 @@ namespace ReleaseNotesService {
                         Created = item.createdDate
                 }).ToList ();
 
-            var categories = downloadedItemsCategorized
+            var categories = downloadedData.Categorized
                 .Where (category => selectedChangesets.Any (x => category.Value.Contains (x.Id))).ToDictionary (
                     category => category.Key,
                     category => selectedChangesets.Where (x => category.Value.Contains (x.Id)).ToList ());
 
-            var workItems = adoclientWorkItems.Where (x => workItemStateInclude.Contains (x.State) && x.ClientProject != null)
+            var workItems = downloadedData.WorkItems.Where (x => workItemStateInclude.Contains (x.State) && x.ClientProject != null)
                 .OrderBy (x => x.ClientProject);
-            var pbi = adoclientWorkItems.Where (x => workItemStateInclude.Contains (x.State) && x.ClientProject == null)
+            var pbi = downloadedData.WorkItems.Where (x => workItemStateInclude.Contains (x.State) && x.ClientProject == null)
                 .OrderBy (x => x.Id);
             var message = new DocumentEditor ().ProcessData (documentLocation, releaseData, categories, workItems, pbi);
             return message;
