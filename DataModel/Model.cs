@@ -7,97 +7,20 @@ using System.Runtime.CompilerServices;
 
 namespace DataModel
 {
-    public class ReleaseData : INotifyPropertyChanged
+    public class ReleaseData
     {
-        [JsonIgnore]
-        public string ErrorMessgage { get; set; }
-        [JsonIgnore]
-        public bool DownloadButtonEnabled =>
-            !string.IsNullOrWhiteSpace(TfsProject) && !string.IsNullOrWhiteSpace(TfsBranch);
-
-        [JsonIgnore]
-        public bool GenerateDocButtonEnabled =>
-            !string.IsNullOrWhiteSpace(ReleaseName) &&
-            !string.IsNullOrWhiteSpace(QaBuildName) &&
-            PsRefresh != null;
-
-        private Change _psRefresh;
-        private string _releaseName;
-        private string _tfsBranch;
-        private string _qaBuildName;
-        private string _tfsProject;
-
-        public string TfsProject
-        {
-            get => _tfsProject;
-            set
-            {
-                _tfsProject = value;
-                OnPropertyChanged(nameof(TfsProject));
-                OnPropertyChanged(nameof(DownloadButtonEnabled));
-            }
-        }
-
-        public string TfsBranch
-        {
-            get => _tfsBranch;
-            set
-            {
-                _tfsBranch = value;
-                OnPropertyChanged(nameof(TfsBranch));
-                OnPropertyChanged(nameof(DownloadButtonEnabled));
-            }
-        }
+        public string TfsProject { get; set; }
+        public string TfsBranch { get; set; }
         public string ProjectSelected { get; set; }
         public string IterationSelected { get; set; }
         public string ChangesetFrom { get; set; }
-        public bool ChangesetFromInclude { get; set; }
         public string ChangesetTo { get; set; }
-        public bool ChangesetToInclude { get; set; }
-
-        public string ReleaseName
-        {
-            get => _releaseName;
-            set
-            {
-                _releaseName = value;
-                OnPropertyChanged(nameof(ReleaseName));
-                OnPropertyChanged(nameof(GenerateDocButtonEnabled));
-            }
-        }
-
+        public string ReleaseName { get; set; }
         public string ReleaseDate { get; set; }
-
-        public string QaBuildName
-        {
-            get => _qaBuildName;
-            set
-            {
-                _qaBuildName = value;
-                OnPropertyChanged(nameof(GenerateDocButtonEnabled));
-            }
-        }
-
+        public string QaBuildName { get; set; }
         public string QaBuildDate { get; set; }
-
-        [JsonIgnore]
-        public Change PsRefresh
-        {
-            get => _psRefresh;
-            set
-            {
-                _psRefresh = value;
-                OnPropertyChanged(nameof(PsRefresh));
-                OnPropertyChanged(nameof(GenerateDocButtonEnabled));
-            }
-        } 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
     }
+
     public class ClientWorkItem
     {
         [JsonProperty(PropertyName = "System.Id")]

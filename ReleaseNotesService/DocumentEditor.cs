@@ -11,7 +11,7 @@ namespace ReleaseNotesService
     public class DocumentEditor
     {
         private readonly string _templateName = "Template.docx";
-        public string ProcessData(string documentLocaion, ReleaseData data, Dictionary<string, List<ChangesetInfo>> categorizedChangesets,
+        public string ProcessData(string documentLocaion, Change psRefresh, ReleaseData data, Dictionary<string, List<ChangesetInfo>> categorizedChangesets,
             IEnumerable<ClientWorkItem> workItems, IEnumerable<ClientWorkItem> pbi, string testReport)
         {
             try
@@ -32,7 +32,7 @@ namespace ReleaseNotesService
                     var tableWithHeader = doc.Paragraphs[doc.Paragraphs.Count - 1]
                         .CreateTableWithHeader(headers, columnSizes, 3);
 
-                    tableWithHeader.FillRow(1, new[] { "PS Refresh Changeset", data.PsRefresh.changesetId.ToString(), data.PsRefresh.createdDate.FormatData() });
+                    tableWithHeader.FillRow(1, new[] { "PS Refresh Changeset", psRefresh.changesetId.ToString(), psRefresh.createdDate.FormatData() });
                     tableWithHeader.FillRow(2, new[] { "QA Build", data.QaBuildName, data.QaBuildDate });
 
                     var fi = tableWithHeader.InsertParagraphAfterSelf($"This release will be available in ")

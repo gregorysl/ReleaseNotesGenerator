@@ -39,9 +39,7 @@ namespace ReleaseNotesGenerator.CLI
                 ChangesetFrom = changesetFrom,
                 IterationSelected = iteration,
                 ReleaseDate = releaseDate,
-                ReleaseName = releaseName,
-                ChangesetFromInclude = true,
-
+                ReleaseName = releaseName
             };
 
             var tfsUrl = ConfigurationManager.AppSettings["tfsUrl"];
@@ -57,12 +55,12 @@ namespace ReleaseNotesGenerator.CLI
             _generator = new Generator(_tfs);
 
             var downloadedData = _generator.DownloadData(tfsProject, branch, changesetFrom, changesetTo, iteration).Result;
-            
-            red.PsRefresh = downloadedData.Changes.First(x => changesetTo == x.changesetId.ToString());
+
+            var psRefresh = downloadedData.Changes.First(x => changesetTo == x.changesetId.ToString());
 
             var workItemStateInclude = GettrimmedSettingList("workItemStateInclude");
-            
-            var message = _generator.CreateDoc(downloadedData, workItemStateInclude, red, documentLocation, testReport);
+
+            var message = _generator.CreateDoc(downloadedData, psRefresh, workItemStateInclude, red, documentLocation, testReport);
 
             if (!string.IsNullOrWhiteSpace(message)) Console.WriteLine(message);
         }
