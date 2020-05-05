@@ -35,13 +35,13 @@ namespace ReleaseNotesService
                 var headers = new[] { "TFS", "Developer", "Date/Time", "Description" };
                 var columnSizes = new[] { 10f, 25, 30f, 35f };
                 var p = newLastPart.InsertParagraphAfterSelf(category.Key).FontSize(11d).Heading(HeadingType.Heading2);
-                var table = p.CreateTableWithHeader(headers, columnSizes, category.Value.Count +1);
+                var table = p.CreateTableWithHeader(headers, columnSizes, category.Value.Count + 1);
 
                 for (var i = 0; i < category.Value.Count; i++)
                 {
                     var item = category.Value[i];
                     var rowData = new[] { item.Id.ToString(), item.CommitedBy, item.Created.ToString(), item.Comment };
-                    table.FillRow(i+1, rowData);
+                    table.FillRow(i + 1, rowData);
                 }
 
                 newLastPart = table;
@@ -59,9 +59,9 @@ namespace ReleaseNotesService
             var heading = "Product reported Defects in this Release";
             var subHeading = "This section gives a list of Client-facing defects that were fixed in this release";
             var paragraph = lastPart.CreateSectionWithParagraph(heading, subHeading);
-            var table = paragraph.CreateTableWithHeader(headers, columnSizes, workItemList.Count);
+            var table = paragraph.CreateTableWithHeader(headers, columnSizes, workItemList.Count + 1);
 
-            for (var i = 0; i < workItemList.Count - 1; i++)
+            for (var i = 0; i < workItemList.Count; i++)
             {
                 var item = workItemList[i];
                 var rowData = new[] { item.Id.ToString(), item.Title, item.ClientProject };

@@ -23,7 +23,7 @@ namespace DataModel
             CoreChange != null;
 
         [JsonIgnore]
-        public DownloadedItems DownloadedItems {get;set;} = new DownloadedItems();
+        public DownloadedItems DownloadedItems { get; set; } = new DownloadedItems();
 
         private Change _psRefresh;
         private Change _coreChange;
@@ -31,7 +31,6 @@ namespace DataModel
         private string _tfsBranch;
         private string _qaBuildName;
         private string _tfsProject;
-        private bool _workItemsDownloaded;
 
         public string TfsProject
         {
@@ -44,10 +43,12 @@ namespace DataModel
             }
         }
 
-        public string TfsBranch { get => _tfsBranch;
+        public string TfsBranch
+        {
+            get => _tfsBranch;
             set
             {
-                _tfsBranch= value;
+                _tfsBranch = value;
                 OnPropertyChanged(nameof(TfsBranch));
                 OnPropertyChanged(nameof(DownloadButtonEnabled));
             }
@@ -83,7 +84,7 @@ namespace DataModel
         }
 
         public string QaBuildDate { get; set; }
-        
+
         [JsonIgnore]
         public Change PsRefresh
         {

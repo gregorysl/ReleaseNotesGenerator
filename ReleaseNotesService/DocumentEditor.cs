@@ -11,7 +11,7 @@ namespace ReleaseNotesService
     public class DocumentEditor
     {
         private readonly string _templateName = "Template.docx";
-        public string ProcessData(string documentLocaion,ReleaseData data, Dictionary<string, List<ChangesetInfo>> categorizedChangesets,
+        public string ProcessData(string documentLocaion, ReleaseData data, Dictionary<string, List<ChangesetInfo>> categorizedChangesets,
             IEnumerable<ClientWorkItem> workItems, IEnumerable<ClientWorkItem> pbi)
         {
             try
@@ -25,22 +25,21 @@ namespace ReleaseNotesService
                     doc.ReplaceText("{ReleaseName}", data.ReleaseName);
                     doc.ReplaceText("{ReleaseDate}", data.ReleaseDate);
                     doc.ReplaceText("{TfsBranch}", data.TfsBranch);
-                    
-                    var headers = new[] { "Item", "Details","Date" };
+
+                    var headers = new[] { "Item", "Details", "Date" };
                     var location = $"$/{data.TfsProject}/{data.TfsBranch}";
                     var columnSizes = new[] { 25f, 45, 30f };
                     var tableWithHeader = doc.Paragraphs[doc.Paragraphs.Count - 1]
-                        .CreateTableWithHeader(headers, columnSizes, 4);
-                    
-                    tableWithHeader.FillRow(1, new []{"Core Changeset",data.CoreChange.changesetId.ToString(),data.CoreChange.createdDate.FormatData()});
-                    tableWithHeader.FillRow(2, new []{"PS Refresh Changeset",data.PsRefresh.changesetId.ToString(),data.PsRefresh.createdDate.FormatData()});
-                    tableWithHeader.FillRow(3, new []{"QA Build",data.QaBuildName,data.QaBuildDate});
+                        .CreateTableWithHeader(headers, columnSizes, 3);
+
+                    tableWithHeader.FillRow(1, new[] { "PS Refresh Changeset", data.PsRefresh.changesetId.ToString(), data.PsRefresh.createdDate.FormatData() });
+                    tableWithHeader.FillRow(2, new[] { "QA Build", data.QaBuildName, data.QaBuildDate });
 
                     var fi = tableWithHeader.InsertParagraphAfterSelf($"This release will be available in ")
-                        .Append(location, new Formatting {Bold = true})
+                        .Append(location, new Formatting { Bold = true })
                         .Append($" branch using the label ")
-                        .Append($"{data.ReleaseName}", new Formatting {Bold = true});
-                    
+                        .Append($"{data.ReleaseName}", new Formatting { Bold = true });
+
                     doc.InsertTableOfContents("Contents",
                         TableOfContentsSwitches.O | TableOfContentsSwitches.U | TableOfContentsSwitches.Z | TableOfContentsSwitches.H | TableOfContentsSwitches.T,
                         "FR HeadNoToc");

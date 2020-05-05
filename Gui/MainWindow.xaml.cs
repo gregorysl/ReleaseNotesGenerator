@@ -20,6 +20,8 @@ namespace Gui
         private readonly string _documentLocation;
         private const string RegexString = @".*\\\w+(?:.*)?\\((\w\d.\d+.\d+).\d+)";
         private static TfsConnector _tfs;
+        private static Generator _generator;
+        private DownloadedItems downloadedData;
         public List<string> Categories => GettrimmedSettingList("categories");
         public MainWindow()
         {
@@ -34,6 +36,7 @@ namespace Gui
             if (string.IsNullOrWhiteSpace(tfsUrl)) return;
 
             _tfs = new TfsConnector(tfsUrl, tfsUsername, tfsKey, adoUrl, adoUsername, adoKey);
+            _generator = new Generator(_tfs);
 
             ProjectCombo.ItemsSource = _tfs.Projects();
             Loaded += MainWindow_Loaded;
@@ -42,7 +45,6 @@ namespace Gui
         {
             DataContext = App.Data;
         }
-
 
         private void ProjectSelected(object sender, SelectionChangedEventArgs e)
         {
@@ -75,23 +77,20 @@ namespace Gui
 
         private async void DownloadClicked(object sender, RoutedEventArgs e)
         {
-            App.Data.CoreChange = null;
             App.Data.PsRefresh = null;
-            var queryLocation = $"$/{App.Data.TfsProject}/{App.Data.TfsBranch}";
+            var tfsProject = App.Data.TfsProject;
+            var branch = App.Data.TfsBranch;
             WorkItemProgress.IsIndeterminate = true;
-            var downloadedData = await Task.Run(() => _tfs.GetChangesetsRest(queryLocation, App.Data.ChangesetFrom, App.Data.ChangesetTo));
-            
+            var changesetFrom = App.Data.ChangesetFrom;
+            var changesetTo = App.Data.ChangesetTo;
+            var iteration = App.Data.IterationSelected;
+
+
+            downloadedData = await _generator.DownloadData(tfsProject, branch, changesetFrom, changesetTo, iteration, _includeTfsService);
+
             WorkItemProgress.IsIndeterminate = false;
-            App.Data.DownloadedItems = downloadedData;
-
-            _dataGrid.ItemsSource = App.Data.DownloadedItems.Changes;
-            FilterTfsChanges();
             
-            var reg = new Regex(@".*\[(\d*)\].*");
-            var changesetWorkItemsId = downloadedData.Changes.Where(x => reg.Match(x.comment).Success)
-                .Select(x => reg.Match(x.comment).Groups[1].Captures[0].Value).Select(x=>Convert.ToInt32(x)).ToList();
-
-            App.Data.DownloadedItems.WorkItems = _tfs.GetWorkItemsAdo(App.Data.IterationSelected, changesetWorkItemsId);
+            _dataGrid.ItemsSource = downloadedData.Changes;
         }
 
         private static List<string> GettrimmedSettingList(string key)
@@ -146,7 +145,6 @@ namespace Gui
                     Created = item.createdDate
                 }).ToList();
 
-
             var categories = new Dictionary<string, List<ChangesetInfo>>();
             foreach (var category in App.Data.DownloadedItems.Categorized)
             {
@@ -160,7 +158,7 @@ namespace Gui
             var workItemStateInclude = GettrimmedSettingList("workItemStateInclude");
             var adoclientWorkItems = App.Data.DownloadedItems.WorkItems;
             var workItems = adoclientWorkItems.Where(x => workItemStateInclude.Contains(x.State) && x.ClientProject != null).OrderBy(x => x.ClientProject);
-            var pbi = adoclientWorkItems.Where(x => workItemStateInclude.Contains(x.State) && x.ClientProject == null).OrderBy(x=>x.Id);
+            var pbi = adoclientWorkItems.Where(x => workItemStateInclude.Contains(x.State) && x.ClientProject == null).OrderBy(x => x.Id);
             var message = new DocumentEditor().ProcessData(_documentLocation, App.Data, categories, workItems, pbi);
             if (!string.IsNullOrWhiteSpace(message)) MessageBox.Show(message);
         }
