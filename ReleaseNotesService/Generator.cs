@@ -17,7 +17,7 @@ namespace ReleaseNotesService
             _tfs = tfs;
         }
 
-        public string CreateDoc(DownloadedItems downloadedData, List<string> workItemStateInclude, ReleaseData releaseData, string documentLocation)
+        public string CreateDoc(DownloadedItems downloadedData, List<string> workItemStateInclude, ReleaseData releaseData, string documentLocation, string testReport = "")
         {
             var selectedChangesets = downloadedData.Changes
                 .Where(x => x.Selected)
@@ -39,7 +39,7 @@ namespace ReleaseNotesService
                 .OrderBy(x => x.ClientProject);
             var pbi = downloadedData.WorkItems.Where(x => workItemStateInclude.Contains(x.State) && x.ClientProject == null)
                 .OrderBy(x => x.Id);
-            var message = new DocumentEditor().ProcessData(documentLocation, releaseData, categories, workItems, pbi);
+            var message = new DocumentEditor().ProcessData(documentLocation, releaseData, categories, workItems, pbi, testReport);
             return message;
         }
 

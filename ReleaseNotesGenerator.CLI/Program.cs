@@ -24,6 +24,7 @@ namespace ReleaseNotesGenerator.CLI
             
             const string changesetFrom = "";
             const string releaseName = "";
+            const string testReport = "";
             var iteration = $"Project\\Current\\{releaseName}";
 
             var releaseDate = DateTime.Now.ToString("d-MMMM-yyyy");//"14.02.2020";
@@ -61,7 +62,7 @@ namespace ReleaseNotesGenerator.CLI
 
             var workItemStateInclude = GettrimmedSettingList("workItemStateInclude");
             
-            var message = _generator.CreateDoc(downloadedData, workItemStateInclude, red, documentLocation);
+            var message = _generator.CreateDoc(downloadedData, workItemStateInclude, red, documentLocation, testReport);
 
             if (!string.IsNullOrWhiteSpace(message)) Console.WriteLine(message);
         }

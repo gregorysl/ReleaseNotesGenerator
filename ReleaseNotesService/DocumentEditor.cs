@@ -12,7 +12,7 @@ namespace ReleaseNotesService
     {
         private readonly string _templateName = "Template.docx";
         public string ProcessData(string documentLocaion, ReleaseData data, Dictionary<string, List<ChangesetInfo>> categorizedChangesets,
-            IEnumerable<ClientWorkItem> workItems, IEnumerable<ClientWorkItem> pbi)
+            IEnumerable<ClientWorkItem> workItems, IEnumerable<ClientWorkItem> pbi, string testReport)
         {
             try
             {
@@ -50,6 +50,7 @@ namespace ReleaseNotesService
                         .WorkItemSection(workItems)
                         .PbiSection(pbi)
                         .CreateHeadingSection("Test Report")
+                        .InsertParagraphAfterSelf(testReport).FontSize(10d)
                         .KnownIssuesSection();
 
                     doc.SaveAs(releasePath);
