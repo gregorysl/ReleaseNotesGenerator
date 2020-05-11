@@ -1,0 +1,23 @@
+{
+  "Data": {
+    "TfsProject": "",
+    "TfsBranch": "",
+    "Iteration": "",
+    "ChangesetFrom": "",
+    "ChangesetTo": "",
+    "ReleaseName": "",
+    "ReleaseDate": "",
+    "QaBuildName": "",
+    "QaBuildDate": ""
+  },
+  "Tfs": {
+    "Url": "",
+    "Pat": ""
+  },
+  "Azure": {
+    "Url": "",
+    "Pat": ""
+  },
+  "DocumentLocation": "",
+  "WorkItemStateInclude": [ "Tested", "Done" ]
+}

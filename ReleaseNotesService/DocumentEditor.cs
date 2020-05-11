@@ -23,7 +23,6 @@ namespace ReleaseNotesService
                 {
                     doc.ReplaceText("{ReleaseName}", data.ReleaseName);
                     doc.ReplaceText("{ReleaseDate}", data.ReleaseDate);
-                    doc.ReplaceText("{TfsBranch}", data.TfsBranch);
 
                     var headers = new[] { "Item", "Details", "Date" };
                     var location = $"$/{data.TfsProject}/{data.TfsBranch}";
