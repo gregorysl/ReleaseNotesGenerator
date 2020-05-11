@@ -28,7 +28,7 @@ namespace ReleaseNotesGenerator.CLI
             var generator = new Generator(tfs);
 
             var releaseData = settings.Data;
-            var downloadedData = generator.DownloadData(releaseData.TfsProject, releaseData.TfsBranch, releaseData.ChangesetFrom, releaseData.ChangesetTo, releaseData.Iteration);
+            var downloadedData = generator.DownloadData(releaseData);
 
             Console.WriteLine($"Downloaded data: {downloadedData.WorkItems.Count} work items {downloadedData.Changes.Count} changesets");
 

@@ -23,7 +23,7 @@ namespace ReleaseNotesService
             return t.Rows[row].Cells[col];
         }
 
-        public static InsertBeforeOrAfter ChangesetsSection(this InsertBeforeOrAfter lastPart, Dictionary<string, List<ChangesetInfo>> categorizedChangesets)
+        public static InsertBeforeOrAfter ChangesetsSection(this InsertBeforeOrAfter lastPart, List<KeyValuePair<string, List<ChangesetInfo>>> categorizedChangesets)
         {
             var heading = "Code Change sets in this Release";
             var subHeading = "The following list of code check-ins to TFS was compiled to make up this release";

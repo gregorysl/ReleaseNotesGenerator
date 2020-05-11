@@ -10,7 +10,7 @@ namespace ReleaseNotesService
     public class DocumentEditor
     {
         private readonly string _templateName = "Template.docx";
-        public string ProcessData(string documentLocaion, Change psRefresh, ReleaseData data, Dictionary<string, List<ChangesetInfo>> categorizedChangesets,
+        public string ProcessData(string documentLocaion, Change psRefresh, ReleaseData data, List<KeyValuePair<string, List<ChangesetInfo>>> categorizedChangesets,
             IEnumerable<ClientWorkItem> workItems, IEnumerable<ClientWorkItem> pbi, string testReport)
         {
             try
