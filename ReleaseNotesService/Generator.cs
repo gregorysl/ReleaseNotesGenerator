@@ -8,11 +8,11 @@ namespace ReleaseNotesService
 {
     public class Generator
     {
-        private readonly TfsConnector _tfs;
+        private readonly TfsConnector _connector;
 
-        public Generator(TfsConnector tfs)
+        public Generator(TfsConnector connector)
         {
-            _tfs = tfs;
+            _connector = connector;
         }
 
         public string CreateDoc(DownloadedItems downloadedData, Change psRefresh, List<string> workItemStateInclude, ReleaseData releaseData, string documentLocation, string testReport = "")
@@ -45,13 +45,13 @@ namespace ReleaseNotesService
             bool includeTfsService = false)
         {
             var queryLocation = $"$/{tfsProject}/{branch}";
-            var downloadedData = _tfs.GetChangesetsRest(queryLocation, changesetFrom, changesetTo);
+            var downloadedData = _connector.GetChangesetsRest(queryLocation, changesetFrom, changesetTo);
             downloadedData.FilterTfsChanges(includeTfsService);
             var reg = new Regex(@".*\[((\d*\,)*?(\d*))\].*");
             var changesetWorkItemsId = downloadedData.Changes.Where(x => !string.IsNullOrWhiteSpace(x.comment) &&  reg.Match(x.comment).Success)
                 .Select(x => reg.Match(x.comment).Groups[1].Captures[0].Value).Select(x => x.Split(',')).SelectMany(x => x)
                 .Select(x => Convert.ToInt32(x)).ToList();
-            downloadedData.WorkItems = _tfs.GetWorkItemsAdo(iteration, changesetWorkItemsId);
+            downloadedData.WorkItems = _connector.GetWorkItemsAdo(iteration, changesetWorkItemsId);
             return downloadedData;
         }
     }

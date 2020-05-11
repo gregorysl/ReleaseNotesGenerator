@@ -12,8 +12,8 @@ namespace TfsData
     public class TfsConnector
     {
         private readonly string _workItemsForIteration = "SELECT [System.Id] FROM WorkItems WHERE [System.IterationPath] UNDER '{0}'";
-        private static HttpClient _tfs;
-        private static HttpClient _ado;
+        private static HttpClient _changesetsClient;
+        private static HttpClient _workItemClient;
         private readonly string _tfsurl;
         private readonly string _adourl;
 
@@ -21,8 +21,8 @@ namespace TfsData
         {
             _tfsurl = tfsSettings.Url;
             _adourl = azureSettings.Url;
-            _tfs = SetupClient(tfsSettings.Pat);
-            _ado = SetupClient(azureSettings.Pat);
+            _changesetsClient = SetupClient(tfsSettings.Pat);
+            _workItemClient = SetupClient(azureSettings.Pat);
         }
 
         public HttpClient SetupClient(string key)
@@ -34,15 +34,15 @@ namespace TfsData
             return client;
         }
 
-        public List<ClientWorkItem> GetWorkItemsAdo(string iterationPath, List<int> additional)
+        public List<ClientWorkItem> GetWorkItems(string iterationPath, List<int> additional, string apiVersion = "5.1")
         {
-            var response = _ado.PostWithResponse<Rootobject>($"{_adourl}/_apis/wit/wiql?api-version=5.1", new { query = string.Format(_workItemsForIteration, iterationPath) });
+            var response = _workItemClient.PostWithResponse<Rootobject>($"{_adourl}/_apis/wit/wiql?api-version={apiVersion}", new { query = string.Format(_workItemsForIteration, iterationPath) });
             var ids = response.workItems.Select(x => x.id).ToList();
             ids.AddRange(additional);
             if (!ids.Any()) return new List<ClientWorkItem>();
 
             var joinedWorkItems = string.Join(",", ids.Distinct().ToList());
-            var changesets = _ado.GetWithResponse<DataWrapper<WrappedWi>>($"{_adourl}/_apis/wit/WorkItems?ids={joinedWorkItems}&api-version=5.1");
+            var changesets = _workItemClient.GetWithResponse<DataWrapper<WrappedWi>>($"{_adourl}/_apis/wit/WorkItems?ids={joinedWorkItems}&api-version={apiVersion}");
             changesets.value.ForEach(x => x.fields.Id = x.id);
             var changeset = changesets.value.Select(x => x.fields).ToList();
 
@@ -54,11 +54,11 @@ namespace TfsData
             return clientWorkItems;
         }
 
-        public DownloadedItems GetChangesetsRest(string queryLocation, string changesetFrom, string changesetTo)
+        public DownloadedItems GetChangesetsRest(string queryLocation, string changesetFrom, string changesetTo, string apiVersion = "5.1")
         {
-            var cats = _tfs
+            var cats = _changesetsClient
                 .GetWithResponse<DataWrapper<Item>>(
-                    $"{_tfsurl}/_apis/tfvc/items?scopePath={queryLocation}&api-version=3.1&recursionLevel=OneLevel")
+                    $"{_tfsurl}/_apis/tfvc/items?scopePath={queryLocation}&api-version={apiVersion}&recursionLevel=OneLevel")
                 .value.Where(x => x.isFolder && x.path != queryLocation).ToList();
 
             var tfsClass = new DownloadedItems();
@@ -68,7 +68,7 @@ namespace TfsData
             Parallel.ForEach(cats, category =>
             {
                 var itemPath = $"searchCriteria.itemPath={category.path}";
-                var response = _tfs
+                var response = _changesetsClient
                     .GetWithResponse<DataWrapper<Change>>(
                         $"{_tfsurl}/_apis/tfvc/changesets?{itemPath}{from}{to}&$top=1000&api-version=1.0").value;
                 if (!response.Any()) return;
