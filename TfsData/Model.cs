@@ -21,14 +21,47 @@ namespace TfsData
 
     public class ClientWorkItem
     {
+        private string _legacyClientProject;
+        private string _clientProject;
+
         [JsonProperty(PropertyName = "System.Id")]
         public int Id { get; set; }
+
         [JsonProperty(PropertyName = "System.Title")]
         public string Title { get; set; }
+
         [JsonProperty(PropertyName = "System.State")]
         public string State { get; set; }
+
         [JsonProperty(PropertyName = "Custom.ClientProject", DefaultValueHandling = DefaultValueHandling.Populate)]
-        public string ClientProject { get; set; }
+        public string ClientProject
+        {
+            get => _clientProject;
+            set
+            {
+                if (string.IsNullOrWhiteSpace(ClientProject))
+                {
+                    _clientProject = value;
+                }
+            }
+        }
+
+
+        [JsonProperty(PropertyName = "client.project", DefaultValueHandling = DefaultValueHandling.Populate)]
+        public string LegacyClientProject
+
+        {
+            get => _legacyClientProject;
+            set
+            {
+                if (string.IsNullOrWhiteSpace(ClientProject))
+                {
+                    ClientProject = value;
+                }
+                _legacyClientProject = value;
+            }
+        }
+
         [JsonProperty(PropertyName = "System.WorkItemType")]
         public string WorkItemType { get; set; }
         [JsonProperty(PropertyName = "System.BoardColumn")]
