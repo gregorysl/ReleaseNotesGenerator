@@ -16,7 +16,7 @@ namespace TfsData
 
         public static T GetWithResponse<T>(this HttpClient client, string url)
         {
-            using (HttpResponseMessage response = client.GetAsync(url).Result)
+            using (var response = client.GetAsync(url).Result)
             {
                 response.EnsureSuccessStatusCode();
                 string responseBody = response.Content.ReadAsStringAsync().Result;
@@ -25,7 +25,7 @@ namespace TfsData
         }
         public static T PostWithResponse<T>(this HttpClient client, string url, object p)
         {
-            using (HttpResponseMessage response = client.PostAsJsonAsync(url, p).Result)
+            using (var response = client.PostAsJsonAsync(url, p).Result)
             {
                 response.EnsureSuccessStatusCode();
                 string responseBody = response.Content.ReadAsStringAsync().Result;

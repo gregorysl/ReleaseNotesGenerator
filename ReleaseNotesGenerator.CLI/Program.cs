@@ -12,12 +12,6 @@ namespace ReleaseNotesGenerator.CLI
     {
         static void Main(string[] args)
         {
-            DoWork();
-        }
-
-        public static async void DoWork()
-        {
-
             var executableLocation = Path.GetDirectoryName(
                 Assembly.GetExecutingAssembly().Location);
             if (executableLocation == null) return;
@@ -36,11 +30,15 @@ namespace ReleaseNotesGenerator.CLI
             var releaseData = settings.Data;
             var downloadedData = generator.DownloadData(releaseData.TfsProject, releaseData.TfsBranch, releaseData.ChangesetFrom, releaseData.ChangesetTo, releaseData.Iteration);
 
+            Console.WriteLine($"Downloaded data: {downloadedData.WorkItems.Count} work items {downloadedData.Changes.Count} changesets");
+
             var psRefresh = downloadedData.Changes.First(x => releaseData.ChangesetTo == x.changesetId.ToString());
 
             var message = generator.CreateDoc(downloadedData, psRefresh, settings.WorkItemStateInclude, releaseData, settings.DocumentLocation, settings.TestReport);
 
-            if (!string.IsNullOrWhiteSpace(message)) Console.WriteLine(message);
+            if (string.IsNullOrWhiteSpace(message)) return;
+
+            Console.WriteLine(message);
         }
     }
 }

@@ -34,41 +34,6 @@ namespace TfsData
             return client;
         }
 
-        public List<string> Projects()
-        {
-            var tfsData = _ado.GetWithResponse<DataWrapper<Project>>(($"{_adourl}/_apis/projects?$top=999"));
-            var projects = tfsData.value.Select(x => x.name).OrderBy(x => x).ToList();
-            return projects;
-        }
-
-        public ICollection<string> GetIterationPaths(string projectName)
-        {
-            var iterationData = _ado.GetWithResponse<Iteration>($"{_adourl}/{projectName}/_apis/wit/classificationNodes/Iterations?$depth=5");
-            var iterations = new List<string>();
-            getI(iterationData, "", iterations);
-            return iterations;
-        }
-
-        private void getI(Iteration iteration, string v, List<string> list)
-        {
-            v = v + iteration.name + "\\";
-            list.Add(v.TrimEnd('\\'));
-            iteration.children?.OrderBy(x => x.name).ToList().ForEach(x => getI(x, v, list));
-        }
-
-        public string GetChangesetTitleById(int id)
-        {
-            try
-            {
-                var changeset = _tfs.GetWithResponse<Change>($"{_tfsurl}/_apis/tfvc/changesets/{id}?api-version=1.0");
-                return changeset.comment;
-            }
-            catch (Exception e)
-            {
-                return e.Message;
-            }
-        }
-
         public List<ClientWorkItem> GetWorkItemsAdo(string iterationPath, List<int> additional)
         {
             var response = _ado.PostWithResponse<Rootobject>($"{_adourl}/_apis/wit/wiql?api-version=5.1", new { query = string.Format(_workItemsForIteration, iterationPath) });

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using TfsData;
 using Xceed.Document.NET;
@@ -56,8 +55,7 @@ namespace ReleaseNotesService
                     doc.SaveAs(releasePath);
                 }
 
-                Process.Start(releasePath);
-                return $"Successfully generated document! You can find it in following location {releasePath}";
+                return $"Successfully generated document! You can find it in following location :{releasePath}";
             }
             catch (Exception e)
             {
