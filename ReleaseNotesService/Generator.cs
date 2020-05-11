@@ -42,11 +42,11 @@ namespace ReleaseNotesService
             return message;
         }
 
-        public async Task<DownloadedItems> DownloadData(string tfsProject, string branch, string changesetFrom, string changesetTo, string iteration,
+        public DownloadedItems DownloadData(string tfsProject, string branch, string changesetFrom, string changesetTo, string iteration,
             bool includeTfsService = false)
         {
             var queryLocation = $"$/{tfsProject}/{branch}";
-            var downloadedData = await Task.Run(() => _tfs.GetChangesetsRest(queryLocation, changesetFrom, changesetTo));
+            var downloadedData = _tfs.GetChangesetsRest(queryLocation, changesetFrom, changesetTo);
             downloadedData.FilterTfsChanges(includeTfsService);
             var reg = new Regex(@".*\[((\d*\,)*?(\d*))\].*");
             var changesetWorkItemsId = downloadedData.Changes.Where(x => reg.Match(x.comment).Success)

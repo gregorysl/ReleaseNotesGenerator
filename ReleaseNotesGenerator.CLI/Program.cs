@@ -1,71 +1,46 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using TfsData;
 using ReleaseNotesService;
+using Newtonsoft.Json;
 
 namespace ReleaseNotesGenerator.CLI
 {
     class Program
     {
-        private static Generator _generator;
-        private static TfsConnector _tfs;
         static void Main(string[] args)
         {
-            const string tfsProject = "";
-            const string branch = "";
-            const string changesetTo = "";
+            DoWork();
+        }
 
-            const string qaBuildName = "";
-            const string qaBuildDate = "";
+        public static async void DoWork()
+        {
 
-            
-            const string changesetFrom = "";
-            const string releaseName = "";
-            const string testReport = "";
-            var iteration = $"Project\\Current\\{releaseName}";
+            var executableLocation = Path.GetDirectoryName(
+                Assembly.GetExecutingAssembly().Location);
+            if (executableLocation == null) return;
 
-            var releaseDate = DateTime.Now.ToString("d-MMMM-yyyy");//"14.02.2020";
+            var settingsLocation = Path.Combine(executableLocation, "settings.json");
+            var settingsContent = File.ReadAllText(settingsLocation);
 
-            var red = new ReleaseData
-            {
-                TfsProject = tfsProject,
-                TfsBranch = branch,
-                ChangesetTo = changesetTo,
-                QaBuildName = qaBuildName,
-                QaBuildDate = qaBuildDate,
-                ChangesetFrom = changesetFrom,
-                IterationSelected = iteration,
-                ReleaseDate = releaseDate,
-                ReleaseName = releaseName
-            };
+            Console.WriteLine("Creating patch notes using following settings:");
+            Console.WriteLine(settingsContent);
 
-            var tfsUrl = ConfigurationManager.AppSettings["tfsUrl"];
-            var tfsUsername = ConfigurationManager.AppSettings["tfsUsername"];
-            var tfsKey = ConfigurationManager.AppSettings["tfsKey"];
-            var adoUrl = ConfigurationManager.AppSettings["adoUrl"];
-            var adoUsername = ConfigurationManager.AppSettings["adoUsername"];
-            var adoKey = ConfigurationManager.AppSettings["adoKey"];
-            var documentLocation = ConfigurationManager.AppSettings["documentLocation"];
-            if (string.IsNullOrWhiteSpace(tfsUrl)) return;
+            var settings = JsonConvert.DeserializeObject<Settings>(settingsContent);
 
-            _tfs = new TfsConnector(tfsUrl, tfsUsername, tfsKey, adoUrl, adoUsername, adoKey);
-            _generator = new Generator(_tfs);
+            var tfs = new TfsConnector(settings.Tfs, settings.Azure);
+            var generator = new Generator(tfs);
 
-            var downloadedData = _generator.DownloadData(tfsProject, branch, changesetFrom, changesetTo, iteration).Result;
+            var releaseData = settings.Data;
+            var downloadedData = generator.DownloadData(releaseData.TfsProject, releaseData.TfsBranch, releaseData.ChangesetFrom, releaseData.ChangesetTo, releaseData.Iteration);
 
-            var psRefresh = downloadedData.Changes.First(x => changesetTo == x.changesetId.ToString());
+            var psRefresh = downloadedData.Changes.First(x => releaseData.ChangesetTo == x.changesetId.ToString());
 
-            var workItemStateInclude = GettrimmedSettingList("workItemStateInclude");
-
-            var message = _generator.CreateDoc(downloadedData, psRefresh, workItemStateInclude, red, documentLocation, testReport);
+            var message = generator.CreateDoc(downloadedData, psRefresh, settings.WorkItemStateInclude, releaseData, settings.DocumentLocation, settings.TestReport);
 
             if (!string.IsNullOrWhiteSpace(message)) Console.WriteLine(message);
-        }
-        private static List<string> GettrimmedSettingList(string key)
-        {
-            return ConfigurationManager.AppSettings[key].Split(',').Select(x => x.Trim()).ToList();
         }
     }
 }

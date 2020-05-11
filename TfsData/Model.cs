@@ -10,8 +10,7 @@ namespace TfsData
     {
         public string TfsProject { get; set; }
         public string TfsBranch { get; set; }
-        public string ProjectSelected { get; set; }
-        public string IterationSelected { get; set; }
+        public string Iteration { get; set; }
         public string ChangesetFrom { get; set; }
         public string ChangesetTo { get; set; }
         public string ReleaseName { get; set; }
@@ -71,5 +70,11 @@ namespace TfsData
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+    }
+
+    public class TfsSettings
+    {
+        public string Url { get; set; }
+        public string Pat { get; set; }
     }
 }

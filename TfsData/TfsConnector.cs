@@ -6,7 +6,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 namespace TfsData
 {
@@ -18,15 +17,15 @@ namespace TfsData
         private readonly string _tfsurl;
         private readonly string _adourl;
 
-        public TfsConnector(string tfsuri, string tfsusername, string tfskey, string adouri, string adousername, string adokey)
+        public TfsConnector(TfsSettings tfsSettings, TfsSettings azureSettings)
         {
-            _tfsurl = tfsuri;
-            _adourl = adouri;
-            _tfs = SetupClient(_tfsurl, tfsusername, tfskey);
-            _ado = SetupClient(_adourl, adousername, adokey);
+            _tfsurl = tfsSettings.Url;
+            _adourl = azureSettings.Url;
+            _tfs = SetupClient(tfsSettings.Pat);
+            _ado = SetupClient(azureSettings.Pat);
         }
 
-        public HttpClient SetupClient(string url, string username, string key)
+        public HttpClient SetupClient(string key)
         {
             var client = new HttpClient();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
