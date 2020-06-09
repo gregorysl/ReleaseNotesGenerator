@@ -1,83 +1,47 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
+using RNA.Model;
 
 namespace TfsData
 {
-    public class TfsConnector
+    public class TfsConnector : Connector
     {
-        private readonly string _workItemsForIteration = "SELECT [System.Id] FROM WorkItems WHERE [System.IterationPath] UNDER '{0}'";
-        private static HttpClient _changesetsClient;
-        private static HttpClient _workItemClient;
-        private readonly string _tfsurl;
-        private readonly string _adourl;
-
-        public TfsConnector(TfsSettings tfsSettings, TfsSettings azureSettings)
+        public TfsConnector(ServerDetails settings) : base(settings)
         {
-            _tfsurl = tfsSettings.Url;
-            _adourl = azureSettings.Url;
-            _changesetsClient = SetupClient(tfsSettings.Pat);
-            _workItemClient = SetupClient(azureSettings.Pat);
         }
 
-        public HttpClient SetupClient(string key)
+        public override async Task<DownloadedItems> GetChangesetsAsync(ReleaseData data, string apiVersion = "5.1")
         {
-            var client = new HttpClient();
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",
-                Convert.ToBase64String(Encoding.ASCII.GetBytes($":{key}")));
-            return client;
-        }
+            var baseurl = $"{Url}/_apis/tfvc/";
+            var queryLocation = $"$/{data.TfsProject}/{data.TfsBranch}";
+            var itemQueryUrl = $"{baseurl}items?scopePath={queryLocation}&api-version={apiVersion}&recursionLevel=OneLevel";
+            var itemQueryResponse = await Client.GetAsync<Wrapper<Item>>(itemQueryUrl, apiVersion);
 
-        public List<ClientWorkItem> GetWorkItems(string iterationPath, List<int> additional, string apiVersion = "5.1")
-        {
-            var response = _workItemClient.PostWithResponse<Rootobject>($"{_adourl}/_apis/wit/wiql?api-version={apiVersion}", new { query = string.Format(_workItemsForIteration, iterationPath) });
-            var ids = response.workItems.Select(x => x.id).ToList();
-            ids.AddRange(additional);
-            if (!ids.Any()) return new List<ClientWorkItem>();
+            var from = !string.IsNullOrEmpty(data.ChangesetFrom) ? "&searchCriteria.fromId=" + data.ChangesetFrom : "";
+            var to = !string.IsNullOrEmpty(data.ChangesetTo) ? "&searchCriteria.toId=" + data.ChangesetTo : "";
 
-            var joinedWorkItems = string.Join(",", ids.Distinct().ToList());
-            var changesets = _workItemClient.GetWithResponse<DataWrapper<WrappedWi>>($"{_adourl}/_apis/wit/WorkItems?ids={joinedWorkItems}&api-version={apiVersion}");
-            changesets.value.ForEach(x => x.fields.Id = x.id);
-            var changeset = changesets.value.Select(x => x.fields).ToList();
-
-
-            var clientWorkItems = changeset.DistinctBy(x => x.Id)
-                .OrderBy(x => x.ClientProject)
-                .ThenBy(x => x.Id).ToList();
-
-            return clientWorkItems;
-        }
-
-        public DownloadedItems GetChangesetsRest(string queryLocation, string changesetFrom, string changesetTo, string apiVersion = "5.1")
-        {
-            var cats = _changesetsClient
-                .GetWithResponse<DataWrapper<Item>>(
-                    $"{_tfsurl}/_apis/tfvc/items?scopePath={queryLocation}&api-version={apiVersion}&recursionLevel=OneLevel")
-                .value.Where(x => x.isFolder && x.path != queryLocation).ToList();
-
-            var tfsClass = new DownloadedItems();
-            string from = !string.IsNullOrEmpty(changesetFrom) ? "&searchCriteria.fromId=" + changesetFrom : "";
-            string to = !string.IsNullOrEmpty(changesetTo) ? "&searchCriteria.toId=" + changesetTo : "";
-            var list = new List<Change>();
-            Parallel.ForEach(cats, category =>
+            var categoryChangesTasks = itemQueryResponse.value.Where(x => x.isFolder && x.path != queryLocation).Select(async category =>
             {
-                var itemPath = $"searchCriteria.itemPath={category.path}";
-                var response = _changesetsClient
-                    .GetWithResponse<DataWrapper<Change>>(
-                        $"{_tfsurl}/_apis/tfvc/changesets?{itemPath}{from}{to}&$top=1000&api-version=1.0").value;
-                if (!response.Any()) return;
-                list.AddRange(response);
-                tfsClass.Categorized.Add(category.path.Replace(queryLocation,"").Trim('/'), response.Select(x => x.changesetId).ToList());
-
+                var urls = $"{baseurl}changesets?searchCriteria.itemPath={category.path}{from}{to}&$top=1000";
+                var wrapper = await Client.GetAsync<Wrapper<Change>>(urls, apiVersion);
+                return new Tuple<string, List<Change>>(category.path, wrapper.value);
             });
-            var changesList = list.DistinctBy(x => x.changesetId).OrderByDescending(x => x.changesetId).ToList();
-            tfsClass.Changes = new ObservableCollection<Change>(changesList);
+            var categoryChangesResponse = await Task.WhenAll(categoryChangesTasks);
+
+            var changesByCategory = categoryChangesResponse
+                .Where(x => x.Item2.Any())
+                .OrderBy(x => x.Item1)
+                .ToDictionary(x => x.Item1, y => y.Item2.Select(z => z.changesetId).ToList());
+
+
+            var changesList = categoryChangesResponse
+                .SelectMany(x => x.Item2)
+                .DistinctBy(x => x.changesetId)
+                .OrderByDescending(x => x.checkedInBy.date)
+                .ToList();
+            var tfsClass = new DownloadedItems { Changes = changesList, Categorized = changesByCategory };
             return tfsClass;
 
         }

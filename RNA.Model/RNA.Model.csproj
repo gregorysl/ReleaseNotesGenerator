@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{461D722E-EB35-4DED-979A-F8E994FCEEA6}</ProjectGuid>
+    <ProjectGuid>{4CB4097D-FE4F-4B5A-BCDB-70DBA651476A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ReleaseNotesService</RootNamespace>
-    <AssemblyName>ReleaseNotesService</AssemblyName>
+    <RootNamespace>RNA.Model</RootNamespace>
+    <AssemblyName>RNA.Model</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -44,29 +44,15 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="Xceed.Document.NET, Version=1.4.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
-      <HintPath>..\packages\DocX.1.4.1\lib\net40\Xceed.Document.NET.dll</HintPath>
-    </Reference>
-    <Reference Include="Xceed.Words.NET, Version=1.4.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
-      <HintPath>..\packages\DocX.1.4.1\lib\net40\Xceed.Words.NET.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DocumentEditor.cs" />
-    <Compile Include="DocumentHelper.cs" />
-    <Compile Include="Generator.cs" />
-    <Compile Include="Helpers.cs" />
+    <Compile Include="ChangesetInfo.cs" />
+    <Compile Include="ClientWorkItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\RNA.Model\RNA.Model.csproj">
-      <Project>{4CB4097D-FE4F-4B5A-BCDB-70DBA651476A}</Project>
-      <Name>RNA.Model</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TfsData\TfsData.csproj">
-      <Project>{F88C7DF3-6632-4FA0-B2B7-67F022A726D2}</Project>
-      <Name>TfsData</Name>
-    </ProjectReference>
+    <Compile Include="ReleaseData.cs" />
+    <Compile Include="ServerDetails.cs" />
+    <Compile Include="Settings.cs" />
+    <Compile Include="TfsModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

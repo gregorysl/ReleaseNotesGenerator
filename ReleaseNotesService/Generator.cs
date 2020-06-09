@@ -2,20 +2,24 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using RNA.Model;
 using TfsData;
 
 namespace ReleaseNotesService
 {
     public class Generator
     {
-        private readonly TfsConnector _connector;
-
-        public Generator(TfsConnector connector)
+        private readonly Regex _regex = new Regex(@".*\[((\d*\,)*?(\d*))\].*", RegexOptions.Compiled);
+        private readonly Connector _changesetConnector;
+        private readonly Connector _workItemConnector;
+        public Generator(Connector changesetConnector, Connector workItemConnector)
         {
-            _connector = connector;
+            _changesetConnector = changesetConnector;
+            _workItemConnector = workItemConnector;
         }
 
-        public string CreateDoc(DownloadedItems downloadedData, Change psRefresh, List<string> workItemStateInclude, ReleaseData releaseData, string documentLocation, string testReport = "")
+        public string CreateDoc(DownloadedItems downloadedData, Change psRefresh, List<string> workItemStateInclude,
+        ReleaseData releaseData, string documentLocation, string testReport = "")
         {
             var selectedChangesets = downloadedData.Changes
                 .Where(x => x.Selected)
@@ -30,26 +34,34 @@ namespace ReleaseNotesService
 
             var categories = downloadedData.Categorized.ToDictionary(
                     category => category.Key,
-                    category => selectedChangesets.Where(x => category.Value.Contains(x.Id)).ToList()).Where(x=>x.Value.Any()).ToList();
+                    category => selectedChangesets.Where(x => category.Value.Contains(x.Id)).ToList())
+                    .Where(x => x.Value.Any()).ToList();
 
-            var workItems = downloadedData.WorkItems.Where(x => workItemStateInclude.Contains(x.State) && x.ClientProject != null)
+            var workItems = downloadedData.WorkItems
+            .Where(x => workItemStateInclude.Contains(x.State) && x.ClientProject != null)
                 .OrderBy(x => x.ClientProject);
-            var pbi = downloadedData.WorkItems.Where(x => workItemStateInclude.Contains(x.State) && x.ClientProject == null)
+            var pbi = downloadedData.WorkItems
+            .Where(x => workItemStateInclude.Contains(x.State) && x.ClientProject == null)
                 .OrderBy(x => x.Id);
-            var message = new DocumentEditor().ProcessData(documentLocation, psRefresh, releaseData, categories, workItems, pbi, testReport);
+            var message = new DocumentEditor().ProcessData(documentLocation, psRefresh, releaseData, categories,
+            workItems, pbi, testReport);
             return message;
         }
 
         public DownloadedItems DownloadData(ReleaseData data, bool includeTfsService = false)
         {
-            var queryLocation = $"$/{data.TfsProject}/{data.TfsBranch}";
-            var downloadedData = _connector.GetChangesetsRest(queryLocation, data.ChangesetFrom, data.ChangesetTo);
+            var downloadedData = _changesetConnector.GetChangesetsAsync(data).Result;
+            //var downloadedData = _changesetConnector.GetChangesetsRest(data, "3.1");
+
             downloadedData.FilterTfsChanges(includeTfsService);
-            var reg = new Regex(@".*\[((\d*\,)*?(\d*))\].*");
-            var changesetWorkItemsId = downloadedData.Changes.Where(x => !string.IsNullOrWhiteSpace(x.comment) &&  reg.Match(x.comment).Success)
-                .Select(x => reg.Match(x.comment).Groups[1].Captures[0].Value).Select(x => x.Split(',')).SelectMany(x => x)
-                .Select(x => Convert.ToInt32(x)).ToList();
-            downloadedData.WorkItems = _connector.GetWorkItems(data.Iteration, changesetWorkItemsId);
+            var changesetWorkItemsId = downloadedData.Changes
+                .Where(x => !string.IsNullOrWhiteSpace(x.comment) && _regex.Match(x.comment).Success)
+                .Select(x => _regex.Match(x.comment).Groups[1].Captures[0].Value)
+                .Select(x => x.Split(','))
+                .SelectMany(x => x)
+                .Select(x => x).ToList();
+
+            downloadedData.WorkItems = _workItemConnector.GetWorkItems(data.Iteration, changesetWorkItemsId);
             return downloadedData;
         }
     }

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using TfsData;
+using RNA.Model;
 using Xceed.Document.NET;
 using Xceed.Words.NET;
 
@@ -54,7 +54,7 @@ namespace ReleaseNotesService
                     doc.SaveAs(releasePath);
                 }
 
-                return $"Successfully generated document! You can find it in following location :{releasePath}";
+                return $"Successfully generated document! You can find it in following location | {releasePath}";
             }
             catch (Exception e)
             {

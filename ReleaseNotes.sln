@@ -7,7 +7,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TfsData", "TfsData\TfsData.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReleaseNotesService", "ReleaseNotesService\ReleaseNotesService.csproj", "{461D722E-EB35-4DED-979A-F8E994FCEEA6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReleaseNotesGenerator.CLI", "ReleaseNotesGenerator.CLI\ReleaseNotesGenerator.CLI.csproj", "{9A951F8A-F809-4551-8885-4BBD833CF610}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RNA.Console", "RNA.Console\RNA.Console.csproj", "{9A951F8A-F809-4551-8885-4BBD833CF610}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RNA.Model", "RNA.Model\RNA.Model.csproj", "{4CB4097D-FE4F-4B5A-BCDB-70DBA651476A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{9A951F8A-F809-4551-8885-4BBD833CF610}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9A951F8A-F809-4551-8885-4BBD833CF610}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9A951F8A-F809-4551-8885-4BBD833CF610}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4CB4097D-FE4F-4B5A-BCDB-70DBA651476A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CB4097D-FE4F-4B5A-BCDB-70DBA651476A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CB4097D-FE4F-4B5A-BCDB-70DBA651476A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CB4097D-FE4F-4B5A-BCDB-70DBA651476A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -6,12 +6,13 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{9A951F8A-F809-4551-8885-4BBD833CF610}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>ReleaseNotesGenerator.CLI</RootNamespace>
-    <AssemblyName>ReleaseNotesGenerator.CLI</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <RootNamespace>RNA.Console</RootNamespace>
+    <AssemblyName>RNA.Console</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -33,12 +34,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -49,7 +51,6 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Settings.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -61,6 +62,10 @@
     <ProjectReference Include="..\ReleaseNotesService\ReleaseNotesService.csproj">
       <Project>{461d722e-eb35-4ded-979a-f8e994fceea6}</Project>
       <Name>ReleaseNotesService</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RNA.Model\RNA.Model.csproj">
+      <Project>{4CB4097D-FE4F-4B5A-BCDB-70DBA651476A}</Project>
+      <Name>RNA.Model</Name>
     </ProjectReference>
     <ProjectReference Include="..\TfsData\TfsData.csproj">
       <Project>{F88C7DF3-6632-4FA0-B2B7-67F022A726D2}</Project>

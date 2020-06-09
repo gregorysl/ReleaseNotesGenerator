@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using TfsData;
+using RNA.Model;
 using Xceed.Document.NET;
 
 namespace ReleaseNotesService

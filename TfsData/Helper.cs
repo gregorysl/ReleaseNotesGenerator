@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace TfsData
@@ -27,10 +28,47 @@ namespace TfsData
         {
             using (var response = client.PostAsJsonAsync(url, p).Result)
             {
-                response.EnsureSuccessStatusCode();
                 string responseBody = response.Content.ReadAsStringAsync().Result;
+                response.EnsureSuccessStatusCode();
                 return JsonConvert.DeserializeObject<T>(responseBody);
             }
+        }
+
+        public static async Task<T> PostAsync<T>(this HttpClient client, string url, object obj, string apiVersion)
+        {
+            var finalUrl = url.AppendApiVersion(apiVersion);
+            using (var response = await client.PostAsJsonAsync(finalUrl, obj))
+            {
+                var responseBody = await response.Content.ReadAsStringAsync();
+                response.EnsureSuccessStatusCode();
+                return JsonConvert.DeserializeObject<T>(responseBody);
+            }
+        }
+
+        public static async Task<T> GetAsync<T>(this HttpClient client, string url, string apiVersion)
+        {
+            var finalUrl = url.AppendApiVersion(apiVersion);
+            using (var response = await client.GetAsync(finalUrl))
+            {
+                var responseBody = await response.Content.ReadAsStringAsync();
+                response.EnsureSuccessStatusCode();
+                return JsonConvert.DeserializeObject<T>(responseBody);
+            }
+        }
+        public static T CloneJson<T>(this T source)
+        {
+            if (source == null)
+            {
+                return default;
+            }
+            var deserializeSettings = new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace };
+            return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(source), deserializeSettings);
+        }
+
+        public static string AppendApiVersion(this string url, string apiVersion)
+        {
+            var connector = url.Contains('?') ? "&" : "?";
+            return $"{url}{connector}api-version={apiVersion}";
         }
     }
 
