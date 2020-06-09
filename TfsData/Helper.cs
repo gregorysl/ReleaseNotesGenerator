@@ -68,7 +68,7 @@ namespace TfsData
         public static string AppendApiVersion(this string url, string apiVersion)
         {
             var connector = url.Contains('?') ? "&" : "?";
-            return $"{connector}api-version={apiVersion}";
+            return $"{url}{connector}api-version={apiVersion}";
         }
     }
 
