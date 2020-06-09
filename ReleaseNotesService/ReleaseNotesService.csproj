@@ -55,6 +55,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\RNA.Model\RNA.Model.csproj">
+      <Project>{4CB4097D-FE4F-4B5A-BCDB-70DBA651476A}</Project>
+      <Name>RNA.Model</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TfsData\TfsData.csproj">
       <Project>{F88C7DF3-6632-4FA0-B2B7-67F022A726D2}</Project>
       <Name>TfsData</Name>

@@ -5,6 +5,7 @@ using System.Reflection;
 using TfsData;
 using ReleaseNotesService;
 using Newtonsoft.Json;
+using RNA.Model;
 
 namespace ReleaseNotesGenerator.CLI
 {

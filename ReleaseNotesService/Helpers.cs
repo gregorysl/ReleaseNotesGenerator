@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Globalization;
-using TfsData;
+using RNA.Model;
 
 namespace ReleaseNotesService
 {

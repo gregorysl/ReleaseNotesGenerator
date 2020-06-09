@@ -57,14 +57,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Cset.cs" />
     <Compile Include="Helper.cs" />
-    <Compile Include="Model.cs" />
     <Compile Include="TfsConnector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RNA.Model\RNA.Model.csproj">
+      <Project>{4CB4097D-FE4F-4B5A-BCDB-70DBA651476A}</Project>
+      <Name>RNA.Model</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
