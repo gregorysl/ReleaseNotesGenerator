@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using RNA.Model;
@@ -33,14 +34,14 @@ namespace TfsData
                 var currentQuery = query.CloneJson();
                 currentQuery.itemPath = category.relativePath;
                 var wrapper = await Client.PostAsync<Wrapper<ChangeAzure>>(changesUrl, currentQuery, apiVersion);
-                return new Tuple<string, Wrapper<ChangeAzure>>(category.relativePath, wrapper);
+                return new Tuple<string, List<ChangeAzure>>(category.relativePath, wrapper.value);
             });
             var categoryChangesResponse = await Task.WhenAll(categoryChangesTasks);
 
-            var changesByCategory = categoryChangesResponse.Where(x => x.Item2.value.Any())
-                .ToDictionary(x => x.Item1, y => y.Item2.value.Select(z => z.commitId).ToList());
+            var changesByCategory = categoryChangesResponse.Where(x => x.Item2.Any())
+                .ToDictionary(x => x.Item1, y => y.Item2.Select(z => z.commitId).ToList());
 
-            var changesList = categoryChangesResponse.SelectMany(x => x.Item2.value).ToList().DistinctBy(x => x.commitId)
+            var changesList = categoryChangesResponse.SelectMany(x => x.Item2).ToList().DistinctBy(x => x.commitId)
                 .OrderByDescending(x => x.commitId).Select(x => new Change
                 {
                     comment = x.comment,
