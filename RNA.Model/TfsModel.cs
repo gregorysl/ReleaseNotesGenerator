@@ -21,7 +21,7 @@ namespace RNA.Model
 
     public class DownloadedItems
     {
-        public Dictionary<string, List<int>> Categorized { get; set; } = new Dictionary<string, List<int>>();
+        public Dictionary<string, List<string>> Categorized { get; set; } = new Dictionary<string, List<string>>();
         public List<Change> Changes { get; set; } = new List<Change>();
         public List<ClientWorkItem> WorkItems { get; set; }
 
@@ -52,11 +52,12 @@ namespace RNA.Model
     public class DataWrapper<T> where T : class
     {
         public List<T> value { get; set; }
+        public List<T> treeEntries { get; set; }
     }
 
     public class Change
     {
-        public int changesetId { get; set; }
+        public string changesetId { get; set; }
         public Author checkedInBy { get; set; }
         public DateTime createdDate { get; set; }
         public string comment { get; set; }
@@ -71,10 +72,58 @@ namespace RNA.Model
     public class Author
     {
         public string displayName { get; set; }
+        public string name
+        {
+            set => displayName = value;
+        }
 
+        public DateTime date { get; set; }
         public override string ToString()
         {
             return displayName;
         }
     }
+
+
+    public class ItemsObject
+    {
+        public string objectId { get; set; }
+        public string relativePath { get; set; }
+        public string gitObjectType { get; set; }
+        public string commitId { get; set; }
+        public string path { get; set; }
+        public bool isFolder { get; set; }
+        public string url { get; set; }
+    }
+
+
+
+
+    public class ChangeAzure
+    {
+        public string commitId { get; set; }
+        public Author author { get; set; }
+        public string comment { get; set; }
+        public DateTime createdDate { get; set; }
+        public List<Workitem> workItems { get; set; }
+    }
+
+
+
+
+
+    public class GitQueryCommitsCriteria
+    {
+        public GitVersion itemVersion { get; set; }
+        public GitVersion compareVersion { get; set; }
+        public bool includeWorkItems { get; set; }
+        public string itemPath { get; set; }
+    }
+
+    public class GitVersion
+    {
+        public string versionType { get; set; }
+        public string version { get; set; }
+    }
+
 }

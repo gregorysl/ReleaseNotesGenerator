@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using RNA.Model;
 
 namespace TfsData
@@ -79,6 +80,50 @@ namespace TfsData
             });
             var changesList = list.DistinctBy(x => x.changesetId).OrderByDescending(x => x.changesetId).ToList();
             tfsClass.Changes = changesList;
+            return tfsClass;
+
+        }
+        public async Task<DownloadedItems> GetChangesetsRestAzure(string queryLocation, ReleaseData data, string apiVersion = "5.1")
+        {
+            var baseurl = $"{_tfsurl}/{data.TfsProject}/_apis/git/repositories/{data.TfsProject}";
+            var objectId = _changesetsClient.GetWithResponse<DataWrapper<ItemsObject>>(
+                $"{baseurl}/items?recursionLevel=oneLevel&api-version={apiVersion}").value.First().objectId;
+
+            var ur = $"{baseurl}/trees/{objectId}?api-version={apiVersion}";
+
+            var cats = _changesetsClient.GetWithResponse<DataWrapper<ItemsObject>>(ur).treeEntries.Where(x => x.gitObjectType == "tree").ToList();
+
+            var query = new GitQueryCommitsCriteria();
+            if (!string.IsNullOrEmpty(data.ChangesetFrom))
+            {
+                query.compareVersion = new GitVersion { versionType = "commit", version = data.ChangesetFrom };
+            }
+            if (!string.IsNullOrEmpty(data.ChangesetTo))
+            {
+                query.itemVersion = new GitVersion { versionType = "commit", version = data.ChangesetTo };
+            }
+
+            var url = $"{baseurl}/commitsbatch?api-version={apiVersion}";
+            var tasks = cats.Select(async category =>
+            {
+                var currentQuery = query.CloneJson();
+                currentQuery.itemPath = category.relativePath;
+                var json = JsonConvert.SerializeObject(query);
+                var wrapper = await _changesetsClient.PostWithResponseAsync<DataWrapper<ChangeAzure>>(url, currentQuery);
+                return new Tuple<string, DataWrapper<ChangeAzure>>(category.relativePath, wrapper);
+            });
+            var tasksResponse = await Task.WhenAll(tasks);
+            var categorizedDictionary = tasksResponse.Where(x => x.Item2.value.Any())
+                .ToDictionary(x => x.Item1, y => y.Item2.value.Select(z => z.commitId).ToList());
+            var changesList = tasksResponse.SelectMany(x => x.Item2.value).ToList().DistinctBy(x => x.commitId)
+                .OrderByDescending(x => x.commitId).Select(x => new Change
+                {
+                    comment = x.comment,
+                    checkedInBy = x.author,
+                    createdDate = x.author.date,
+                    changesetId = x.commitId
+                }).ToList();
+            var tfsClass = new DownloadedItems { Categorized = categorizedDictionary, Changes = changesList };
             return tfsClass;
 
         }

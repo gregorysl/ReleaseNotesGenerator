@@ -7,7 +7,7 @@ namespace RNA.Model
     {
         public bool Selected { get; set; } = true;
 
-        public int Id { get; set; }
+        public string Id { get; set; }
         public string CommitedBy { get; set; }
         public DateTime Created { get; set; }
         public string Comment { get; set; } = "";

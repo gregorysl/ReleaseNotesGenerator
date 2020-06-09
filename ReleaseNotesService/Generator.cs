@@ -60,5 +60,18 @@ namespace ReleaseNotesService
             downloadedData.WorkItems = _connector.GetWorkItems(data.Iteration, changesetWorkItemsId);
             return downloadedData;
         }
+
+        public DownloadedItems DownloadDataAzure(ReleaseData data, bool includeTfsService = false)
+        {
+            var queryLocation = $"$/{data.TfsProject}/{data.TfsBranch}";
+            var downloadedData = _connector.GetChangesetsRestAzure(queryLocation, data).Result;
+            downloadedData.FilterTfsChanges(includeTfsService);
+            var reg = new Regex(@".*\[((\d*\,)*?(\d*))\].*");
+            var changesetWorkItemsId = downloadedData.Changes.Where(x => !string.IsNullOrWhiteSpace(x.comment) && reg.Match(x.comment).Success)
+                .Select(x => reg.Match(x.comment).Groups[1].Captures[0].Value).Select(x => x.Split(',')).SelectMany(x => x)
+                .Select(x => Convert.ToInt32(x)).ToList();
+            downloadedData.WorkItems = _connector.GetWorkItems(data.Iteration, changesetWorkItemsId);
+            return downloadedData;
+        }
     }
 }
