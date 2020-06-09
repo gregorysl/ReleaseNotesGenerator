@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace RNA.Model
 {
@@ -49,7 +48,7 @@ namespace RNA.Model
         public Iteration[] children { get; set; }
     }
 
-    public class DataWrapper<T> where T : class
+    public class Wrapper<T> where T : class
     {
         public List<T> value { get; set; }
         public List<T> treeEntries { get; set; }

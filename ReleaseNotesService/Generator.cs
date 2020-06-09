@@ -9,11 +9,13 @@ namespace ReleaseNotesService
 {
     public class Generator
     {
-        private readonly TfsConnector _connector;
         private readonly Regex _regex = new Regex(@".*\[((\d*\,)*?(\d*))\].*", RegexOptions.Compiled);
-        public Generator(TfsConnector connector)
+        private readonly Connector _changesetConnector;
+        private readonly Connector _workItemConnector;
+        public Generator(Connector changesetConnector, Connector workItemConnector)
         {
-            _connector = connector;
+            _changesetConnector = changesetConnector;
+            _workItemConnector = workItemConnector;
         }
 
         public string CreateDoc(DownloadedItems downloadedData, Change psRefresh, List<string> workItemStateInclude,
@@ -48,8 +50,8 @@ namespace ReleaseNotesService
 
         public DownloadedItems DownloadData(ReleaseData data, bool includeTfsService = false)
         {
-            var downloadedData = _connector.GetChangesetsRestAzure(data).Result;
-            //var downloadedData = _connector.GetChangesetsRest(data, "3.1");
+            var downloadedData = _changesetConnector.GetChangesetsAsync(data).Result;
+            //var downloadedData = _changesetConnector.GetChangesetsRest(data, "3.1");
 
             downloadedData.FilterTfsChanges(includeTfsService);
             var changesetWorkItemsId = downloadedData.Changes
@@ -58,7 +60,8 @@ namespace ReleaseNotesService
                 .Select(x => x.Split(','))
                 .SelectMany(x => x)
                 .Select(x => Convert.ToInt32(x)).ToList();
-            downloadedData.WorkItems = _connector.GetWorkItems(data.Iteration, changesetWorkItemsId);
+
+            downloadedData.WorkItems = _workItemConnector.GetWorkItems(data.Iteration, changesetWorkItemsId);
             return downloadedData;
         }
     }

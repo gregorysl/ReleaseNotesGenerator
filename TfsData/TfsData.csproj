@@ -57,6 +57,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AzureConnector.cs" />
+    <Compile Include="Connector.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="TfsConnector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

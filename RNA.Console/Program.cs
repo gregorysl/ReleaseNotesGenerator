@@ -24,8 +24,10 @@ namespace RNA.Console
 
             var settings = JsonConvert.DeserializeObject<Settings>(settingsContent);
 
-            var tfs = new TfsConnector(settings.Tfs, settings.Azure);
-            var generator = new Generator(tfs);
+            //var changesetConnector = new TfsConnector(settings.Tfs);
+            var changesetConnector = new AzureConnector(settings.Tfs);
+            var workItemConnector = new AzureConnector(settings.Azure);
+            var generator = new Generator(changesetConnector, workItemConnector);
 
             var releaseData = settings.Data;
             var downloadedData = generator.DownloadData(releaseData);
