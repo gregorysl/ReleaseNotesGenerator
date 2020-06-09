@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text.Json;
+using Newtonsoft.Json;
 using RNA.Model;
 
 namespace ReleaseNotesService
@@ -23,12 +23,12 @@ namespace ReleaseNotesService
             {
                 response.EnsureSuccessStatusCode();
                 string responseBody = response.Content.ReadAsStringAsync().Result;
-                return JsonSerializer.Deserialize<T>(responseBody);
+                return JsonConvert.DeserializeObject<T>(responseBody);
             }
         }
         public static T PostWithResponse<T>(this HttpClient client, string url, object data)
         {
-            var dataAsString = JsonSerializer.Serialize(data);
+            var dataAsString = JsonConvert.SerializeObject(data);
             var content = new StringContent(dataAsString);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
@@ -37,7 +37,7 @@ namespace ReleaseNotesService
 
                 response.EnsureSuccessStatusCode();
                 string responseBody = response.Content.ReadAsStringAsync().Result;
-                return JsonSerializer.Deserialize<T>(responseBody);
+                return JsonConvert.DeserializeObject<T>(responseBody);
             }
         }
         public static string FormatData(this DateTime date)

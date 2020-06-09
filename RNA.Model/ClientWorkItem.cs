@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
 
 namespace RNA.Model
 {
@@ -7,16 +7,16 @@ namespace RNA.Model
         private string _legacyClientProject;
         private string _clientProject;
 
-        [JsonPropertyName("System.Id")]
+        [JsonProperty("System.Id")]
         public int Id { get; set; }
 
-        [JsonPropertyName("System.Title")]
+        [JsonProperty("System.Title")]
         public string Title { get; set; }
 
-        [JsonPropertyName("System.State")]
+        [JsonProperty("System.State")]
         public string State { get; set; }
 
-        [JsonPropertyName("Custom.ClientProject")]
+        [JsonProperty("Custom.ClientProject")]
         public string ClientProject
         {
             get => _clientProject;
@@ -30,7 +30,7 @@ namespace RNA.Model
         }
 
 
-        [JsonPropertyName("client.project")]
+        [JsonProperty("client.project")]
         public string LegacyClientProject
 
         {
@@ -45,9 +45,9 @@ namespace RNA.Model
             }
         }
 
-        [JsonPropertyName("System.WorkItemType")]
+        [JsonProperty("System.WorkItemType")]
         public string WorkItemType { get; set; }
-        [JsonPropertyName("System.BoardColumn")]
+        [JsonProperty("System.BoardColumn")]
         public string BoardColumn { get; set; }
         public override string ToString()
         {
