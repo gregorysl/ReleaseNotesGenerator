@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using RNA.Model;
 
 namespace TfsData
 {
@@ -17,7 +18,7 @@ namespace TfsData
         private readonly string _tfsurl;
         private readonly string _adourl;
 
-        public TfsConnector(TfsSettings tfsSettings, TfsSettings azureSettings)
+        public TfsConnector(ServerDetails tfsSettings, ServerDetails azureSettings)
         {
             _tfsurl = tfsSettings.Url;
             _adourl = azureSettings.Url;
@@ -54,7 +55,7 @@ namespace TfsData
             return clientWorkItems;
         }
 
-        public DownloadedItems GetChangesetsRest(string queryLocation, string changesetFrom, string changesetTo, string apiVersion = "5.1")
+        public DownloadedItems GetChangesetsRest(string queryLocation, ReleaseData data, string apiVersion = "5.1")
         {
             var cats = _changesetsClient
                 .GetWithResponse<DataWrapper<Item>>(
@@ -62,8 +63,8 @@ namespace TfsData
                 .value.Where(x => x.isFolder && x.path != queryLocation).ToList();
 
             var tfsClass = new DownloadedItems();
-            string from = !string.IsNullOrEmpty(changesetFrom) ? "&searchCriteria.fromId=" + changesetFrom : "";
-            string to = !string.IsNullOrEmpty(changesetTo) ? "&searchCriteria.toId=" + changesetTo : "";
+            string from = !string.IsNullOrEmpty(data.ChangesetFrom) ? "&searchCriteria.fromId=" + data.ChangesetFrom : "";
+            string to = !string.IsNullOrEmpty(data.ChangesetTo) ? "&searchCriteria.toId=" + data.ChangesetTo : "";
             var list = new List<Change>();
             Parallel.ForEach(cats, category =>
             {
@@ -73,11 +74,11 @@ namespace TfsData
                         $"{_tfsurl}/_apis/tfvc/changesets?{itemPath}{from}{to}&$top=1000&api-version=1.0").value;
                 if (!response.Any()) return;
                 list.AddRange(response);
-                tfsClass.Categorized.Add(category.path.Replace(queryLocation,"").Trim('/'), response.Select(x => x.changesetId).ToList());
+                tfsClass.Categorized.Add(category.path.Replace(queryLocation, "").Trim('/'), response.Select(x => x.changesetId).ToList());
 
             });
             var changesList = list.DistinctBy(x => x.changesetId).OrderByDescending(x => x.changesetId).ToList();
-            tfsClass.Changes = new ObservableCollection<Change>(changesList);
+            tfsClass.Changes = changesList;
             return tfsClass;
 
         }

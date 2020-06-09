@@ -54,7 +54,7 @@ namespace ReleaseNotesService
                     doc.SaveAs(releasePath);
                 }
 
-                return $"Successfully generated document! You can find it in following location :{releasePath}";
+                return $"Successfully generated document! You can find it in following location | {releasePath}";
             }
             catch (Exception e)
             {

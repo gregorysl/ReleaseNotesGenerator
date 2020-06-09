@@ -2,10 +2,10 @@
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using TfsData;
+using System.Text.Json;
 using ReleaseNotesService;
-using Newtonsoft.Json;
 using RNA.Model;
+using TfsData;
 
 namespace ReleaseNotesGenerator.CLI
 {
@@ -23,7 +23,7 @@ namespace ReleaseNotesGenerator.CLI
             Console.WriteLine("Creating patch notes using following settings:");
             Console.WriteLine(settingsContent);
 
-            var settings = JsonConvert.DeserializeObject<Settings>(settingsContent);
+            var settings = JsonSerializer.Deserialize<Settings>(settingsContent);
 
             var tfs = new TfsConnector(settings.Tfs, settings.Azure);
             var generator = new Generator(tfs);
