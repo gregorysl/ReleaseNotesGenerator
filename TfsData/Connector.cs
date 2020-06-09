@@ -13,7 +13,7 @@ namespace TfsData
     {
         private const string WorkItemsForIteration = "SELECT [System.Id] FROM WorkItems WHERE [System.IterationPath] UNDER '{0}'";
         protected readonly string Url;
-        protected static HttpClient Client;
+        protected HttpClient Client;
         public abstract Task<DownloadedItems> GetChangesetsAsync(ReleaseData data, string apiVersion = "5.1");
 
         protected Connector(ServerDetails settings)

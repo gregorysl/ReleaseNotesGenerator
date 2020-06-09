@@ -28,8 +28,8 @@ namespace TfsData
         {
             using (var response = client.PostAsJsonAsync(url, p).Result)
             {
-                response.EnsureSuccessStatusCode();
                 string responseBody = response.Content.ReadAsStringAsync().Result;
+                response.EnsureSuccessStatusCode();
                 return JsonConvert.DeserializeObject<T>(responseBody);
             }
         }
