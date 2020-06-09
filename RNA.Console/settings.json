@@ -19,5 +19,8 @@
     "Pat": ""
   },
   "DocumentLocation": "",
-  "WorkItemStateInclude": [ "Tested", "Done" ]
+  "WorkItemStateInclude": [
+    "Tested",
+    "Done"
+  ]
 }
