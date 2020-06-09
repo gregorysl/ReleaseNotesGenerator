@@ -38,11 +38,16 @@ namespace TfsData
             });
             var categoryChangesResponse = await Task.WhenAll(categoryChangesTasks);
 
-            var changesByCategory = categoryChangesResponse.Where(x => x.Item2.Any())
+            var changesByCategory = categoryChangesResponse
+                .Where(x => x.Item2.Any())
+                .OrderBy(x => x.Item1)
                 .ToDictionary(x => x.Item1, y => y.Item2.Select(z => z.commitId).ToList());
 
-            var changesList = categoryChangesResponse.SelectMany(x => x.Item2).ToList().DistinctBy(x => x.commitId)
-                .OrderByDescending(x => x.commitId).Select(x => new Change
+            var changesList = categoryChangesResponse
+                .SelectMany(x => x.Item2)
+                .DistinctBy(x => x.commitId)
+                .OrderByDescending(x => x.author.date)
+                .Select(x => new Change
                 {
                     comment = x.comment,
                     checkedInBy = x.author,
