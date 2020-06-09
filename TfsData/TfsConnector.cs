@@ -19,8 +19,8 @@ namespace TfsData
             var itemQueryUrl = $"{baseurl}items?scopePath={queryLocation}&api-version={apiVersion}&recursionLevel=OneLevel";
             var itemQueryResponse = await Client.GetAsync<Wrapper<Item>>(itemQueryUrl, apiVersion);
 
-            var from = !string.IsNullOrEmpty(data.ChangesetFrom) ? "&searchCriteria.fromId=" + data.ChangesetFrom : "";
-            var to = !string.IsNullOrEmpty(data.ChangesetTo) ? "&searchCriteria.toId=" + data.ChangesetTo : "";
+            var from = !string.IsNullOrEmpty(data.ChangesetFrom) ? $"&searchCriteria.fromId={data.ChangesetFrom}" : "";
+            var to = !string.IsNullOrEmpty(data.ChangesetTo) ? $"&searchCriteria.toId={data.ChangesetTo}" : "";
 
             var categoryChangesTasks = itemQueryResponse.value.Where(x => x.isFolder && x.path != queryLocation).Select(async category =>
             {
