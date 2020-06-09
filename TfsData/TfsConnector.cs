@@ -56,8 +56,9 @@ namespace TfsData
             return clientWorkItems;
         }
 
-        public DownloadedItems GetChangesetsRest(string queryLocation, ReleaseData data, string apiVersion = "5.1")
+        public DownloadedItems GetChangesetsRest(ReleaseData data, string apiVersion = "5.1")
         {
+            var queryLocation = $"$/{data.TfsProject}/{data.TfsBranch}";
             var cats = _changesetsClient
                 .GetWithResponse<DataWrapper<Item>>(
                     $"{_tfsurl}/_apis/tfvc/items?scopePath={queryLocation}&api-version={apiVersion}&recursionLevel=OneLevel")
@@ -83,7 +84,7 @@ namespace TfsData
             return tfsClass;
 
         }
-        public async Task<DownloadedItems> GetChangesetsRestAzure(string queryLocation, ReleaseData data, string apiVersion = "5.1")
+        public async Task<DownloadedItems> GetChangesetsRestAzure(ReleaseData data, string apiVersion = "5.1")
         {
             var baseurl = $"{_tfsurl}/{data.TfsProject}/_apis/git/repositories/{data.TfsProject}";
             var objectId = _changesetsClient.GetWithResponse<DataWrapper<ItemsObject>>(

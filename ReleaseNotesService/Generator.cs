@@ -10,7 +10,7 @@ namespace ReleaseNotesService
     public class Generator
     {
         private readonly TfsConnector _connector;
-
+        private readonly Regex _regex = new Regex(@".*\[((\d*\,)*?(\d*))\].*", RegexOptions.Compiled);
         public Generator(TfsConnector connector)
         {
             _connector = connector;
@@ -48,27 +48,15 @@ namespace ReleaseNotesService
 
         public DownloadedItems DownloadData(ReleaseData data, bool includeTfsService = false)
         {
-            var queryLocation = $"$/{data.TfsProject}/{data.TfsBranch}";
-            var downloadedData = _connector.GetChangesetsRest(queryLocation, data, "3.1");
-            downloadedData.FilterTfsChanges(includeTfsService);
-            var reg = new Regex(@".*\[((\d*\,)*?(\d*))\].*");
-            var changesetWorkItemsId = downloadedData.Changes
-            .Where(x => !string.IsNullOrWhiteSpace(x.comment) && reg.Match(x.comment).Success)
-            .Select(x => reg.Match(x.comment).Groups[1].Captures[0].Value)
-            .Select(x => x.Split(',')).SelectMany(x => x)
-                .Select(x => Convert.ToInt32(x)).ToList();
-            downloadedData.WorkItems = _connector.GetWorkItems(data.Iteration, changesetWorkItemsId);
-            return downloadedData;
-        }
+            var downloadedData = _connector.GetChangesetsRestAzure(data).Result;
+            //var downloadedData = _connector.GetChangesetsRest(data, "3.1");
 
-        public DownloadedItems DownloadDataAzure(ReleaseData data, bool includeTfsService = false)
-        {
-            var queryLocation = $"$/{data.TfsProject}/{data.TfsBranch}";
-            var downloadedData = _connector.GetChangesetsRestAzure(queryLocation, data).Result;
             downloadedData.FilterTfsChanges(includeTfsService);
-            var reg = new Regex(@".*\[((\d*\,)*?(\d*))\].*");
-            var changesetWorkItemsId = downloadedData.Changes.Where(x => !string.IsNullOrWhiteSpace(x.comment) && reg.Match(x.comment).Success)
-                .Select(x => reg.Match(x.comment).Groups[1].Captures[0].Value).Select(x => x.Split(',')).SelectMany(x => x)
+            var changesetWorkItemsId = downloadedData.Changes
+                .Where(x => !string.IsNullOrWhiteSpace(x.comment) && _regex.Match(x.comment).Success)
+                .Select(x => _regex.Match(x.comment).Groups[1].Captures[0].Value)
+                .Select(x => x.Split(','))
+                .SelectMany(x => x)
                 .Select(x => Convert.ToInt32(x)).ToList();
             downloadedData.WorkItems = _connector.GetWorkItems(data.Iteration, changesetWorkItemsId);
             return downloadedData;
