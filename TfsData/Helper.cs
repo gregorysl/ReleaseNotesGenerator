@@ -33,31 +33,42 @@ namespace TfsData
                 return JsonConvert.DeserializeObject<T>(responseBody);
             }
         }
-        public static async Task<T> PostWithResponseAsync<T>(this HttpClient client, string url, object p)
+
+        public static async Task<T> PostAsync<T>(this HttpClient client, string url, object obj, string apiVersion)
         {
-            Console.WriteLine(JsonConvert.SerializeObject(p));
-            using (var response = await client.PostAsJsonAsync(url, p))
+            var finalUrl = url.AppendApiVersion(apiVersion);
+            using (var response = await client.PostAsJsonAsync(finalUrl, obj))
             {
-                string responseBody = response.Content.ReadAsStringAsync().Result;
+                var responseBody = await response.Content.ReadAsStringAsync();
+                response.EnsureSuccessStatusCode();
+                return JsonConvert.DeserializeObject<T>(responseBody);
+            }
+        }
+
+        public static async Task<T> GetAsync<T>(this HttpClient client, string url, string apiVersion)
+        {
+            var finalUrl = url.AppendApiVersion(apiVersion);
+            using (var response = await client.GetAsync(finalUrl))
+            {
+                var responseBody = await response.Content.ReadAsStringAsync();
                 response.EnsureSuccessStatusCode();
                 return JsonConvert.DeserializeObject<T>(responseBody);
             }
         }
         public static T CloneJson<T>(this T source)
         {
-            // Don't serialize a null object, simply return the default for that object
-            if (Object.ReferenceEquals(source, null))
+            if (source == null)
             {
-                return default(T);
+                return default;
             }
-
-            // initialize inner objects individually
-            // for example in default constructor some list property initialized with some values,
-            // but in 'source' these items are cleaned -
-            // without ObjectCreationHandling.Replace default constructor values will be added to result
             var deserializeSettings = new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace };
-
             return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(source), deserializeSettings);
+        }
+
+        public static string AppendApiVersion(this string url, string apiVersion)
+        {
+            var connector = url.Contains('?') ? "&" : "?";
+            return $"{connector}api-version={apiVersion}";
         }
     }
 

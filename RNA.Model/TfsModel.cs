@@ -15,7 +15,7 @@ namespace RNA.Model
 
     public class Workitem
     {
-        public int id { get; set; }
+        public string id { get; set; }
     }
 
     public class DownloadedItems

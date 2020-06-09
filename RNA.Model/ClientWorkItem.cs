@@ -8,7 +8,7 @@ namespace RNA.Model
         private string _clientProject;
 
         [JsonProperty("System.Id")]
-        public int Id { get; set; }
+        public string Id { get; set; }
 
         [JsonProperty("System.Title")]
         public string Title { get; set; }

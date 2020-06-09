@@ -59,7 +59,7 @@ namespace ReleaseNotesService
                 .Select(x => _regex.Match(x.comment).Groups[1].Captures[0].Value)
                 .Select(x => x.Split(','))
                 .SelectMany(x => x)
-                .Select(x => Convert.ToInt32(x)).ToList();
+                .Select(x => x).ToList();
 
             downloadedData.WorkItems = _workItemConnector.GetWorkItems(data.Iteration, changesetWorkItemsId);
             return downloadedData;

@@ -31,15 +31,16 @@ namespace TfsData
             return client;
         }
 
-        public List<ClientWorkItem> GetWorkItems(string iterationPath, List<int> additional, string apiVersion = "5.1")
+        public List<ClientWorkItem> GetWorkItems(string iterationPath, List<string> additional, string apiVersion = "5.1")
         {
-            var response = Client.PostWithResponse<Rootobject>($"{Url}/_apis/wit/wiql?api-version={apiVersion}", new { query = string.Format(WorkItemsForIteration, iterationPath) });
+            var baseUrl = $"{Url}/_apis/wit/";
+            var response = Client.PostWithResponse<Rootobject>($"{baseUrl}wiql?api-version={apiVersion}", new { query = string.Format(WorkItemsForIteration, iterationPath) });
             var ids = response.workItems.Select(x => x.id).ToList();
             ids.AddRange(additional);
             if (!ids.Any()) return new List<ClientWorkItem>();
 
             var joinedWorkItems = string.Join(",", ids.Distinct().ToList());
-            var changesets = Client.GetWithResponse<Wrapper<WrappedWi>>($"{Url}/_apis/wit/WorkItems?ids={joinedWorkItems}&api-version={apiVersion}");
+            var changesets = Client.GetWithResponse<Wrapper<WrappedWi>>($"{baseUrl}WorkItems?ids={joinedWorkItems}&api-version={apiVersion}");
             changesets.value.ForEach(x => x.fields.Id = x.id);
             var changeset = changesets.value.Select(x => x.fields).ToList();
 

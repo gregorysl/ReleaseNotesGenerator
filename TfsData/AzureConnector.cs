@@ -14,35 +14,33 @@ namespace TfsData
         public override async Task<DownloadedItems> GetChangesetsAsync(ReleaseData data, string apiVersion = "5.1")
         {
             var baseurl = $"{Url}/{data.TfsProject}/_apis/git/repositories/{data.TfsProject}";
-            var objectId = Client.GetWithResponse<Wrapper<ItemsObject>>(
-                $"{baseurl}/items?recursionLevel=oneLevel&api-version={apiVersion}").value.First().objectId;
 
-            var ur = $"{baseurl}/trees/{objectId}?api-version={apiVersion}";
+            var itemUrl = $"{baseurl}/items?path=/&versionType=Branch&versionOptions=None&versionDescriptor.version={data.TfsBranch}";
+            var itemResponse = await Client.GetAsync<ItemsObject>(itemUrl, apiVersion);
 
-            var cats = Client.GetWithResponse<Wrapper<ItemsObject>>(ur).treeEntries.Where(x => x.gitObjectType == "tree").ToList();
+            var treeUrl = $"{baseurl}/trees/{itemResponse.objectId}";
+            var treeResponse = await Client.GetAsync<Wrapper<ItemsObject>>(treeUrl, apiVersion);
 
-            var query = new GitQueryCommitsCriteria();
-            if (!string.IsNullOrEmpty(data.ChangesetFrom))
+            var query = new GitQueryCommitsCriteria
             {
-                query.compareVersion = new GitVersion { versionType = "commit", version = data.ChangesetFrom };
-            }
-            if (!string.IsNullOrEmpty(data.ChangesetTo))
-            {
-                query.itemVersion = new GitVersion { versionType = "commit", version = data.ChangesetTo };
-            }
+                compareVersion = GitVersionFromCommit(data.ChangesetFrom),
+                itemVersion = GitVersionFromCommit(data.ChangesetTo)
+            };
 
-            var url = $"{baseurl}/commitsbatch?api-version={apiVersion}";
-            var tasks = cats.Select(async category =>
+            var changesUrl = $"{baseurl}/commitsbatch";
+            var categoryChangesTasks = treeResponse.treeEntries.Where(x => x.gitObjectType == "tree").Select(async category =>
             {
                 var currentQuery = query.CloneJson();
                 currentQuery.itemPath = category.relativePath;
-                var wrapper = await Client.PostWithResponseAsync<Wrapper<ChangeAzure>>(url, currentQuery);
+                var wrapper = await Client.PostAsync<Wrapper<ChangeAzure>>(changesUrl, currentQuery, apiVersion);
                 return new Tuple<string, Wrapper<ChangeAzure>>(category.relativePath, wrapper);
             });
-            var tasksResponse = await Task.WhenAll(tasks);
-            var categorizedDictionary = tasksResponse.Where(x => x.Item2.value.Any())
+            var categoryChangesResponse = await Task.WhenAll(categoryChangesTasks);
+
+            var changesByCategory = categoryChangesResponse.Where(x => x.Item2.value.Any())
                 .ToDictionary(x => x.Item1, y => y.Item2.value.Select(z => z.commitId).ToList());
-            var changesList = tasksResponse.SelectMany(x => x.Item2.value).ToList().DistinctBy(x => x.commitId)
+
+            var changesList = categoryChangesResponse.SelectMany(x => x.Item2.value).ToList().DistinctBy(x => x.commitId)
                 .OrderByDescending(x => x.commitId).Select(x => new Change
                 {
                     comment = x.comment,
@@ -50,8 +48,15 @@ namespace TfsData
                     createdDate = x.author.date,
                     changesetId = x.commitId
                 }).ToList();
-            var tfsClass = new DownloadedItems { Categorized = categorizedDictionary, Changes = changesList };
+            var tfsClass = new DownloadedItems { Categorized = changesByCategory, Changes = changesList };
             return tfsClass;
+        }
+
+        private static GitVersion GitVersionFromCommit(string changeset)
+        {
+            return !string.IsNullOrEmpty(changeset)
+                ? new GitVersion { versionType = "commit", version = changeset }
+                : null;
         }
     }
 }
