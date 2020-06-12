@@ -16,7 +16,8 @@ namespace TfsData
         protected readonly string Url;
         protected HttpClient Client;
         protected readonly IMapper Mapper;
-        public abstract Task<DownloadedItems> GetChangesetsAsync(ReleaseData data, string apiVersion = "5.1");
+        public abstract Task<Tuple<string, List<Change>>[]> GetChangesetsAsync(ReleaseData data,
+            string apiVersion = "5.1");
 
         protected Connector(ServerDetails settings, IMapper mapper)
         {
