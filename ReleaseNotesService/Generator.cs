@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using AutoMapper;
 using RNA.Model;
 using TfsData;
 
@@ -48,12 +50,25 @@ namespace ReleaseNotesService
             return message;
         }
 
-        public DownloadedItems DownloadData(ReleaseData data, bool includeTfsService = false)
+        public async Task<DownloadedItems> DownloadData(ReleaseData data, bool includeTfsService = false)
         {
-            var downloadedData = _changesetConnector.GetChangesetsAsync(data).Result;
-            //var downloadedData = _changesetConnector.GetChangesetsRest(data, "3.1");
+            //var downloadedData = await _changesetConnector.GetChangesetsAsync(data);
+            var categoryChanges = await _changesetConnector.GetChangesetsAsync(data,"3.1");
+
+            var changesByCategory = categoryChanges
+                .Where(x => x.Item2.Any())
+                .OrderBy(x => x.Item1)
+                .ToDictionary(x => x.Item1, y => y.Item2.Select(z => z.changesetId).ToList());
+
+            var changesList = categoryChanges
+                .SelectMany(x => x.Item2)
+                .DistinctBy(x => x.changesetId)
+                .OrderByDescending(x => x.checkedInBy.date)
+                .ToList();
+            var downloadedData = new DownloadedItems { Categorized = changesByCategory, Changes = changesList };
 
             downloadedData.FilterTfsChanges(includeTfsService);
+
             var changesetWorkItemsId = downloadedData.Changes
                 .Where(x => !string.IsNullOrWhiteSpace(x.comment) && _regex.Match(x.comment).Success)
                 .Select(x => _regex.Match(x.comment).Groups[1].Captures[0].Value)

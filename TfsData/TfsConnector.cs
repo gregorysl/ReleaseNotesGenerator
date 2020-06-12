@@ -2,17 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using RNA.Model;
 
 namespace TfsData
 {
     public class TfsConnector : Connector
     {
-        public TfsConnector(ServerDetails settings) : base(settings)
+        public TfsConnector(ServerDetails settings, IMapper mapper) : base(settings, mapper)
         {
         }
 
-        public override async Task<DownloadedItems> GetChangesetsAsync(ReleaseData data, string apiVersion = "5.1")
+        public override async Task<Tuple<string, List<Change>>[]> GetChangesetsAsync(ReleaseData data,
+            string apiVersion = "5.1")
         {
             var baseurl = $"{Url}/_apis/tfvc/";
             var queryLocation = $"$/{data.TfsProject}/{data.TfsBranch}";
@@ -30,19 +32,7 @@ namespace TfsData
             });
             var categoryChangesResponse = await Task.WhenAll(categoryChangesTasks);
 
-            var changesByCategory = categoryChangesResponse
-                .Where(x => x.Item2.Any())
-                .OrderBy(x => x.Item1)
-                .ToDictionary(x => x.Item1, y => y.Item2.Select(z => z.changesetId).ToList());
-
-
-            var changesList = categoryChangesResponse
-                .SelectMany(x => x.Item2)
-                .DistinctBy(x => x.changesetId)
-                .OrderByDescending(x => x.checkedInBy.date)
-                .ToList();
-            var tfsClass = new DownloadedItems { Changes = changesList, Categorized = changesByCategory };
-            return tfsClass;
+            return categoryChangesResponse;
 
         }
     }

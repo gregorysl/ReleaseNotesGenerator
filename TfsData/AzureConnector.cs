@@ -2,17 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using RNA.Model;
 
 namespace TfsData
 {
     public class AzureConnector : Connector
     {
-        public AzureConnector(ServerDetails settings) : base(settings)
+        public AzureConnector(ServerDetails settings, IMapper mapper) : base(settings, mapper)
         {
         }
 
-        public override async Task<DownloadedItems> GetChangesetsAsync(ReleaseData data, string apiVersion = "5.1")
+        public override async Task<Tuple<string, List<Change>>[]> GetChangesetsAsync(ReleaseData data,
+            string apiVersion = "5.1")
         {
             var baseurl = $"{Url}/{data.TfsProject}/_apis/git/repositories/{data.TfsProject}";
 
@@ -34,28 +36,12 @@ namespace TfsData
                 var currentQuery = query.CloneJson();
                 currentQuery.itemPath = category.relativePath;
                 var wrapper = await Client.PostAsync<Wrapper<ChangeAzure>>(changesUrl, currentQuery, apiVersion);
-                return new Tuple<string, List<ChangeAzure>>(category.relativePath, wrapper.value);
+                var mappedData = Mapper.Map<List<ChangeAzure>,List<Change>>(wrapper.value);
+                return new Tuple<string, List<Change>>(category.relativePath, mappedData);
             });
             var categoryChangesResponse = await Task.WhenAll(categoryChangesTasks);
 
-            var changesByCategory = categoryChangesResponse
-                .Where(x => x.Item2.Any())
-                .OrderBy(x => x.Item1)
-                .ToDictionary(x => x.Item1, y => y.Item2.Select(z => z.commitId).ToList());
-
-            var changesList = categoryChangesResponse
-                .SelectMany(x => x.Item2)
-                .DistinctBy(x => x.commitId)
-                .OrderByDescending(x => x.author.date)
-                .Select(x => new Change
-                {
-                    comment = x.comment,
-                    checkedInBy = x.author,
-                    createdDate = x.author.date,
-                    changesetId = x.commitId
-                }).ToList();
-            var tfsClass = new DownloadedItems { Categorized = changesByCategory, Changes = changesList };
-            return tfsClass;
+            return categoryChangesResponse;
         }
 
         private static GitVersion GitVersionFromCommit(string changeset)
