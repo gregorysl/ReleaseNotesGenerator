@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -36,9 +37,9 @@ namespace RNA.Console
 
             var settings = JsonConvert.DeserializeObject<Settings>(settingsContent);
 
-            //var changesetConnector = new TfsConnector(settings.Tfs, mapper);
-            var changesetConnector = new AzureConnector(settings.Tfs, mapper);
-            var workItemConnector = new AzureConnector(settings.Azure, mapper);
+            var changesetConnector = GetConnector(settings.ChangesetsServer, mapper);
+            var workItemConnector = GetConnector(settings.WorkItemServer, mapper);
+
             var generator = new Generator(changesetConnector, workItemConnector);
 
             var releaseData = settings.Data;
@@ -53,6 +54,19 @@ namespace RNA.Console
             if (string.IsNullOrWhiteSpace(message)) return;
 
             System.Console.WriteLine(message);
+        }
+
+        private static Connector GetConnector(ServerDetails server, IMapper mapper)
+        {
+            switch (server.ServerType)
+            {
+                case ServerTypeEnum.Azure:
+                    return new AzureConnector(server, mapper);
+                case ServerTypeEnum.Tfs:
+                    return new TfsConnector(server, mapper);
+                default:
+                    throw new KeyNotFoundException($"Server type {server.ServerType} is not supported.");
+            }
         }
     }
 }

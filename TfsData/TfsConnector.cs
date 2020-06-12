@@ -24,12 +24,14 @@ namespace TfsData
             var from = !string.IsNullOrEmpty(data.ChangesetFrom) ? $"&searchCriteria.fromId={data.ChangesetFrom}" : "";
             var to = !string.IsNullOrEmpty(data.ChangesetTo) ? $"&searchCriteria.toId={data.ChangesetTo}" : "";
 
-            var categoryChangesTasks = itemQueryResponse.value.Where(x => x.isFolder && x.path != queryLocation).Select(async category =>
-            {
-                var urls = $"{baseurl}changesets?searchCriteria.itemPath={category.path}{from}{to}&$top=1000";
-                var wrapper = await Client.GetAsync<Wrapper<Change>>(urls, apiVersion);
-                return new Tuple<string, List<Change>>(category.path, wrapper.value);
-            });
+            var categoryChangesTasks = itemQueryResponse.value
+                .Where(x => x.isFolder && x.path != queryLocation)
+                .Select(async category =>
+                {
+                    var urls = $"{baseurl}changesets?searchCriteria.itemPath={category.path}{from}{to}&$top=1000";
+                    var wrapper = await Client.GetAsync<Wrapper<Change>>(urls, apiVersion);
+                    return new Tuple<string, List<Change>>(category.path, wrapper.value);
+                });
             var categoryChangesResponse = await Task.WhenAll(categoryChangesTasks);
 
             return categoryChangesResponse;
