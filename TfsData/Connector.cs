@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 using RNA.Model;
 
 namespace TfsData
@@ -14,12 +15,14 @@ namespace TfsData
         private const string WorkItemsForIteration = "SELECT [System.Id] FROM WorkItems WHERE [System.IterationPath] UNDER '{0}'";
         protected readonly string Url;
         protected HttpClient Client;
+        protected readonly IMapper Mapper;
         public abstract Task<DownloadedItems> GetChangesetsAsync(ReleaseData data, string apiVersion = "5.1");
 
-        protected Connector(ServerDetails settings)
+        protected Connector(ServerDetails settings, IMapper mapper)
         {
             Url = settings.Url; 
             Client = SetupClient(settings.Pat);
+            Mapper = mapper;
         }
 
         public HttpClient SetupClient(string key)

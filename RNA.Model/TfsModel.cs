@@ -103,8 +103,6 @@ namespace RNA.Model
         public string commitId { get; set; }
         public Author author { get; set; }
         public string comment { get; set; }
-        public DateTime createdDate { get; set; }
-        public List<Workitem> workItems { get; set; }
     }
 
 

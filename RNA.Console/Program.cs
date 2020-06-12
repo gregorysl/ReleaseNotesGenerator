@@ -1,6 +1,8 @@
 ﻿using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
+using AutoMapper;
 using Newtonsoft.Json;
 using ReleaseNotesService;
 using RNA.Model;
@@ -10,8 +12,18 @@ namespace RNA.Console
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<ChangeAzure, Change>()
+                    .ForMember(dest => dest.checkedInBy, src => src.MapFrom(x => x.author))
+                    .ForMember(dest => dest.createdDate, src => src.MapFrom(x => x.author.date))
+                    .ForMember(dest => dest.changesetId, src=>src.MapFrom(x=>x.commitId));
+            });
+            
+            IMapper mapper = config.CreateMapper();
+
             var executableLocation = Path.GetDirectoryName(
                 Assembly.GetExecutingAssembly().Location);
             if (executableLocation == null) return;
@@ -24,13 +36,13 @@ namespace RNA.Console
 
             var settings = JsonConvert.DeserializeObject<Settings>(settingsContent);
 
-            //var changesetConnector = new TfsConnector(settings.Tfs);
-            var changesetConnector = new AzureConnector(settings.Tfs);
-            var workItemConnector = new AzureConnector(settings.Azure);
+            //var changesetConnector = new TfsConnector(settings.Tfs, mapper);
+            var changesetConnector = new AzureConnector(settings.Tfs, mapper);
+            var workItemConnector = new AzureConnector(settings.Azure, mapper);
             var generator = new Generator(changesetConnector, workItemConnector);
 
             var releaseData = settings.Data;
-            var downloadedData = generator.DownloadData(releaseData);
+            var downloadedData = await generator.DownloadData(releaseData);
 
             System.Console.WriteLine($"Downloaded data: {downloadedData.WorkItems.Count} work items {downloadedData.Changes.Count} changesets");
 
