@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using Newtonsoft.Json;
 using RNA.Model;
 
 namespace ReleaseNotesService
@@ -15,30 +12,6 @@ namespace ReleaseNotesService
             (this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
         {
             return source.GroupBy(keySelector).Select(x => x.FirstOrDefault());
-        }
-
-        public static T GetWithResponse<T>(this HttpClient client, string url)
-        {
-            using (var response = client.GetAsync(url).Result)
-            {
-                response.EnsureSuccessStatusCode();
-                string responseBody = response.Content.ReadAsStringAsync().Result;
-                return JsonConvert.DeserializeObject<T>(responseBody);
-            }
-        }
-        public static T PostWithResponse<T>(this HttpClient client, string url, object data)
-        {
-            var dataAsString = JsonConvert.SerializeObject(data);
-            var content = new StringContent(dataAsString);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
-            using (var response = client.PostAsync(url, content).Result)
-            {
-
-                response.EnsureSuccessStatusCode();
-                string responseBody = response.Content.ReadAsStringAsync().Result;
-                return JsonConvert.DeserializeObject<T>(responseBody);
-            }
         }
         public static string FormatData(this DateTime date)
         {
