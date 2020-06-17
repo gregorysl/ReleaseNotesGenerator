@@ -13,6 +13,8 @@ namespace RNA.Console
 {
     class Program
     {
+        public static readonly string ConnectorFailText =
+            "{0} connector authentication failed. Make sure your PAT is up to date.\nResponse:{1}";
         static async Task Main(string[] args)
         {
             var config = new MapperConfiguration(cfg =>
@@ -23,7 +25,7 @@ namespace RNA.Console
                     .ForMember(dest => dest.changesetId, src=>src.MapFrom(x=>x.commitId));
             });
             
-            IMapper mapper = config.CreateMapper();
+            var mapper = config.CreateMapper();
 
             var executableLocation = Path.GetDirectoryName(
                 Assembly.GetExecutingAssembly().Location);
@@ -38,7 +40,19 @@ namespace RNA.Console
             var settings = JsonConvert.DeserializeObject<Settings>(settingsContent);
 
             var changesetConnector = GetConnector(settings.ChangesetsServer, mapper);
+            var ccStatus = await changesetConnector.TestConnection();
+            if (ccStatus != "OK")
+            {
+                System.Console.WriteLine(ConnectorFailText, "Changeset", ccStatus);
+                return;
+            }
             var workItemConnector = GetConnector(settings.WorkItemServer, mapper);
+            var wiStatus = await workItemConnector.TestConnection();
+            if (wiStatus != "OK")
+            {
+                System.Console.WriteLine(ConnectorFailText, "Work Item", wiStatus);
+                return;
+            }
 
             var generator = new Generator(changesetConnector, workItemConnector);
 

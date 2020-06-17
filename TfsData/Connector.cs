@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -33,6 +34,13 @@ namespace TfsData
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",
                 Convert.ToBase64String(Encoding.ASCII.GetBytes($":{key}")));
             return client;
+        }
+
+        public async Task<string> TestConnection(string apiVersion = "5.1-preview")
+        {
+            var baseUrl = $"{Url}/_apis/connectionData";
+            var response = await Client.GetAsync($"{baseUrl}?api-version={apiVersion}");
+            return response.StatusCode == HttpStatusCode.OK ? "OK" : await response.Content.ReadAsStringAsync();
         }
 
         public List<ClientWorkItem> GetWorkItems(string iterationPath, List<string> additional, string apiVersion = "5.1")
