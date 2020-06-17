@@ -21,6 +21,10 @@ namespace ReleaseNotesService
 
                 using (var doc = DocX.Load(templatePath))
                 {
+                    var hyperlink = doc.AddHyperlink(testReport, new Uri(testReport));
+                    var hyperlinkParagraph = doc.InsertParagraph();
+                    hyperlinkParagraph.AppendHyperlink(hyperlink);
+
                     doc.ReplaceText("{ReleaseName}", data.ReleaseName);
                     doc.ReplaceText("{ReleaseDate}", data.ReleaseDate);
 
@@ -43,14 +47,13 @@ namespace ReleaseNotesService
                         "FR HeadNoToc");
 
                     doc.InsertSectionPageBreak();
+                    var hyper = doc.AddHyperlink(testReport, new Uri(testReport));
                     var lastParagraph = doc.Paragraphs[doc.Paragraphs.Count - 1]
                         .ChangesetsSection(categorizedChangesets)
                         .WorkItemSection(workItems)
                         .PbiSection(pbi)
-                        .CreateHeadingSection("Test Report")
-                        .InsertParagraphAfterSelf(testReport).FontSize(10d)
+                        .TestReportSection(hyperlinkParagraph)
                         .KnownIssuesSection();
-
                     doc.SaveAs(releasePath);
                 }
 

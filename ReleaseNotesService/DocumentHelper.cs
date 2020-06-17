@@ -89,6 +89,13 @@ namespace ReleaseNotesService
             }
             return table;
         }
+        public static Paragraph TestReportSection(this InsertBeforeOrAfter lastPart, Paragraph p)
+        {
+            var headingSection = lastPart.CreateHeadingSection("Test Report");
+            headingSection.InsertParagraphAfterSelf(p);
+
+            return p;
+        }
         public static Table KnownIssuesSection(this InsertBeforeOrAfter lastPart)
         {
             var headers = new[] { "Bug Id", "Work Item Description" };
