@@ -123,4 +123,9 @@ namespace RNA.Model
         public string version { get; set; }
     }
 
+    public class ErrorObject
+    {
+        public string message { get; set; }
+    }
+
 }

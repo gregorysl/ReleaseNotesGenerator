@@ -54,6 +54,12 @@ namespace RNA.Console
                 return;
             }
 
+            var iterationTest =await workItemConnector.TestIteration("", settings.Data.Iteration);
+            if (iterationTest != "OK")
+            {
+                System.Console.WriteLine($"Error while testing iteration path:{iterationTest}");
+                return;
+            }
             var generator = new Generator(changesetConnector, workItemConnector);
 
             var releaseData = settings.Data;

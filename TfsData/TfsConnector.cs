@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
 using RNA.Model;
@@ -37,5 +38,14 @@ namespace TfsData
             return categoryChangesResponse;
 
         }
+
+        public override async Task<string> TestConnection()
+        {
+            var apiVersion = "3.1";
+            var baseUrl = $"{Url}/_apis/projects";
+            var response = await Client.GetAsync($"{baseUrl}?api-version={apiVersion}");
+            return response.StatusCode == HttpStatusCode.OK ? "OK" : await response.Content.ReadAsStringAsync();
+        }
+
     }
 }

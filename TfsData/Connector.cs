@@ -7,6 +7,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using Newtonsoft.Json;
 using RNA.Model;
 
 namespace TfsData
@@ -19,6 +20,8 @@ namespace TfsData
         protected readonly IMapper Mapper;
         public abstract Task<Tuple<string, List<Change>>[]> GetChangesetsAsync(ReleaseData data,
             string apiVersion = "5.1");
+
+        public abstract Task<string> TestConnection();
 
         protected Connector(ServerDetails settings, IMapper mapper)
         {
@@ -36,11 +39,19 @@ namespace TfsData
             return client;
         }
 
-        public async Task<string> TestConnection(string apiVersion = "5.1-preview")
+        public async Task<string> TestIteration(string project, string iteration, string apiVersion = "5.1-preview")
         {
-            var baseUrl = $"{Url}/_apis/connectionData";
-            var response = await Client.GetAsync($"{baseUrl}?api-version={apiVersion}");
-            return response.StatusCode == HttpStatusCode.OK ? "OK" : await response.Content.ReadAsStringAsync();
+            var baseUrl = $"{Url}/_apis/wit/";
+            var response = await Client.PostAsJsonAsync($"{baseUrl}wiql?api-version={apiVersion}", new { query = string.Format(WorkItemsForIteration, iteration) });
+            var json = await response.Content.ReadAsStringAsync();
+            var workItemsResponse = JsonConvert.DeserializeObject<Rootobject>(json);
+            if (workItemsResponse?.workItems==null)
+            {
+                var errorResponse = JsonConvert.DeserializeObject<ErrorObject>(json);
+                return errorResponse.message;
+            }
+            
+            return "OK";
         }
 
         public List<ClientWorkItem> GetWorkItems(string iterationPath, List<string> additional, string apiVersion = "5.1")
