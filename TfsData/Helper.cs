@@ -15,25 +15,6 @@ namespace TfsData
             return source.GroupBy(keySelector).Select(x => x.FirstOrDefault());
         }
 
-        public static T GetWithResponse<T>(this HttpClient client, string url)
-        {
-            using (var response = client.GetAsync(url).Result)
-            {
-                response.EnsureSuccessStatusCode();
-                string responseBody = response.Content.ReadAsStringAsync().Result;
-                return JsonConvert.DeserializeObject<T>(responseBody);
-            }
-        }
-        public static T PostWithResponse<T>(this HttpClient client, string url, object p)
-        {
-            using (var response = client.PostAsJsonAsync(url, p).Result)
-            {
-                string responseBody = response.Content.ReadAsStringAsync().Result;
-                response.EnsureSuccessStatusCode();
-                return JsonConvert.DeserializeObject<T>(responseBody);
-            }
-        }
-
         public static async Task<T> PostAsync<T>(this HttpClient client, string url, object obj, string apiVersion)
         {
             var finalUrl = url.AppendApiVersion(apiVersion);

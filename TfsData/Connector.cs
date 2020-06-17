@@ -54,16 +54,16 @@ namespace TfsData
             return "OK";
         }
 
-        public List<ClientWorkItem> GetWorkItems(string iterationPath, List<string> additional, string apiVersion = "5.1")
+        public async Task<List<ClientWorkItem>> GetWorkItems(string iterationPath, List<string> additional, string apiVersion = "5.1")
         {
             var baseUrl = $"{Url}/_apis/wit/";
-            var response = Client.PostWithResponse<Rootobject>($"{baseUrl}wiql?api-version={apiVersion}", new { query = string.Format(WorkItemsForIteration, iterationPath) });
+            var response = await Client.PostAsync<Rootobject>($"{baseUrl}wiql", new { query = string.Format(WorkItemsForIteration, iterationPath) }, apiVersion);
             var ids = response.workItems.Select(x => x.id).ToList();
             ids.AddRange(additional);
             if (!ids.Any()) return new List<ClientWorkItem>();
 
             var joinedWorkItems = string.Join(",", ids.Distinct().ToList());
-            var changesets = Client.GetWithResponse<Wrapper<WrappedWi>>($"{baseUrl}WorkItems?ids={joinedWorkItems}&api-version={apiVersion}");
+            var changesets = await Client.GetAsync<Wrapper<WrappedWi>>($"{baseUrl}WorkItems?ids={joinedWorkItems}", apiVersion);
             changesets.value.ForEach(x => x.fields.Id = x.id);
             var changeset = changesets.value.Select(x => x.fields).ToList();
 

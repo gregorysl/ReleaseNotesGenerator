@@ -76,7 +76,7 @@ namespace ReleaseNotesService
                 .SelectMany(x => x)
                 .Select(x => x).ToList();
 
-            downloadedData.WorkItems = _workItemConnector.GetWorkItems(data.Iteration, changesetWorkItemsId);
+            downloadedData.WorkItems = await _workItemConnector.GetWorkItems(data.Iteration, changesetWorkItemsId);
             return downloadedData;
         }
     }
