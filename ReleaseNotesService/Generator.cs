@@ -20,8 +20,7 @@ namespace ReleaseNotesService
             _workItemConnector = workItemConnector;
         }
 
-        public string CreateDoc(DownloadedItems downloadedData, Change psRefresh, List<string> workItemStateInclude,
-        ReleaseData releaseData, string documentLocation, string testReport = "")
+        public string CreateDoc(DownloadedItems downloadedData, Change psRefresh, Settings settings)
         {
             var selectedChangesets = downloadedData.Changes
                 .Where(x => x.Selected)
@@ -40,13 +39,14 @@ namespace ReleaseNotesService
                     .Where(x => x.Value.Any()).ToList();
 
             var workItems = downloadedData.WorkItems
-            .Where(x => workItemStateInclude.Contains(x.State) && x.ClientProject != null)
+            .Where(x => settings.WorkItemStateInclude.Contains(x.State) && x.ClientProject != null)
                 .OrderBy(x => x.ClientProject);
             var pbi = downloadedData.WorkItems
-            .Where(x => workItemStateInclude.Contains(x.State) && x.ClientProject == null)
+            .Where(x => settings.WorkItemStateInclude.Contains(x.State) && x.ClientProject == null)
                 .OrderBy(x => x.Id);
-            var message = new DocumentEditor().ProcessData(documentLocation, psRefresh, releaseData, categories,
-            workItems, pbi, testReport);
+            var message = new DocumentEditor().ProcessData(settings.DocumentLocation, psRefresh, settings.Data,
+                categories,
+                workItems, pbi, settings.TestReport, settings.DateFormat);
             return message;
         }
 

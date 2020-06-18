@@ -11,7 +11,7 @@ namespace ReleaseNotesService
     {
         private readonly string _templateName = "Template.docx";
         public string ProcessData(string documentLocaion, Change psRefresh, ReleaseData data, List<KeyValuePair<string, List<ChangesetInfo>>> categorizedChangesets,
-            IEnumerable<ClientWorkItem> workItems, IEnumerable<ClientWorkItem> pbi, string testReport)
+            IEnumerable<ClientWorkItem> workItems, IEnumerable<ClientWorkItem> pbi, string testReport, string dateinputFormat)
         {
             try
             {
@@ -26,7 +26,7 @@ namespace ReleaseNotesService
                     hyperlinkParagraph.AppendHyperlink(hyperlink);
 
                     doc.ReplaceText("{ReleaseName}", data.ReleaseName);
-                    doc.ReplaceText("{ReleaseDate}", data.ReleaseDate);
+                    doc.ReplaceText("{ReleaseDate}", data.ReleaseDate.ParseAndFormatData(dateinputFormat, data.ReleaseDateOutputFormat));
 
                     var headers = new[] { "Item", "Details", "Date" };
                     var location = $"$/{data.TfsProject}/{data.TfsBranch}";
@@ -35,7 +35,7 @@ namespace ReleaseNotesService
                         .CreateTableWithHeader(headers, columnSizes, 3);
 
                     tableWithHeader.FillRow(1, new[] { "PS Refresh Changeset", psRefresh.changesetId.ToString(), psRefresh.createdDate.FormatData() });
-                    tableWithHeader.FillRow(2, new[] { "QA Build", data.QaBuildName, data.QaBuildDate });
+                    tableWithHeader.FillRow(2, new[] { "QA Build", data.QaBuildName, data.QaBuildDate.ParseAndFormatData(dateinputFormat, data.QaBuildDateOutputFormat) });
 
                     var fi = tableWithHeader.InsertParagraphAfterSelf($"This release will be available in ")
                         .Append(location, new Formatting { Bold = true })

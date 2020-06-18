@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -22,9 +24,9 @@ namespace RNA.Console
                 cfg.CreateMap<ChangeAzure, Change>()
                     .ForMember(dest => dest.checkedInBy, src => src.MapFrom(x => x.author))
                     .ForMember(dest => dest.createdDate, src => src.MapFrom(x => x.author.date))
-                    .ForMember(dest => dest.changesetId, src=>src.MapFrom(x=>x.commitId));
+                    .ForMember(dest => dest.changesetId, src => src.MapFrom(x => x.commitId));
             });
-            
+
             var mapper = config.CreateMapper();
 
             var executableLocation = Path.GetDirectoryName(
@@ -54,7 +56,7 @@ namespace RNA.Console
                 return;
             }
 
-            var iterationTest =await workItemConnector.TestIteration("", settings.Data.Iteration);
+            var iterationTest = await workItemConnector.TestIteration("", settings.Data.Iteration);
             if (iterationTest != "OK")
             {
                 System.Console.WriteLine($"Error while testing iteration path:{iterationTest}");
@@ -69,7 +71,7 @@ namespace RNA.Console
 
             var psRefresh = downloadedData.Changes.First(x => releaseData.ChangesetTo == x.changesetId.ToString());
 
-            var message = generator.CreateDoc(downloadedData, psRefresh, settings.WorkItemStateInclude, releaseData, settings.DocumentLocation, settings.TestReport);
+            var message = generator.CreateDoc(downloadedData, psRefresh, settings);
 
             if (string.IsNullOrWhiteSpace(message)) return;
 

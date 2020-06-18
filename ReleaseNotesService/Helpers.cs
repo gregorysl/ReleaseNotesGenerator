@@ -17,6 +17,12 @@ namespace ReleaseNotesService
         {
             return date.ToString("yyyy-MM-dd HH:mm", new CultureInfo("en-US"));
         }
+        public static string ParseAndFormatData(this string input, string inputFormat, string outputFormat)
+        {
+            return DateTime.TryParseExact(input, inputFormat, null, DateTimeStyles.None, out var parsedDate)
+                ? parsedDate.ToString(outputFormat)
+                : $"Failed to parse {input} with format {inputFormat}";
+        }
 
         public static bool Contains(this string source, string toCheck, StringComparison comp)
         {

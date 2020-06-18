@@ -10,5 +10,6 @@ namespace RNA.Model
         public string DocumentLocation { get; set; }
         public string TestReport { get; set; }
         public List<string> WorkItemStateInclude { get; set; }
+        public string DateFormat { get; set; } = "yyyy-MM-dd";
     }
 }
