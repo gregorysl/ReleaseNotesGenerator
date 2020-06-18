@@ -44,16 +44,8 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="Xceed.Document.NET, Version=1.4.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
-      <HintPath>..\packages\DocX.1.4.1\lib\net40\Xceed.Document.NET.dll</HintPath>
-    </Reference>
-    <Reference Include="Xceed.Words.NET, Version=1.4.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
-      <HintPath>..\packages\DocX.1.4.1\lib\net40\Xceed.Words.NET.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DocumentEditor.cs" />
-    <Compile Include="DocumentHelper.cs" />
     <Compile Include="Generator.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -63,13 +55,16 @@
       <Project>{4CB4097D-FE4F-4B5A-BCDB-70DBA651476A}</Project>
       <Name>RNA.Model</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RNA.Service.Document\RNA.Service.Document.csproj">
+      <Project>{3B570F4A-DDAB-43E3-AF03-D91322D7174E}</Project>
+      <Name>RNA.Service.Document</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RNA.Service.Tfs\RNA.Service.Tfs.csproj">
       <Project>{2CA88253-F483-4053-8B65-EBA47EF2E1F7}</Project>
       <Name>RNA.Service.Tfs</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

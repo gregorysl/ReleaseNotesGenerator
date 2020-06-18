@@ -1,14 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using RNA.Model;
 using Xceed.Document.NET;
 using Xceed.Words.NET;
 
-namespace RNA.Service
+namespace RNA.Service.Document
 {
     public static class DocumentHelper
     {
+        public static string FormatData(this DateTime date)
+        {
+            return date.ToString("yyyy-MM-dd HH:mm", new CultureInfo("en-US"));
+        }
+        public static string ParseAndFormatData(this string input, string inputFormat, string outputFormat)
+        {
+            DateTime parsedDate;
+            if (String.IsNullOrWhiteSpace(input))
+            {
+                parsedDate = DateTime.Today;
+            }
+            else
+            {
+                var isParsed = DateTime.TryParseExact(input, inputFormat, null, DateTimeStyles.None, out parsedDate);
+                if (!isParsed) return $"Failed to parse {input} with format {inputFormat}";
+            }
+
+            return parsedDate.ToString(outputFormat);
+        }
+
         public static Paragraph CreateHeadingSection(this InsertBeforeOrAfter paragraph, string title)
         {
             return paragraph.InsertParagraphAfterSelf(title)

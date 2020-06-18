@@ -2,6 +2,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using RNA.Model;
+using RNA.Service.Document;
 using RNA.Service.Tfs;
 
 namespace RNA.Service

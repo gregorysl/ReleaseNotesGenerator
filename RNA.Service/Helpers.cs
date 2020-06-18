@@ -13,27 +13,6 @@ namespace RNA.Service
         {
             return source.GroupBy(keySelector).Select(x => x.FirstOrDefault());
         }
-        public static string FormatData(this DateTime date)
-        {
-            return date.ToString("yyyy-MM-dd HH:mm", new CultureInfo("en-US"));
-        }
-
-        public static string ParseAndFormatData(this string input, string inputFormat, string outputFormat)
-        {
-            DateTime parsedDate;
-            if (string.IsNullOrWhiteSpace(input))
-            {
-                parsedDate = DateTime.Today;
-            }
-            else
-            {
-                var isParsed = DateTime.TryParseExact(input, inputFormat, null, DateTimeStyles.None, out parsedDate);
-                if (!isParsed) return $"Failed to parse {input} with format {inputFormat}";
-            }
-
-            return parsedDate.ToString(outputFormat);
-        }
-
         public static bool Contains(this string source, string toCheck, StringComparison comp)
         {
             return source != null && toCheck != null && source.IndexOf(toCheck, comp) >= 0;

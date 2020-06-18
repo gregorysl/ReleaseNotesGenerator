@@ -5,7 +5,7 @@ using RNA.Model;
 using Xceed.Document.NET;
 using Xceed.Words.NET;
 
-namespace RNA.Service
+namespace RNA.Service.Document
 {
     public class DocumentEditor
     {
