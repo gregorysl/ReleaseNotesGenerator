@@ -14,10 +14,12 @@ namespace RNA.Service.Upload
         private const string ApiPath = "/api/core/v3/";
         private readonly Jive _settings;
         private readonly string _location;
-        public JiveUpload(Jive settings, string location)
+        private readonly string _releaseName;
+        public JiveUpload(Jive settings, string location, string releaseName)
         {
             _settings = settings;
             _location = location;
+            _releaseName = releaseName;
         }
         public async Task<string> Upload()
         {
@@ -81,7 +83,7 @@ namespace RNA.Service.Upload
                 type = "file",
                 parent = $"{settings.Url}{ApiPath}places/{settings.PlaceId}",
                 categories = new[] { "Release Notes" },
-                tags = CreateTags(settings.Version)
+                tags = CreateTags(_releaseName)
             };
             var requestContent = new MultipartFormDataContent();
 
@@ -95,9 +97,9 @@ namespace RNA.Service.Upload
             return requestContent;
         }
 
-        private string[] CreateTags(string settings)
+        private string[] CreateTags(string version)
         {
-            var versionSplit = settings.Split('.');
+            var versionSplit = version.Split('.');
             var tags = new[]
             {
                 NewTag(versionSplit, 2, false, "" ),

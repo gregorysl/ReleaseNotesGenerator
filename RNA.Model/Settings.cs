@@ -20,7 +20,5 @@ namespace RNA.Model
         public string Password { get; set; }
         public string Url { get; set; }
         public string PlaceId { get; set; }
-        public string Version { get; set; }
-        public string Location { get; set; }
     }
 }

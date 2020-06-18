@@ -63,7 +63,7 @@ namespace RNA.Console
             if (string.IsNullOrWhiteSpace(message)) return;
 
             System.Console.WriteLine(message);
-            var upload = new JiveUpload(settings.UploadSettings, releasePath).Upload();
+            var upload = new JiveUpload(settings.UploadSettings, releasePath, settings.Data.ReleaseName).Upload();
             System.Console.WriteLine(upload);
         }
 
