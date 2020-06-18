@@ -1,3 +1,4 @@
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -18,7 +19,7 @@ namespace RNA.Service
             _workItemConnector = workItemConnector;
         }
 
-        public string CreateDoc(DownloadedItems downloadedData, Change psRefresh, Settings settings)
+        public string CreateDoc(DownloadedItems downloadedData, Change psRefresh, Settings settings, string templatePath, string releasePath)
         {
             var selectedChangesets = downloadedData.Changes
                 .Where(x => x.Selected)
@@ -42,9 +43,9 @@ namespace RNA.Service
             var pbi = downloadedData.WorkItems
             .Where(x => settings.WorkItemStateInclude.Contains(x.State) && x.ClientProject == null)
                 .OrderBy(x => x.Id);
-            var message = new DocumentEditor().ProcessData(settings.DocumentLocation, psRefresh, settings.Data,
-                categories,
-                workItems, pbi, settings.TestReport, settings.DateFormat);
+
+            var message = new DocumentEditor().ProcessData(psRefresh, settings.Data, categories, workItems, pbi,
+                settings.TestReport, settings.DateFormat, templatePath, releasePath);
             return message;
         }
 

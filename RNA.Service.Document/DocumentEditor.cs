@@ -9,14 +9,11 @@ namespace RNA.Service.Document
 {
     public class DocumentEditor
     {
-        private readonly string _templateName = "Template.docx";
-        public string ProcessData(string documentLocaion, Change psRefresh, ReleaseData data, List<KeyValuePair<string, List<ChangesetInfo>>> categorizedChangesets,
-            IEnumerable<ClientWorkItem> workItems, IEnumerable<ClientWorkItem> pbi, string testReport, string dateinputFormat)
+        public string ProcessData(Change psRefresh, ReleaseData data, List<KeyValuePair<string, List<ChangesetInfo>>> categorizedChangesets,
+            IEnumerable<ClientWorkItem> workItems, IEnumerable<ClientWorkItem> pbi, string testReport, string dateinputFormat, string templatePath, string releasePath)
         {
             try
             {
-                var templatePath = Path.Combine(documentLocaion, _templateName);
-                var releasePath = Path.Combine(documentLocaion, $"{data.ReleaseName} Patch Release Notes.docx");
                 if (!File.Exists(templatePath)) return $"Template file not found in following location {templatePath}";
 
                 using (var doc = DocX.Load(templatePath))
