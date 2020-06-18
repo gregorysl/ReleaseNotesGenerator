@@ -22,5 +22,12 @@
   "WorkItemStateInclude": [
     "Tested",
     "Done"
-  ]
+  ],
+  "UploadSettings": {
+    "Username": "",
+    "Password": "",
+    "Url": "",
+    "PlaceId": "",
+    "Version": ""
+  } 
 }
