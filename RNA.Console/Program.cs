@@ -16,17 +16,13 @@ namespace RNA.Console
             "{0} connector authentication failed. Make sure your PAT is up to date.\nResponse:{1}";
         static async Task Main(string[] args)
         {
-            var executableLocation = Path.GetDirectoryName(
-                Assembly.GetExecutingAssembly().Location);
-            if (executableLocation == null) return;
+            var settings = GetSettings();
+            if (settings == null)
+            {
+                System.Console.WriteLine("Error getting setting");
+                return;
+            }
 
-            var settingsLocation = Path.Combine(executableLocation, "settings.json");
-            var settingsContent = File.ReadAllText(settingsLocation);
-
-            System.Console.WriteLine("Creating patch notes using following settings:");
-            System.Console.WriteLine(settingsContent);
-
-            var settings = JsonConvert.DeserializeObject<Settings>(settingsContent);
 
             var changesetConnector = GetConnector(settings.ChangesetsServer);
             var ccStatus = await changesetConnector.TestConnection();
@@ -76,6 +72,21 @@ namespace RNA.Console
                 default:
                     throw new KeyNotFoundException($"Server type {server.ServerType} is not supported.");
             }
+        }
+        private static Settings GetSettings()
+        {
+            var executableLocation = Path.GetDirectoryName(
+                Assembly.GetExecutingAssembly().Location);
+            if (executableLocation == null) return null;
+
+            var settingsLocation = Path.Combine(executableLocation, "settings.json");
+            var settingsContent = File.ReadAllText(settingsLocation);
+
+            System.Console.WriteLine("Creating patch notes using following settings:");
+            System.Console.WriteLine(settingsContent);
+
+            var settings = JsonConvert.DeserializeObject<Settings>(settingsContent);
+            return settings;
         }
     }
 }
