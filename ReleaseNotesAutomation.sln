@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RNA.Service.Tfs", "RNA.Serv
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RNA.Service.Document", "RNA.Service.Document\RNA.Service.Document.csproj", "{3B570F4A-DDAB-43E3-AF03-D91322D7174E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RNA.Service.Upload", "RNA.Service.Upload\RNA.Service.Upload.csproj", "{2736ECB8-4A38-474F-9FFC-CB86F8EFC536}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{3B570F4A-DDAB-43E3-AF03-D91322D7174E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3B570F4A-DDAB-43E3-AF03-D91322D7174E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3B570F4A-DDAB-43E3-AF03-D91322D7174E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2736ECB8-4A38-474F-9FFC-CB86F8EFC536}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2736ECB8-4A38-474F-9FFC-CB86F8EFC536}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2736ECB8-4A38-474F-9FFC-CB86F8EFC536}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2736ECB8-4A38-474F-9FFC-CB86F8EFC536}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

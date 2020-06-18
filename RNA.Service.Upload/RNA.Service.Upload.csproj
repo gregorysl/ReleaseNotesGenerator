@@ -4,15 +4,14 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4CB4097D-FE4F-4B5A-BCDB-70DBA651476A}</ProjectGuid>
+    <ProjectGuid>{2736ECB8-4A38-474F-9FFC-CB86F8EFC536}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RNA.Model</RootNamespace>
-    <AssemblyName>RNA.Model</AssemblyName>
+    <RootNamespace>RNA.Service.Upload</RootNamespace>
+    <AssemblyName>RNA.Service.Upload</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -37,7 +36,6 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -46,15 +44,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChangesetInfo.cs" />
-    <Compile Include="ClientWorkItem.cs" />
-    <Compile Include="JiveModel.cs" />
+    <Compile Include="JiveUpload.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ReleaseData.cs" />
-    <Compile Include="ServerDetails.cs" />
-    <Compile Include="ServerTypeEnum.cs" />
-    <Compile Include="Settings.cs" />
-    <Compile Include="TfsModel.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RNA.Model\RNA.Model.csproj">
+      <Project>{4CB4097D-FE4F-4B5A-BCDB-70DBA651476A}</Project>
+      <Name>RNA.Model</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
