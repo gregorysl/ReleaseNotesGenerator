@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using RNA.Service;
 using RNA.Model;
 using RNA.Service.Tfs;
+using RNA.Service.Upload;
 
 namespace RNA.Console
 {
@@ -54,11 +55,16 @@ namespace RNA.Console
 
             var psRefresh = downloadedData.Changes.First(x => releaseData.ChangesetTo == x.changesetId.ToString());
 
-            var message = generator.CreateDoc(downloadedData, psRefresh, settings);
+            var templatePath = Path.Combine(settings.DocumentLocation, "Template.docx");
+            var releasePath = Path.Combine(settings.DocumentLocation, $"{settings.Data.ReleaseName} Patch Release Notes.docx");
 
+            var message = generator.CreateDoc(downloadedData, psRefresh, settings, templatePath, releasePath);
+            
             if (string.IsNullOrWhiteSpace(message)) return;
 
             System.Console.WriteLine(message);
+            var upload = new JiveUpload(settings.UploadSettings, releasePath).Upload();
+            System.Console.WriteLine(upload);
         }
 
         private static Connector GetConnector(ServerDetails server)

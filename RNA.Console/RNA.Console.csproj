@@ -63,6 +63,10 @@
       <Project>{2CA88253-F483-4053-8B65-EBA47EF2E1F7}</Project>
       <Name>RNA.Service.Tfs</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RNA.Service.Upload\RNA.Service.Upload.csproj">
+      <Project>{2736ECB8-4A38-474F-9FFC-CB86F8EFC536}</Project>
+      <Name>RNA.Service.Upload</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RNA.Service\RNA.Service.csproj">
       <Project>{461d722e-eb35-4ded-979a-f8e994fceea6}</Project>
       <Name>RNA.Service</Name>

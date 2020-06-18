@@ -19,13 +19,12 @@ namespace RNA.Service.Upload
             _settings = settings;
             _location = location;
         }
-        public async Task Upload()
+        public async Task<string> Upload()
         {
             var fileInfo = new FileInfo(_location);
             if (!fileInfo.Exists)
             {
-                Console.WriteLine($"{_location} file doesn't exist!");
-                return;
+                return $"{_location} file doesn't exist!";
             }
             var client = SetupHttpClient(_settings);
 
@@ -51,7 +50,7 @@ namespace RNA.Service.Upload
             var outcomeText = responseData?.Resources == null
                 ? $"Error uploading document:{responseJson}"
                 : $"Document successfully uploaded. You can find it here:{responseData.Resources.Html}";
-            Console.WriteLine(outcomeText);
+            return outcomeText;
         }
 
         private async Task<SearchResponse> SearchForFile(Jive settings, string name, HttpClient client)
