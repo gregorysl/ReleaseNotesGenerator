@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using AutoMapper;
 using RNA.Model;
 
 namespace TfsData
 {
     public class AzureConnector : Connector
     {
-        public AzureConnector(ServerDetails settings, IMapper mapper) : base(settings, mapper)
+        public AzureConnector(ServerDetails settings) : base(settings)
         {
         }
 
@@ -37,7 +36,7 @@ namespace TfsData
                 var currentQuery = query.CloneJson();
                 currentQuery.itemPath = category.relativePath;
                 var wrapper = await Client.PostAsync<Wrapper<ChangeAzure>>(changesUrl, currentQuery, apiVersion);
-                var mappedData = Mapper.Map<List<ChangeAzure>,List<Change>>(wrapper.value);
+                var mappedData = wrapper.value.Select(x => new Change(x)).ToList();
                 return new Tuple<string, List<Change>>(category.relativePath, mappedData);
             });
             var categoryChangesResponse = await Task.WhenAll(categoryChangesTasks);

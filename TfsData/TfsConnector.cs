@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using AutoMapper;
 using RNA.Model;
 
 namespace TfsData
 {
     public class TfsConnector : Connector
     {
-        public TfsConnector(ServerDetails settings, IMapper mapper) : base(settings, mapper)
+        public TfsConnector(ServerDetails settings) : base(settings)
         {
         }
 

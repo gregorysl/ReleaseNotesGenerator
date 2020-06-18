@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using AutoMapper;
 using Newtonsoft.Json;
 using ReleaseNotesService;
 using RNA.Model;
@@ -19,16 +16,6 @@ namespace RNA.Console
             "{0} connector authentication failed. Make sure your PAT is up to date.\nResponse:{1}";
         static async Task Main(string[] args)
         {
-            var config = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<ChangeAzure, Change>()
-                    .ForMember(dest => dest.checkedInBy, src => src.MapFrom(x => x.author))
-                    .ForMember(dest => dest.createdDate, src => src.MapFrom(x => x.author.date))
-                    .ForMember(dest => dest.changesetId, src => src.MapFrom(x => x.commitId));
-            });
-
-            var mapper = config.CreateMapper();
-
             var executableLocation = Path.GetDirectoryName(
                 Assembly.GetExecutingAssembly().Location);
             if (executableLocation == null) return;
@@ -41,14 +28,14 @@ namespace RNA.Console
 
             var settings = JsonConvert.DeserializeObject<Settings>(settingsContent);
 
-            var changesetConnector = GetConnector(settings.ChangesetsServer, mapper);
+            var changesetConnector = GetConnector(settings.ChangesetsServer);
             var ccStatus = await changesetConnector.TestConnection();
             if (ccStatus != "OK")
             {
                 System.Console.WriteLine(ConnectorFailText, "Changeset", ccStatus);
                 return;
             }
-            var workItemConnector = GetConnector(settings.WorkItemServer, mapper);
+            var workItemConnector = GetConnector(settings.WorkItemServer);
             var wiStatus = await workItemConnector.TestConnection();
             if (wiStatus != "OK")
             {
@@ -78,14 +65,14 @@ namespace RNA.Console
             System.Console.WriteLine(message);
         }
 
-        private static Connector GetConnector(ServerDetails server, IMapper mapper)
+        private static Connector GetConnector(ServerDetails server)
         {
             switch (server.ServerType)
             {
                 case ServerTypeEnum.Azure:
-                    return new AzureConnector(server, mapper);
+                    return new AzureConnector(server);
                 case ServerTypeEnum.Tfs:
-                    return new TfsConnector(server, mapper);
+                    return new TfsConnector(server);
                 default:
                     throw new KeyNotFoundException($"Server type {server.ServerType} is not supported.");
             }

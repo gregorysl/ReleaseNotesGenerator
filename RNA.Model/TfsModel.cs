@@ -56,6 +56,16 @@ namespace RNA.Model
 
     public class Change
     {
+        public Change() { }
+
+        public Change(ChangeAzure changeAzure)
+        {
+            changesetId = changeAzure.commitId;
+            checkedInBy = changeAzure.author;
+            createdDate = changeAzure.author.date;
+            comment = changeAzure.comment;
+        }
+
         public string changesetId { get; set; }
         public Author checkedInBy { get; set; }
         public DateTime createdDate { get; set; }
