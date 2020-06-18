@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.29609.76
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TfsData", "TfsData\TfsData.csproj", "{F88C7DF3-6632-4FA0-B2B7-67F022A726D2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReleaseNotesService", "ReleaseNotesService\ReleaseNotesService.csproj", "{461D722E-EB35-4DED-979A-F8E994FCEEA6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RNA.Service", "RNA.Service\RNA.Service.csproj", "{461D722E-EB35-4DED-979A-F8E994FCEEA6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RNA.Console", "RNA.Console\RNA.Console.csproj", "{9A951F8A-F809-4551-8885-4BBD833CF610}"
 EndProject

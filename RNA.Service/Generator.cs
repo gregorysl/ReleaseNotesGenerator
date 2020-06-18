@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using RNA.Model;
 using TfsData;
 
-namespace ReleaseNotesService
+namespace RNA.Service
 {
     public class Generator
     {

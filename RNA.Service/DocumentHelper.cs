@@ -5,7 +5,7 @@ using RNA.Model;
 using Xceed.Document.NET;
 using Xceed.Words.NET;
 
-namespace ReleaseNotesService
+namespace RNA.Service
 {
     public static class DocumentHelper
     {

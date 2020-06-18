@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using RNA.Model;
 
-namespace ReleaseNotesService
+namespace RNA.Service
 {
     public static class Helpers
     {

@@ -60,9 +60,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ReleaseNotesService\ReleaseNotesService.csproj">
+    <ProjectReference Include="..\RNA.Service\RNA.Service.csproj">
       <Project>{461d722e-eb35-4ded-979a-f8e994fceea6}</Project>
-      <Name>ReleaseNotesService</Name>
+      <Name>RNA.Service</Name>
     </ProjectReference>
     <ProjectReference Include="..\RNA.Model\RNA.Model.csproj">
       <Project>{4CB4097D-FE4F-4B5A-BCDB-70DBA651476A}</Project>
