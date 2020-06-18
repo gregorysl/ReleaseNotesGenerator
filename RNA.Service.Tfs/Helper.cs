@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace TfsData
+namespace RNA.Service.Tfs
 {
     public static class Helper
     {
@@ -25,6 +26,13 @@ namespace TfsData
                 return JsonConvert.DeserializeObject<T>(responseBody);
             }
         }
+        public static async Task<HttpResponseMessage> PostAsJsonAsync(this HttpClient client, string url, object obj)
+        {
+            var json = JsonConvert.SerializeObject(obj);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            return await client.PostAsync(url, content);
+        }
+
 
         public static async Task<T> GetAsync<T>(this HttpClient client, string url, string apiVersion)
         {

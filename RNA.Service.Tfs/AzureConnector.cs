@@ -5,7 +5,7 @@ using System.Net;
 using System.Threading.Tasks;
 using RNA.Model;
 
-namespace TfsData
+namespace RNA.Service.Tfs
 {
     public class AzureConnector : Connector
     {

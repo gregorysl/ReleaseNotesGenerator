@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RNA.Model;
 
-namespace TfsData
+namespace RNA.Service.Tfs
 {
     public abstract class Connector
     {

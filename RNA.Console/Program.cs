@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RNA.Service;
 using RNA.Model;
-using TfsData;
+using RNA.Service.Tfs;
 
 namespace RNA.Console
 {

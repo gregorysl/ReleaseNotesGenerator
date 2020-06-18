@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29609.76
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TfsData", "TfsData\TfsData.csproj", "{F88C7DF3-6632-4FA0-B2B7-67F022A726D2}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RNA.Service", "RNA.Service\RNA.Service.csproj", "{461D722E-EB35-4DED-979A-F8E994FCEEA6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RNA.Console", "RNA.Console\RNA.Console.csproj", "{9A951F8A-F809-4551-8885-4BBD833CF610}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RNA.Model", "RNA.Model\RNA.Model.csproj", "{4CB4097D-FE4F-4B5A-BCDB-70DBA651476A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RNA.Service.Tfs", "RNA.Service.Tfs\RNA.Service.Tfs.csproj", "{2CA88253-F483-4053-8B65-EBA47EF2E1F7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F88C7DF3-6632-4FA0-B2B7-67F022A726D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F88C7DF3-6632-4FA0-B2B7-67F022A726D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F88C7DF3-6632-4FA0-B2B7-67F022A726D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F88C7DF3-6632-4FA0-B2B7-67F022A726D2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{461D722E-EB35-4DED-979A-F8E994FCEEA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{461D722E-EB35-4DED-979A-F8E994FCEEA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{461D722E-EB35-4DED-979A-F8E994FCEEA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -33,6 +29,10 @@ Global
 		{4CB4097D-FE4F-4B5A-BCDB-70DBA651476A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4CB4097D-FE4F-4B5A-BCDB-70DBA651476A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4CB4097D-FE4F-4B5A-BCDB-70DBA651476A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2CA88253-F483-4053-8B65-EBA47EF2E1F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CA88253-F483-4053-8B65-EBA47EF2E1F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CA88253-F483-4053-8B65-EBA47EF2E1F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CA88253-F483-4053-8B65-EBA47EF2E1F7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
