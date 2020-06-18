@@ -21,10 +21,6 @@ namespace ReleaseNotesService
 
                 using (var doc = DocX.Load(templatePath))
                 {
-                    var hyperlink = doc.AddHyperlink(testReport, new Uri(testReport));
-                    var hyperlinkParagraph = doc.InsertParagraph();
-                    hyperlinkParagraph.AppendHyperlink(hyperlink);
-
                     doc.ReplaceText("{ReleaseName}", data.ReleaseName);
                     doc.ReplaceText("{ReleaseDate}", data.ReleaseDate.ParseAndFormatData(dateinputFormat, data.ReleaseDateOutputFormat));
 
@@ -34,26 +30,21 @@ namespace ReleaseNotesService
                     var tableWithHeader = doc.Paragraphs[doc.Paragraphs.Count - 1]
                         .CreateTableWithHeader(headers, columnSizes, 3);
 
-                    tableWithHeader.FillRow(1, new[] { "PS Refresh Changeset", psRefresh.changesetId.ToString(), psRefresh.createdDate.FormatData() });
+                    tableWithHeader.FillRow(1, new[] { "PS Refresh Changeset", psRefresh.changesetId, psRefresh.createdDate.FormatData() });
                     tableWithHeader.FillRow(2, new[] { "QA Build", data.QaBuildName, data.QaBuildDate.ParseAndFormatData(dateinputFormat, data.QaBuildDateOutputFormat) });
 
-                    var fi = tableWithHeader.InsertParagraphAfterSelf($"This release will be available in ")
+                    doc.InsertParagraph("This release will be available in ")
                         .Append(location, new Formatting { Bold = true })
-                        .Append($" branch using the label ")
-                        .Append($"{data.ReleaseName}", new Formatting { Bold = true });
-
-                    doc.InsertTableOfContents("Contents",
-                        TableOfContentsSwitches.O | TableOfContentsSwitches.U | TableOfContentsSwitches.Z | TableOfContentsSwitches.H | TableOfContentsSwitches.T,
-                        "FR HeadNoToc");
+                        .Append(" branch using the label ")
+                        .Append(data.ReleaseName, new Formatting { Bold = true });
 
                     doc.InsertSectionPageBreak();
-                    var hyper = doc.AddHyperlink(testReport, new Uri(testReport));
-                    var lastParagraph = doc.Paragraphs[doc.Paragraphs.Count - 1]
+                    doc.Paragraphs[doc.Paragraphs.Count - 1]
                         .ChangesetsSection(categorizedChangesets)
                         .WorkItemSection(workItems)
-                        .PbiSection(pbi)
-                        .TestReportSection(hyperlinkParagraph)
-                        .KnownIssuesSection();
+                        .PbiSection(pbi);
+
+                    doc.TestReportSection(testReport).KnownIssuesSection();
                     doc.SaveAs(releasePath);
                 }
 

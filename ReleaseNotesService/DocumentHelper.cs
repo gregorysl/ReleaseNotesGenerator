@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using RNA.Model;
 using Xceed.Document.NET;
+using Xceed.Words.NET;
 
 namespace ReleaseNotesService
 {
@@ -89,12 +91,16 @@ namespace ReleaseNotesService
             }
             return table;
         }
-        public static Paragraph TestReportSection(this InsertBeforeOrAfter lastPart, Paragraph p)
+        public static Paragraph TestReportSection(this DocX doc, string testReport)
         {
-            var headingSection = lastPart.CreateHeadingSection("Test Report");
-            headingSection.InsertParagraphAfterSelf(p);
+            var hyperlink = doc.AddHyperlink(testReport, new Uri(testReport));
+            var paragraph = doc
+                .InsertParagraph()
+                .CreateHeadingSection("Test Report")
+                .InsertParagraphAfterSelf("")
+                .AppendHyperlink(hyperlink);
 
-            return p;
+            return paragraph;
         }
         public static Table KnownIssuesSection(this InsertBeforeOrAfter lastPart)
         {
